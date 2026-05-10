@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LongSongPokerLibCore", "LongSongPokerLibCore\LongSongPokerLibCore.csproj", "{24816C2B-7607-4DE9-977F-2E97C261AF52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{996B9845-163E-49FF-B48F-607F09112449}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{24816C2B-7607-4DE9-977F-2E97C261AF52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24816C2B-7607-4DE9-977F-2E97C261AF52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24816C2B-7607-4DE9-977F-2E97C261AF52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24816C2B-7607-4DE9-977F-2E97C261AF52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{996B9845-163E-49FF-B48F-607F09112449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{996B9845-163E-49FF-B48F-607F09112449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{996B9845-163E-49FF-B48F-607F09112449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{996B9845-163E-49FF-B48F-607F09112449}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
