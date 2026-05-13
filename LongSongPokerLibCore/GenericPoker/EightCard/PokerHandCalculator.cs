@@ -158,7 +158,7 @@ namespace GenericPoker.EightCard
 
 			foreach (var card in _allPokerCards)
 			{
-				if (card is JokerCard) _jokerCards.Add(card);
+				if (card is EightCardJokerCard) _jokerCards.Add(card);
 				else _noneJokerCards.Add(card);
 			}
 		}
@@ -182,7 +182,7 @@ namespace GenericPoker.EightCard
 				// So we need the second check to ensure it's real enum string matched.
 				if (Enum.TryParse<JokerType>(splitDeckStrs[0], out var jokerType) && Enum.IsDefined(typeof(JokerType), jokerType))
 				{
-					newCardList.Add(JokerCard.CreateInstance(jokerType, deckID: deckNumber));
+					newCardList.Add(EightCardJokerCard.CreateInstance(jokerType, deckID: deckNumber));
 				} else {
 					newCardList.Add(EightCardPokerCard.CreateInstance(splitDeckStrs[0], deckID :deckNumber));
 				}
@@ -216,84 +216,6 @@ namespace GenericPoker.EightCard
 		{
 			return inputListInList
 				.Select(subList => new PokerCardComponent<PokerCardCompRank> { CompRank = pokerCardCompRank, Cards = subList }).ToList();
-		}
-
-		public List<PokerCardComponent<PokerCardCompRank>> GetAllPermuteComps(int cardCountInComp)
-		{
-			var allPokerCardComps = new List<PokerCardComponent<PokerCardCompRank>>();
-			var permutes = new List<List<EightCardPokerCard>>();
-
-			//=============================
-			// ======= process kinds ======
-			//============================
-			List<List<EightCardPokerCard>> kindGroupLists = GetNumberGroups(cardCountInComp, _noneJokerCards);
-			foreach (var gList in kindGroupLists)
-			{
-				permutes.AddRange(UtilFunc.GetPermutation<EightCardPokerCard>(gList, cardCountInComp));
-			}
-
-			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
-				PokerCompNameDict[(cardCountInComp, CompType.Kind)]));
-
-			//==========================
-			//====== process flush =====
-			//==========================
-			permutes.Clear();
-			var flushGroupLists = _evaluateFlushGroups(cardCountInComp, _allPokerCards);
-			foreach (var gList in flushGroupLists)
-			{
-				permutes.AddRange(UtilFunc.GetPermutation<EightCardPokerCard>(gList, cardCountInComp));
-			}
-
-			// filter out flush straight as later, we will have dedicated method to collect flush straight?
-			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
-				PokerCompNameDict[(cardCountInComp, CompType.Flush)]));
-
-			//======= Straight ====
-			// process straight might be a bit trickier than kinds and flush.
-			//====================
-			permutes.Clear();
-			kindGroupLists = GetNumberGroups(1, _noneJokerCards);
-			var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
-			ProcessPermuteStraight(cardCountInComp, kindGroupLists, straightableJokerCards, permutes);
-
-			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
-				PokerCompNameDict[(cardCountInComp, CompType.Straight)]));
-
-
-			//==== Flush Straight ===
-			// For flush straight, we get flush groups, and check each flush group to sort out all possible
-			// straights to collect flush straight hands.
-			//======================
-			permutes.Clear();
-			foreach (var gList in flushGroupLists)
-			{
-				// Need to convert the single List into ListInList to cater the straight searching.
-				var wrapperListInList = gList.Select(item => new List<EightCardPokerCard> { item }).ToList();
-				RecursivePermuteStraight(cardCountInComp, wrapperListInList, new List<EightCardPokerCard>(), permutes);
-			}
-
-			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
-				PokerCompNameDict[(cardCountInComp, CompType.FlushStraight)]));
-
-			// After running above, we have flush and straight, and flush straight, So sometimes,
-			// the same Comp will be double of tripple count as flush, straight or flush-straight.
-			// Ex: A-Spade, K-Spade, Q-Spade, can be flush, straight, and flush-straight. Then we will pick these three
-			// cards as highest Comp to represent, which is flush-straight.
-			// Then our below algorithm is to group by same Comp cards -- Using CompUniqueKey(), and if there are multi Comps
-			// in each group which are duplicated, but different CompRank, then we sort each duplicated group, and pick the first one
-			// which has best CompRank, which is flush-straight in the example.
-			allPokerCardComps = allPokerCardComps.GroupBy(cardComp => cardComp.CompUniqueKey())
-				.Select(cardCompDupGroups =>
-					cardCompDupGroups.OrderByDescending(cardComp => cardComp.CompRank).First())
-				.ToList();
-
-			//--- Finally sort them out base on their CompPower order.
-			//allPokerCardComps = allPokerCardComps.OrderByDescending(obj => obj.CompPower).ToList();
-			allPokerCardComps.Sort((x, y) => y.CompareTo(x));
-
-
-			return allPokerCardComps;
 		}
 
 
@@ -348,7 +270,7 @@ namespace GenericPoker.EightCard
 			allComps.AddRange(ListsToPokerComp(permutes, PokerCompNameDict[(cardCountInComp, CompType.Straight)]));
 
 
-			//--- Finally sort them out base on their CompPower order.
+			//--- Finally, sort them out base on their CompPower order.
 			allComps.Sort((x, y) => y.CompareTo(x));
 
 			return allComps;
@@ -417,7 +339,7 @@ namespace GenericPoker.EightCard
 
 					foreach (var (jokerCard, index) in jokerCards.Select((value, i) => (value, i)))
 					{
-						var newJoker = JokerCard.CreateInstance((JokerCard)jokerCard);
+						var newJoker = EightCardJokerCard.CreateInstance((EightCardJokerCard)jokerCard);
 						((IJokerFlushable)newJoker).SetSuitSub(subSuit);
 						if (newJoker.IsNumberable)
 							((IJokerStraightable)newJoker).SetStraightSub(jokerReplacedNumCandidate[index]);
@@ -448,7 +370,7 @@ namespace GenericPoker.EightCard
 
 
 			flushableJokerCards =
-				flushableJokerCards.OrderByDescending(obj => ((JokerCard)obj).PokerCardPower).ToList();
+				flushableJokerCards.OrderByDescending(obj => ((EightCardJokerCard)obj).PokerCardPower).ToList();
 
 
 			foreach (var gList in flushGroupLists)
@@ -541,7 +463,7 @@ namespace GenericPoker.EightCard
 					foreach (var pair in straightableJokerCards.Zip(
 						         gapNumbers, (obj, num) => new { jokerCard = obj, Number = num }))
 					{
-						var newJoker = JokerCard.CreateInstance((JokerCard)pair.jokerCard);
+						var newJoker = EightCardJokerCard.CreateInstance((EightCardJokerCard)pair.jokerCard);
 						((IJokerStraightable)newJoker).SetStraightSub(pair.Number);
 						if (assignedSuit != PokerSuit.NoSuit && newJoker is IJokerFlushable)
 							((IJokerFlushable)newJoker).SetSuitSub(assignedSuit);
@@ -715,7 +637,7 @@ namespace GenericPoker.EightCard
 				.ToList();
 		}
 		
-		
+		/*
 		private List<List<EightCardPokerCard>> GetNumberGroups(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
 		{
 			// Use a dictionary to group cards by their number
@@ -745,6 +667,38 @@ namespace GenericPoker.EightCard
 				.Select(kv => kv.Value) // Select the groups
 				.ToList(); // Materialize the result as a list
 		}
+		*/
+		
+		private List<List<EightCardPokerCard>> GetNumberGroups(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
+		{
+			// 使用 Dictionary 根據牌面點數（Number）進行分組
+			var rankGroupsDict = new Dictionary<int, List<EightCardPokerCard>>();
+
+			// 遍歷所有非鬼牌，直接在一次 Pass 中完成分組，避免建立不必要的暫存排序清單
+			foreach (var card in noneJokerCards)
+			{
+				if (!rankGroupsDict.TryGetValue(card.Number, out var group))
+				{
+					group = new List<EightCardPokerCard>();
+					rankGroupsDict[card.Number] = group;
+				}
+				group.Add(card);
+			}
+
+			// 針對每個點位分組執行原地排序（In-place Sort），以極小化堆積記憶體（Heap Allocation）配置
+			foreach (var group in rankGroupsDict.Values)
+			{
+				group.Sort((x, y) => y.CompareTo(x)); // 排序優先級：點數相同時，按花色權重降序排列
+			}
+
+			// 透過 LINQ 鍊式呼叫一次完成過濾、點數降序排序與清單轉換
+			return rankGroupsDict
+				.Where(kv => kv.Value.Count >= minCardCountInGroup) // 僅保留符合最小張數條件的分組（例如：找對子則至少需 2 張）
+				.OrderByDescending(kv => kv.Key) // 依據點數由大到小排序，確保回傳結果符合 Power 順序
+				.Select(kv => kv.Value) // 提取出分組內的卡片清單
+				.ToList(); // 將結果實體化（Materialize）為 List 以供後續遞歸運算使用
+		}
+		
 		
 
 		private List<List<EightCardPokerCard>> GetKindGroups(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
@@ -1042,761 +996,82 @@ namespace GenericPoker.EightCard
 
 
 
-
-
-		// Select all possible group from input cardCount in each group.
-		// For 3 cards, we can have 3 of kind, 3 cards straight, 3 cards of flush and 3 cards flush straight. etc..
-		// For 4 cards, we can have 4 of kind, 4 cards of straight, 4 cards of flush and 4 cards of flush straight.
-		// For 5 cards, we can have potential 5 of kind, five card straight, five card of flush, and 
-
-		/*public void RankAndSort() {
-
-			InitTempEvaluateData();
-			_allPokerCards.Sort(AceBigCardCompare);
-			RecursiveEvaluateCards(_allPokerCards);
-			foreach (var card in rankSortedCards) {
-				card.PrintCard();
-			}
-
-			for (var i = 0; i < rankSortedCards.Count; i++) {
-				transform.Find(rankSortedCards[i].CardStr).transform.SetSiblingIndex(i);
-			}
-
-			//var handRankObj = transform.parent.transform.Find("HandRank").gameObject;
-			//handRankObj.GetComponent<Text>().text = _bestRank.ToString();
-		}*/
-
-
-
-
 		/*
-		private void EvaluateKinds(List <PokerCard> runCards) {
-
-			for (int number = 14; number >=2; number-- ) {
-				List <PokerCard> groupCards = runCards.FindAll(e => e.Number == number);
-				if (groupCards.Count>1) {
-					_tempEvaluateData.KindGroups.Add(groupCards);
-				}
-			}
-
-			_tempEvaluateData.KindGroups.Sort(delegate(List <PokerCard> x, List <PokerCard> y)
-			{
-				if (x.Count == y.Count)  return x[0].CompareToAceBig(y[0]);
-				else if (x.Count < y.Count) return 1;
-				else return -1;
-			});
-
-
-			// According to group, determine how many paris, 3 kinds, etc.. to turn on associate bits.
-			foreach (var group in _tempEvaluateData.KindGroups)
-			{
-				switch (group.Count)
-				{
-					case 2:
-						_tempEvaluateData.PairCnt += 1;
-						_tempEvaluateData.RankTypeBits |= (byte) PokerBitTypes.BitPair;
-						_tempEvaluateData.KindCards.AddRange(group);
-						Debug.Log("Evalute Kinds Count = Get into pairs");
-						break;
-					case 3:
-						_tempEvaluateData.ThreeOfKindCnt += 1;
-						_tempEvaluateData.RankTypeBits |= (byte) PokerBitTypes.BitThreeOfKind;
-						_tempEvaluateData.KindCards.AddRange(group);
-						Debug.Log("Evalute Kinds Count = Get into three od kind");
-						break;
-					case 4:
-						_tempEvaluateData.FourOfKindCnt += 1;
-						_tempEvaluateData.RankTypeBits |= (byte) PokerBitTypes.BitFourOfKind;
-						_tempEvaluateData.KindCards.AddRange(group);
-						break;
-					case 5:
-						_tempEvaluateData.FiveOfKindCnt += 1;
-						_tempEvaluateData.RankTypeBits |= (byte) PokerBitTypes.BitFiveOfKind;
-						_tempEvaluateData.KindCards.AddRange(group);
-						break;
-					case 1:
-						_tempEvaluateData.NoneKindCards.AddRange( group);
-						break;
-					default:
-						break;
-				}
-			}
-		}*/
-
-		/*
-		private List <PokerCard> CheckStraight(List <PokerCard> runCards) {
-			List <PokerCard> retStraightCards = new List <PokerCard>();
-
-			if (runCards.Count <= 3) {
-				return retStraightCards;
-			}
-
-			var list1 = runCards.GetRange(0, runCards.Count-1);
-			var list2 = runCards.GetRange(1, runCards.Count-1);
-
-			Debug.Log("From CheckStraight : run card count " + runCards.Count);
-			Debug.Log("From CheckStraight : List1 count " + list1.Count);
-			Debug.Log("From CheckStraight : List2 count " + list2.Count);
-
-			int consectiveNumber = 0;
-
-			foreach (var pair in list1.Zip(list2, (a, b) => new {card1 = a, card2 = b})) {
-				int number1 = pair.card1.Number;
-				int number2 = pair.card2.Number;
-				if (number1 - number2 == 1) {
-					consectiveNumber ++;
-					if (retStraightCards.Count == 0) {
-						retStraightCards.Add(pair.card1);
-						retStraightCards.Add(pair.card2);
-					} else {
-						retStraightCards.Add(pair.card2);
-					}
-				} else {
-					// larger than 3 meaning at least four card straight.
-					if (consectiveNumber >= 3) {
-						// break directly
-						break;
-					} else {
-						consectiveNumber = 0;
-						retStraightCards.Clear();
-					}
-				}
-			}
-			Debug.Log("From CheckStraight : " + retStraightCards.Count);
-			foreach (var card in retStraightCards) {
-				card.PrintCard();
-			}
-			return retStraightCards;
-		}
-	    */
-
-/*
-
-	private List<PokerCard> FillNumberGapWithJokers_old(List<PokerCard> inputCards, List<PokerCard> jokers, PokerSuit subSuit)
-	{
-		var cards = new List<PokerCard>(inputCards);
-
-		while (jokers.Count > 0)
+		public List<PokerCardComponent<PokerCardCompRank>> GetAllPermuteComps(int cardCountInComp)
 		{
-			// Find the first occurrence of the gap and include index
-			var searchGapResult = inputCards
-				.Select((value, index) => new { Value = value, Index = index }) // Attach index
-				.Zip(inputCards.Skip(1).Select((value, index) => new { Value = value, Index = index + 1 }),
-					(current, next) => new { Current = current, Next = next })
-				.FirstOrDefault(pair => pair.Current.Value.Number - pair.Next.Value.Number > 1);
+			var allPokerCardComps = new List<PokerCardComponent<PokerCardCompRank>>();
+			var permutes = new List<List<EightCardPokerCard>>();
 
-			if (searchGapResult != null) {
-				var fillSpace = searchGapResult.Current.Value.Number-searchGapResult.Next.Value.Number-1;
-				var insertJokerCardCount = fillSpace > jokers.Count ? jokers.Count : fillSpace;
-
-				// Pop out needed JokerCardCount from jokers.
-				//var fillListFromJokers = jokers.Take(insertJokerCardCount).ToList();
-				var fillListFromJokers = new List<PokerCard>();
-				for (var i = 0; i < insertJokerCardCount; i++)
-				{
-					var newJoker = JokerCard.CreateInstance((JokerCard)jokers[i]);
-					((IJokerFlushable)newJoker).SetSuitSub(subSuit);
-					var replacedNumber = searchGapResult.Current.Value.Number - 1 - i;
-					((IJokerStraightable)newJoker).SetStraightSub(replacedNumber);
-					fillListFromJokers.Add(newJoker);
-				}
-				jokers.RemoveRange(0, insertJokerCardCount);
-
-				// InsertRange was insert a sublist in front of this index
-				cards.InsertRange(searchGapResult.Next.Index, fillListFromJokers);
-			} else {
-				// Normally, the code will not run to here as the joker consumed up to fill the gap before all the gap are filled.
-				break;
-			}
-		}
-
-		return cards;
-	}
-	*/
-
-/*
-private void Awake() {
-
-}
-
-// Start is called before the first frame update
-private void Start()
-{
-
-
-}
-*/
-
-/*
-		for (var loopCardNumber = PokerCard.AceBigNumber; loopCardNumber >= straightCount; loopCardNumber--)
-		{
-			var adjustKindGroupList = new List<List<PokerCard>>();
-			var newJokerCards = new List<PokerCard>(straightableJokerCards);
-			// The idea here is to scan each straightCount, ex: 3 cards.
-			// If any number exist in regular pokerCard, fill that in the adjustKindGroupList, if not fill jokerCards.
-			for (var cardNumber = loopCardNumber ; cardNumber > loopCardNumber-straightCount; cardNumber--)
+			//=============================
+			// ======= process kinds ======
+			//============================
+			List<List<EightCardPokerCard>> kindGroupLists = GetNumberGroups(cardCountInComp, _noneJokerCards);
+			foreach (var gList in kindGroupLists)
 			{
-				if (numberToKindGroupDict.ContainsKey(cardNumber)) {
-					adjustKindGroupList.Add(numberToKindGroupDict[cardNumber]);
-				} else {
-					if (newJokerCards.Count != 0) // If we still have straightable joker Card remains, fill in the list
-					{
-						// we need to create new jokerCard as dummy and change its number. If we do not use new copy, and share
-						// the jokerCard and change its number, this number will be messed up when do the Comp sorting for same straight.
-						var newJokerCard = JokerCard.CreateInstance((JokerCard)newJokerCards[0]);
-						((IJokerStraightable)newJokerCard).SetStraightSub(cardNumber);
-						adjustKindGroupList.Add(new List<PokerCard> { newJokerCard });
-						newJokerCards.RemoveAt(0);
-					}
-				}
+				permutes.AddRange(UtilFunc.GetPermutation<EightCardPokerCard>(gList, cardCountInComp));
 			}
 
-			// only the Count fullfill the straight Count Will suffice the straight. Sometimes, the adjustKindGroupList has enough
-			// pokerCard combining with jokerCards. Ex: 1 poker Card and 1 joker, total cards = 2,  will not suffice for 3 cards straight.
-			if (adjustKindGroupList.Count == straightCount)
+			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
+				PokerCompNameDict[(cardCountInComp, CompType.Kind)]));
+
+			//==========================
+			//====== process flush =====
+			//==========================
+			permutes.Clear();
+			var flushGroupLists = _evaluateFlushGroups(cardCountInComp, _allPokerCards);
+			foreach (var gList in flushGroupLists)
 			{
-				RecursivePermuteStraight(straightCount, adjustKindGroupList,
-					new List<PokerCard>(),  permutes);
+				permutes.AddRange(UtilFunc.GetPermutation<EightCardPokerCard>(gList, cardCountInComp));
 			}
-		}
-		*/
+
+			// filter out flush straight as later, we will have dedicated method to collect flush straight?
+			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
+				PokerCompNameDict[(cardCountInComp, CompType.Flush)]));
+
+			//======= Straight ====
+			// process straight might be a bit trickier than kinds and flush.
+			//====================
+			permutes.Clear();
+			kindGroupLists = GetNumberGroups(1, _noneJokerCards);
+			var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
+			ProcessPermuteStraight(cardCountInComp, kindGroupLists, straightableJokerCards, permutes);
+
+			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
+				PokerCompNameDict[(cardCountInComp, CompType.Straight)]));
 
 
-/*
-		// step 1 , convert a kindGroupList into a dictionary.
-		// Map to sorted dictionary
-		var numberToKindGroupDict = kindGroupList
-			.ToDictionary(group => group.First().Number, group => group);
-
-		// step2, since 5,4,3,2,A can also be a straight, and in step1, we assume A is 14, so also copy A's kind group
-		// as "1" in the last group.
-		if (numberToKindGroupDict.ContainsKey(PokerCard.AceBigNumber))
-			numberToKindGroupDict[1] = new List<PokerCard>(numberToKindGroupDict[PokerCard.AceBigNumber]);
-
-		// Scan all possible straight from A-K-Q, K-Q-J, Q-J-10, all the way to 3-2-A. This Scan strategy is for none_jokers only.
-		// For jokers involved we need different approaches.
-		for (var loopCardNumber = PokerCard.AceBigNumber; loopCardNumber >= straightCount; loopCardNumber--)
-		{
-			var adjustKindGroupList = new List<List<PokerCard>>();
-			var newJokerCards = new List<PokerCard>(straightableJokerCards);
-			// The idea here is to scan each straightCount, ex: 3 cards.
-			// If any number exist in regular pokerCard, fill that in the adjustKindGroupList, if not fill jokerCards.
-			for (var cardNumber = loopCardNumber ; cardNumber > loopCardNumber-straightCount; cardNumber--)
+			//==== Flush Straight ===
+			// For flush straight, we get flush groups, and check each flush group to sort out all possible
+			// straights to collect flush straight hands.
+			//======================
+			permutes.Clear();
+			foreach (var gList in flushGroupLists)
 			{
-				if (numberToKindGroupDict.TryGetValue(cardNumber, out var value)) {
-					adjustKindGroupList.Add(value);
-				}
+				// Need to convert the single List into ListInList to cater the straight searching.
+				var wrapperListInList = gList.Select(item => new List<EightCardPokerCard> { item }).ToList();
+				RecursivePermuteStraight(cardCountInComp, wrapperListInList, new List<EightCardPokerCard>(), permutes);
 			}
 
-			// only the Count fulfill the straight Count Will suffice the straight. Sometimes, the adjustKindGroupList has enough
-			// pokerCard combining with jokerCards. Ex: 1 poker Card and 1 joker, total cards = 2,  will not suffice for 3 cards straight.
-			if (adjustKindGroupList.Count == straightCount)
-			{
-				RecursivePermuteStraight(straightCount, adjustKindGroupList,
-					new List<PokerCard>(),  permutes);
-			}
-		}
-		*/
-		
-		
-		/*
-		private void getMaxPossibleStraightCount(List<List<PokerCard>> kindGroupList)
-		{
-			var representedCards = kindGroupList.Select(group => group[0]).ToList();
-			
-			// if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
-			// so that to let 3,2,1 straight become available.
-			if (representedCards[0] is AceCard)
-			{
-				var newAce = PokerCard.CreateInstance(representedCards[0]);
-				((IJokerStraightable)newAce).SetStraightSub(1);
-				representedCards.Add(newAce);
-			}
-			
-			var numberList = representedCards.Select(group => group.Number).ToList();
-			var gapNumbers = numberList
-				.Zip(numberList.Skip(1), (a, b) => Enumerable.Range(b + 1, a - b - 1).Reverse())
-				.SelectMany(g => g)
+			allPokerCardComps.AddRange(ListsToPokerComp(permutes,
+				PokerCompNameDict[(cardCountInComp, CompType.FlushStraight)]));
+
+			// After running above, we have flush and straight, and flush straight, So sometimes,
+			// the same Comp will be double of tripple count as flush, straight or flush-straight.
+			// Ex: A-Spade, K-Spade, Q-Spade, can be flush, straight, and flush-straight. Then we will pick these three
+			// cards as highest Comp to represent, which is flush-straight.
+			// Then our below algorithm is to group by same Comp cards -- Using CompUniqueKey(), and if there are multi Comps
+			// in each group which are duplicated, but different CompRank, then we sort each duplicated group, and pick the first one
+			// which has best CompRank, which is flush-straight in the example.
+			allPokerCardComps = allPokerCardComps.GroupBy(cardComp => cardComp.CompUniqueKey())
+				.Select(cardCompDupGroups =>
+					cardCompDupGroups.OrderByDescending(cardComp => cardComp.CompRank).First())
 				.ToList();
-			
-		}*/
-		
-		
-		/*
-		//2. Sort majorly for Straight
-		if (_tempEvaluateData.NumberGroups.Count >=3 ) {
-			Debug.Log("+++++++++" + _tempEvaluateData.NumberGroups.Count );
-			var List1 = _tempEvaluateData.NumberGroups.GetRange(0, _tempEvaluateData.NumberGroups.Count-1);
-			var List2 = _tempEvaluateData.NumberGroups.GetRange(1, _tempEvaluateData.NumberGroups.Count-1);
-
-			int consectiveNumber = 0;
-			List <PokerCard> straightColllectedCards = new List <PokerCard>();
-			foreach (var pair in List1.Zip(List2, (a, b) => new {cardList1 = a, cardList2 = b})) {
-				int number1 = pair.cardList1[0].Number;
-				int number2 = pair.cardList2[0].Number;
-				Debug.Log("-----  Straight log num1, num2 = " + number1 + " , " + number2 );
-				if (number1 - number2 == 1) {
-					consectiveNumber ++;
-					// Always get number group last element as it's less suit power to use them to compose a straight
-					if (straightColllectedCards.Count == 0) {
-						straightColllectedCards.Add(pair.cardList1.Last());
-						straightColllectedCards.Add(pair.cardList2.Last());
-					} else {
-						straightColllectedCards.Add(pair.cardList2.Last());
-					}
-				} else {
-					if (consectiveNumber >=3) {
-						break;
-					} else {
-						consectiveNumber = 0;
-						straightColllectedCards.Clear();
-					}
-				}
-			}
-			if (consectiveNumber == 3) {
-				newCandidate.HandType = PokerRankTypes.FourCardStraight;
-				newCandidate.Cards = straightColllectedCards;
-				Debug.Log("Get tino Straight  ==4");
-				handCandidates.Add(newCandidate);
-			} else if (consectiveNumber >= 4) {
-				newCandidate.HandType = PokerRankTypes.Straight;
-				newCandidate.Cards = straightColllectedCards;
-				Debug.Log("Get tino Straight  >=5");
-				handCandidates.Add(newCandidate);
-			}
-		}
-*/
-
-/*
-			for (var desiredCount = 8; desiredCount >= 3; desiredCount--)
-			{
-				var permutes = new List<List<PokerCard>>();
-				//var kindGroupLists = _evaluateKindGroups(1, _noneJokerCards);
-				//var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
-			
-				ProcessPermuteStraight(cardCountInComp, kindGroupList, new List<PokerCard>(), permutes);
-				
-			}
-
-			
-
 
 			//--- Finally sort them out base on their CompPower order.
-			allComps.Sort((x, y) => y.CompareTo(x));
-			var output = "";
-			foreach (var Comp in allComps)
-			{
-				output += $"\"{Comp.CompString}\",";
-			}
-
-			return allComps;
-			
-			
-			
-			for (var desiredCount = flushGroup.Count; desiredCount >= 3; desiredCount--)
-			{
-
-				var flushStraightPermutes = new List<List<PokerCard>>();
-				var flushOnlyPermutes = new List<List<PokerCard>>();
-				var wrapperListInList = flushGroup.Select(item => new List<PokerCard> { item }).ToList();
-				ProcessPermuteStraight(desiredCount, wrapperListInList, new List<PokerCard>(),
-					flushStraightPermutes);
-
-				if (flushStraightPermutes.Count >
-				    0) // Yes we have straight in suit group which implies flush straight
-				{
-					var handType = EightCardsCompTypeDict[(desiredCount, CompType.FlushStraight)];
-					foreach (var permute in flushStraightPermutes)
-					{
-						var newHandCandidateData = new HandCandidateData { HandType = handType, Cards = permute };
-						currentHandCandidates.Add(newHandCandidateData);
-						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute);
-						RecursiveEvaluateCards(newRemainCards, currentHandCandidates, results);
-						currentHandCandidates.RemoveAt(currentHandCandidates.Count - 1);
-						hasRank = true;
-					}
-				}
-				else
-				{
-					var handType = EightCardsCompTypeDict[(desiredCount, CompType.Flush)];
-					UtilFunc.RecursivePermute<PokerCard>(flushGroup, desiredCount, new List<PokerCard>(),
-						flushOnlyPermutes);
-					foreach (var permute in flushOnlyPermutes)
-					{
-						var newHandCandidateData = new HandCandidateData { HandType = handType, Cards = permute };
-						currentHandCandidates.Add(newHandCandidateData);
-						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute);
-						RecursiveEvaluateCards(newRemainCards, currentHandCandidates, results);
-						currentHandCandidates.RemoveAt(currentHandCandidates.Count - 1);
-						hasRank = true;
-					}
-				}
-
-			}*/
-			
-						/*		
-			// 3. Process Kind groups
-			if (_tempEvaluateData.FiveOfKindCnt >= 1) {
-				newCandidate.HandType = PokerRankTypes.FiveOfKind;
-				newCandidate.Cards = _tempEvaluateData.KindGroups[0];
-				handCandidates.Add(newCandidate);
-			} else if (_tempEvaluateData.FourOfKindCnt >= 1) {
-				newCandidate.HandType = PokerRankTypes.FiveOfKind;
-				newCandidate.Cards = _tempEvaluateData.KindGroups[0];
-				handCandidates.Add(newCandidate);
-			} else if (_tempEvaluateData.ThreeOfKindCnt >= 1 && _tempEvaluateData.PairCnt >= 1) {
-				newCandidate.HandType = PokerRankTypes.FullHouse;
-				newCandidate.Cards = _tempEvaluateData.KindGroups[0];
-				foreach (var group in _tempEvaluateData.KindGroups) {
-					if (group.Count == 2) {
-						newCandidate.Cards.AddRange(group);
-						break;
-					}
-				}
-				handCandidates.Add(newCandidate);
-				Debug.Log("fullhouse count = " + newCandidate.Cards.Count);
-			} else if (_tempEvaluateData.ThreeOfKindCnt >= 1) {
-				newCandidate.HandType = PokerRankTypes.ThreeOfKind;
-				newCandidate.Cards = _tempEvaluateData.KindGroups[0];
-				handCandidates.Add(newCandidate);
-			} else if (_tempEvaluateData.PairCnt >= 2) {
-				newCandidate.HandType = PokerRankTypes.TwoPairs;
-				newCandidate.Cards = _tempEvaluateData.KindGroups[0];
-				newCandidate.Cards.AddRange(_tempEvaluateData.KindGroups[1]);
-				handCandidates.Add(newCandidate);
-			} else if (_tempEvaluateData.PairCnt == 1) {
-				newCandidate.HandType = PokerRankTypes.OnePair;
-				newCandidate.Cards = _tempEvaluateData.KindGroups[0];
-				handCandidates.Add(newCandidate);
-			}
+			//allPokerCardComps = allPokerCardComps.OrderByDescending(obj => obj.CompPower).ToList();
+			allPokerCardComps.Sort((x, y) => y.CompareTo(x));
 
 
-			handCandidates.Sort((t1, t2) => t2.HandType.CompareTo(t1.HandType));
-
-			if (handCandidates.Count > 0) {
-				Debug.Log("The best rank = " + handCandidates[0].HandType.ToString() + " Count = " + handCandidates[0].Cards.Count);
-
-				rankSortedCards.AddRange(handCandidates[0].Cards);
-				HashSet <PokerCard> determinedSet = new HashSet<PokerCard>();
-				foreach (var card in handCandidates[0].Cards) {
-					determinedSet.Add(card);
-				}
-				HashSet <PokerCard> remainingSet = new HashSet<PokerCard>();
-				foreach (var card in remainingCards) {
-					remainingSet.Add(card);
-				}
-
-				remainingSet.ExceptWith(determinedSet);
-
-				RecursiveEvaluateCards(new List<PokerCard>(remainingSet));
-
-				if (handCandidates[0].HandType > _bestRank) {
-					_bestRank = handCandidates[0].HandType;
-				}
-			} else {
-				// Nothing in rank, quit the recursive loop and report the hand has nothing.
-				Debug.Log("The best rank = Nothing.");
-				rankSortedCards.AddRange(remainingCards);
-			}
-			*/
-
-/*
-	private void RecursiveEvaluateCards(List<PokerCard> remainingCards,
-			List<HandCandidateData> currentHandCandidates, List<List<HandCandidateData>> results)
-		{
-
-			var hasRank = false;
-
-			var kindGroupList = GetNumberGroups(1, remainingCards);
-			var flushGroups = _evaluateFlushGroups(3, remainingCards);
-
-			
-			//1. Sort the number in each suit, try to find suit first and find straight by the way to see if we have flush Straight.
-			foreach (var flushGroup in flushGroups)
-			{
-
-				for (var desiredCount = flushGroup.Count; desiredCount >= 3; desiredCount--)
-				{
-					var flushStraightPermutes = new List<List<PokerCard>>();
-					var flushOnlyPermutes = new List<List<PokerCard>>();
-					var wrapperListInList = flushGroup.Select(item => new List<PokerCard> { item }).ToList();
-					ProcessPermuteStraight(desiredCount, wrapperListInList, new List<PokerCard>(),
-						flushStraightPermutes);
-
-					if (flushStraightPermutes.Count >
-					    0) // Yes we have straight in suit group which implies flush straight
-					{
-						var handType = EightCardsCompTypeDict[(desiredCount, CompType.FlushStraight)];
-						foreach (var permute in flushStraightPermutes)
-						{
-							var newHandCandidateData = new HandCandidateData { HandType = handType, Cards = permute };
-							currentHandCandidates.Add(newHandCandidateData);
-							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute);
-							RecursiveEvaluateCards(newRemainCards, currentHandCandidates, results);
-							currentHandCandidates.RemoveAt(currentHandCandidates.Count - 1);
-							hasRank = true;
-						}
-					}
-					else
-					{
-						var handType = EightCardsCompTypeDict[(desiredCount, CompType.Flush)];
-						UtilFunc.RecursivePermute<PokerCard>(flushGroup, desiredCount, new List<PokerCard>(),
-							flushOnlyPermutes);
-						foreach (var permute in flushOnlyPermutes)
-						{
-							var newHandCandidateData = new HandCandidateData { HandType = handType, Cards = permute };
-							currentHandCandidates.Add(newHandCandidateData);
-							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute);
-							RecursiveEvaluateCards(newRemainCards, currentHandCandidates, results);
-							currentHandCandidates.RemoveAt(currentHandCandidates.Count - 1);
-							hasRank = true;
-						}
-					}
-
-				}
-			}
-
-			// 2. Sort majorly for straight
-			var allStraightClusters = GetAllStraightCluster(3, kindGroupList);
-			foreach (var straightCluster in allStraightClusters)
-			{
-				var allPermutes = new List<List<PokerCard>>();
-				var handType = EightCardsCompTypeDict[(straightCluster.Count, CompType.Straight)];
-				RecursivePermuteStraight(straightCluster.Count, straightCluster, new List<PokerCard>(), allPermutes);
-				foreach (var permute in allPermutes)
-				{
-					var newHandCandidateData = new HandCandidateData { HandType = handType, Cards = permute };
-					currentHandCandidates.Add(newHandCandidateData);
-					var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute);
-					RecursiveEvaluateCards(newRemainCards, currentHandCandidates, results);
-					currentHandCandidates.RemoveAt(currentHandCandidates.Count - 1);
-				}
-				hasRank = true;
-			}
-			
-			// 3. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc..
-			var allKindGroups = GetKindGroups(2, remainingCards);
-			
-			//for (var groupNum = allKindGroups.Count; groupNum >= 1; groupNum--)
-			foreach(var kindGroup in allKindGroups)
-			{
-				for (var groupCardNum = kindGroup.Count; groupCardNum >= 2 ; groupCardNum--) {
-					var allPermutes = new List<List<PokerCard>>();
-					var handType = EightCardsCompTypeDict[(groupCardNum, CompType.Kind)];
-					UtilFunc.RecursivePermute<PokerCard>(kindGroup, groupCardNum, new List<PokerCard>(),
-						allPermutes);
-					foreach (var permute in allPermutes)
-					{
-						var newHandCandidateData = new HandCandidateData { HandType = handType, Cards = permute };
-						currentHandCandidates.Add(newHandCandidateData);
-						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute);
-						RecursiveEvaluateCards(newRemainCards, currentHandCandidates, results);
-						currentHandCandidates.RemoveAt(currentHandCandidates.Count - 1);
-					}
-				}
-				hasRank = true;
-			}
-			
-			// Process Three of Kind.
-			
-			
-			// Process pairs.
-			
-			
-			
-			
-			// When code comes here, it means there are nothing else worthy to record, so that put all current into Results.
-			if (hasRank == false)
-			{
-				results.Add(new List<HandCandidateData>(currentHandCandidates));
-			}
+			return allPokerCardComps;
 		}
-*/
-
-
-/*public bool Equals(CandidateComps x, CandidateComps y)
-{
-	foreach (var (Comp1, Comp2) in x.Comps.Zip(y.Comps, (a, b) => (a, b)))
-	{
-		bool equRes = Comp1.Equals(Comp2);
-		if (equRes == false) return false;
-	}
-	return true;
-}*/
-		
-/*public override bool Equals(CandidateComps another)
-{
-
-	return true;
-}
-*/
-
-//var handStrings = new List<string>();
-/*
-foreach (var result in retResults)
-{
-	var CompTypeCountDict = new Dictionary<EightCardsCompType, int>();
-	foreach (var handCandidate in result)
-	{
-		if (CompTypeCountDict.ContainsKey(handCandidate.HandType))
-		{
-			CompTypeCountDict[handCandidate.HandType] += 1;
-		}
-		else
-		{
-			CompTypeCountDict[handCandidate.HandType] = 1;
-		}
-	}
-
-	var sortedCompTypeCountDict = CompTypeCountDict
-		.OrderBy(kvp => kvp.Key) // Keys are enums, naturally sorted by declaration order
-		.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-	var resultString = string.Join(
-		",",
-		sortedCompTypeCountDict.Select(kvp => $"{kvp.Key}_{kvp.Value}")
-	);
-	handStrings.Add(resultString);
-}
-*/
-//var uniqueStrings = handStrings.Distinct().ToList();
-
-
-/*
-	public struct HandCandidateData : IComparable<HandCandidateData>, IEqualityComparer<HandCandidateData>
-	{
-		public EightCardsCompType HandType;
-
-		// Reset all temporary variables
-		public List<PokerCard> Cards;
-		public int CompareTo(HandCandidateData other)
-		{
-			throw new NotImplementedException();
-		}
-
-		public bool Equals(HandCandidateData x, HandCandidateData y)
-		{
-			throw new NotImplementedException();
-		}
-
-		public int GetHashCode(HandCandidateData obj)
-		{
-			throw new NotImplementedException();
-		}
-	};
-	*/
-
-/*
-		private void InitTempEvaluateData()
-		{
-			_tempEvaluateData.KindGroups = new List<List<PokerCard>>();
-			_tempEvaluateData.SuitGroups = new List<List<PokerCard>>();
-			_tempEvaluateData.NumberGroups = new List<List<PokerCard>>();
-			_tempEvaluateData.KindCards = new List<PokerCard>();
-			_tempEvaluateData.NoneKindCards = new List<PokerCard>();
-			_tempEvaluateData.PairCnt = 0;
-			_tempEvaluateData.ThreeOfKindCnt = 0;
-			_tempEvaluateData.FourOfKindCnt = 0;
-			_tempEvaluateData.FiveOfKindCnt = 0;
-			_tempEvaluateData.RankTypeBits = 0;
-			rankSortedCards = new List<PokerCard>();
-		}*/
-
-
-
-						/*
-						private void EvaluateStraightAndFlush(List<PokerCard> runCards)
-						{
-
-							foreach (PokerSuit pokerSuit in Enum.GetValues(typeof(PokerSuit)))
-							{
-								List<PokerCard> sameSuitCards = runCards.FindAll(e => e.Suit == pokerSuit);
-								if (sameSuitCards.Count > 3)
-								{
-									_tempEvaluateData.SuitGroups.Add(sameSuitCards);
-								}
-							}
-
-							// Sort with any suit with most cards.
-							_tempEvaluateData.SuitGroups.Sort(delegate(List<PokerCard> x, List<PokerCard> y)
-							{
-								if (x.Count == y.Count) return 0;
-								else if (x.Count > y.Count) return 1;
-								else return -1;
-							});
-
-
-							//2. preparating data for straight with AceBig
-							for (var number = 14; number >= 1; number--)
-							{
-								List<PokerCard> sameNumberCards = runCards.FindAll(e => e.Number == number);
-								if (sameNumberCards.Count > 0)
-								{
-									//Debug.Log("YYY number sorted: " + sameNumberCards[0].number);
-									_tempEvaluateData.NumberGroups.Add(sameNumberCards);
-								}
-							}
-
-						}*/
-
-
-
-						/*
-						public struct HandProcessData
-						{
-							// Reset all temporary variables
-							public List<List<PokerCard>> KindGroups;
-							public List<List<PokerCard>> SuitGroups;
-
-							// collect number groups from 1 to 14, ex: you have 2,5,5,5,7 then you will have single member group of 2,
-							// and 3 members of group of number 5, and single member group of 7.
-							// This variable is majorly facilitate the straight extraction.
-							public List<List<PokerCard>> NumberGroups;
-
-							public List<PokerCard> KindCards;
-							public List<PokerCard> NoneKindCards;
-
-							public int PairCnt;
-							public int ThreeOfKindCnt;
-							public int FourOfKindCnt;
-							public int FiveOfKindCnt;
-							public byte RankTypeBits;
-							//public List <HandCandidateData> handCandidates;
-
-						};
-					*/
-
-/*
-		private void ResetEvaluateSet()
-		{
-
-			foreach (var t in _tempEvaluateData.KindGroups)
-			{
-				t.Clear();
-			}
-
-			_tempEvaluateData.KindGroups.Clear();
-
-			foreach (var t in _tempEvaluateData.SuitGroups)
-			{
-				t.Clear();
-			}
-
-			_tempEvaluateData.SuitGroups.Clear();
-
-			foreach (var t in _tempEvaluateData.NumberGroups)
-			{
-				t.Clear();
-			}
-
-			_tempEvaluateData.NumberGroups.Clear();
-
-			_tempEvaluateData.KindCards.Clear();
-			_tempEvaluateData.NoneKindCards.Clear();
-
-			_tempEvaluateData.PairCnt = 0;
-			_tempEvaluateData.ThreeOfKindCnt = 0;
-			_tempEvaluateData.FourOfKindCnt = 0;
-			_tempEvaluateData.FiveOfKindCnt = 0;
-			_tempEvaluateData.RankTypeBits = 0;
-		}*/
-
+	    */

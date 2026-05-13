@@ -1,6 +1,6 @@
 ﻿namespace GenericPoker.EightCard
 {
-    public class JokerCardMajor : JokerCard, IJokerFlushable, IJokerStraightable
+    public class EightCardJokerCardMajor : EightCardJokerCard, IJokerFlushable, IJokerStraightable
     {
         private JokerType _jokerType;
         private PokerSuit _replacedSuit = PokerSuit.NoSuit;
@@ -51,7 +51,7 @@
         
     }
     
-    public class JokerCardMinor : JokerCard, IJokerFlushable, IJokerStraightable
+    public class EightCardJokerCardMinor : EightCardJokerCard, IJokerFlushable, IJokerStraightable
     {
         private JokerType _jokerType;
         private PokerSuit _replacedSuit = PokerSuit.NoSuit;
@@ -102,7 +102,7 @@
     }
     
     
-    public class JokerCardSuit : JokerCard, IJokerFlushable
+    public class EightCardJokerCardSuit : EightCardJokerCard, IJokerFlushable
     {
         private JokerType _jokerType;
         private PokerSuit _replacedSuit = PokerSuit.NoSuit;
@@ -139,7 +139,7 @@
         }*/
     }
     
-    public class JokerCardStraight : JokerCard, IJokerStraightable
+    public class EightCardJokerCardStraight : EightCardJokerCard, IJokerStraightable
     {
         private JokerType _jokerType;
         private int _replacedNumber = 0;

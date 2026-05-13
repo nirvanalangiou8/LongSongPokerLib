@@ -1,23 +1,40 @@
 namespace GenericPoker
 {
-    public interface IJokerFlushable
+
+
+    
+    public interface IJokerFlushable 
     {
-        void CheckFlush();
-        bool MatchSuit(PokerSuit inputSuit);
+        /*bool MatchSuit(PokerSuit inputSuit)
+        {
+            var retBool = ((int)_suit & (int)inputSuit) != 0;
+            if (retBool) SetSuitSub(inputSuit);
+            return retBool;
+        }*/
         void SetSuitSub(PokerSuit inputSuit);
         
     }
 
-    public interface IJokerStraightable
+    public interface IJokerStraightable 
     {
-        void CheckStraight();
+        //void CheckStraight();
         void SetStraightSub(int number);
     }
     
     
-    public interface IAceable
+    public interface IAceable : INumberReplaceable
     {
         void CheckAce();
     }
 
+    public interface IAKable : INumberReplaceable
+    {
+        void CheckAce();
+    }
+    
+    public interface INumberReplaceable
+    {
+        void CheckAce();
+    }
+    
 }

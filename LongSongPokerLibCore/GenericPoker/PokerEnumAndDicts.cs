@@ -67,6 +67,7 @@ namespace GenericPoker
 		TwoThreeCardFlushStraights,
 	}
 
+	/*
 	public enum EightCardsComboType_Old_With_3_flush_straight
 	{
 		Pair,
@@ -90,7 +91,7 @@ namespace GenericPoker
 		EightCardsFlush,
 		EightCardsStraight,
 		EightCardsFlushStraight,
-	}
+	}*/
 
 
 	public enum EightCardsCompType

@@ -220,9 +220,7 @@ namespace GenericPoker.EightCard
 			if (Components.Count > other.Components.Count)
 			{
 				return 1;
-			}
-			else
-			{
+			} else {
 				if (Components.Count < other.Components.Count)
 				{
 					return -1;
