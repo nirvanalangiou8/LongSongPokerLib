@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
+using GenericPoker.EightCard;
 using GenericPoker;
 
 namespace GenericPoker.SevenCard
@@ -12,9 +13,9 @@ namespace GenericPoker.SevenCard
 	public class HandAnalyzer
 	{
 		
-		private readonly List<BasePokerCard> _allPokerCards;
-		private readonly List<BasePokerCard> _noneJokerCards;
-		private readonly List<BasePokerCard> _jokerCards;
+		private readonly List<EightCardPokerCard> _allPokerCards;
+		private readonly List<EightCardPokerCard> _noneJokerCards;
+		private readonly List<EightCardPokerCard> _jokerCards;
 		private PokerRankTypes _bestRank;
 
 
@@ -120,11 +121,11 @@ namespace GenericPoker.SevenCard
 				{ "8_FlushStraight", EightCardsCompType.EightCardsFlushStraight }
 			};
 
-		public PokerHandCalculator()
+		public HandAnalyzer()
 		{
-			_allPokerCards = new List<BasePokerCard>();
-			_noneJokerCards = new List<BasePokerCard>();
-			_jokerCards = new List<BasePokerCard>();
+			_allPokerCards = new List<EightCardPokerCard>();
+			_noneJokerCards = new List<EightCardPokerCard>();
+			_jokerCards = new List<EightCardPokerCard>();
 
 			_bestRank = PokerRankTypes.Nothing;
 

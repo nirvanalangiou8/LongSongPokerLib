@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using GenericPoker;
 using GenericPoker.EightCard;
-using GenericPoker.FourCard;
 using NUnit.Framework;
 
 namespace EightCardsProbTest
