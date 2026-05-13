@@ -1,6 +1,6 @@
 ﻿namespace GenericPoker;
 
-public class JokerCard
+public class HandAnalyzer
 {
     
 }

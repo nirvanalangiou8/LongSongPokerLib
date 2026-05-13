@@ -4,7 +4,6 @@ using Random = System.Random;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Linq;
-using GenericPoker.FourCard;
 using GenericPoker.EightCard;
 
 namespace GenericPoker
@@ -34,10 +33,7 @@ namespace GenericPoker
 				    {
 					    int id = (suitId - 1) * PokerConst.AceBigNumber + number;
 					    BasePokerCard newPokerCard;
-					    if (typeof(TCard) == typeof(FourCardPokerCard)) {
-						    //public static FourCardPokerCard CreateInstance(string pokerCardStr, int objectID = 0, int deckID = 1)
-						    newPokerCard = FourCardPokerCard.CreateInstance(number, pokerSuit, deckID: i+1);
-					    } else if (typeof(TCard) == typeof(EightCardPokerCard)) {
+  			    if (typeof(TCard) == typeof(EightCardPokerCard)) {
 						    newPokerCard = EightCardPokerCard.CreateInstance(id, number, pokerSuit, deckID: i+1);
 					    } else {
 						    throw new InvalidOperationException($"Unsupported card type: {typeof(TCard).Name}");

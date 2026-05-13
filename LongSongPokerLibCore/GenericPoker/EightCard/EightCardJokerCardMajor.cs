@@ -35,23 +35,19 @@
             _replacedSuit = inputSuit;
         }
 
+        /*
         public override bool MatchSuit(PokerSuit inputSuit)
         {
             var retBool = ((int)_suit & (int)inputSuit) != 0;
             if (retBool) SetSuitSub(inputSuit);
             return retBool;
-        }
+        }*/
         
-        public void CheckFlush()
-        {
-            //Debug.Log("DBG get into joker card major.");
-            throw new System.NotImplementedException();
-        }
         
-        public void CheckStraight()
+        /*public void CheckStraight()
         {
             throw new System.NotImplementedException();
-        }
+        }*/
         
     }
     
@@ -88,22 +84,18 @@
             _replacedSuit = inputSuit;
         }
 
-        public override bool MatchSuit(PokerSuit inputSuit)
+       /* public override bool MatchSuit(PokerSuit inputSuit)
         {
             var retBool = ((int)_suit & (int)inputSuit) != 0;
             if (retBool) SetSuitSub(inputSuit);
             return retBool;
-        }
+        }*/
         
-        public void CheckFlush()
-        {
-            throw new System.NotImplementedException();
-        }
-        
+        /*
         public void CheckStraight()
         {
             throw new System.NotImplementedException();
-        }
+        }*/
 
         public override string CardStr => $"MinorJoker";
         
@@ -126,22 +118,25 @@
             _replacedSuit = inputSuit;
         }
 
+        /*
         public override bool MatchSuit(PokerSuit inputSuit)
         {
             var retBool = ((int)_suit & (int)inputSuit) != 0;
             if (retBool) SetSuitSub(inputSuit);
             return retBool;
         }
-        
+        */
+        /*
         public void CheckFlush()
         {
             throw new System.NotImplementedException();
-        }
+        }*/
         
+        /*
         public void CheckStraight()
         {
             throw new System.NotImplementedException();
-        }
+        }*/
     }
     
     public class JokerCardStraight : JokerCard, IJokerStraightable
@@ -164,10 +159,11 @@
             throw new System.NotImplementedException();
         }
         
+        /*
         public void CheckStraight()
         {
             throw new System.NotImplementedException();
-        }
+        }*/
     }
 }
 

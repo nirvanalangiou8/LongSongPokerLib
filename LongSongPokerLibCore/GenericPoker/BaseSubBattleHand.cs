@@ -1,11 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GenericPoker.FourCard;
 using GenericPoker.EightCard;
 
 namespace GenericPoker
 {
+    
+    
+    public enum BaseBattleHandRank
+    {
+        Nothing,
+        Pair,
+        TwoPairs,
+        FourCardStraight,
+        FourCardsFlush,
+        ThreeCardsPairInFlush,
+        ThreeOfKind,
+        TownHouse, // ThreeCardsPairInFlush_Pair
+        FourCardsPairInFlush,
+        FiveCardsStraight,
+        FullHouse,
+        ThreeCardsFlushStraight,
+        FiveCardsFlush,
+        Mansion, // ThreeCardsFlushStraight_Pair,
+        FiveCardsPairInFlush,
+        SixCardsStraight,
+        FourOfKind,
+        FourCardsFlushStraight,
+        SixCardsFlush,
+        SixCardsPairInFlush,
+        SevenCardsStraight,
+        FourCardsTwoPairsInFlush,
+        FiveCardsTwoPairsInFlush,
+        SixCardsTwoPairsInFlush,
+        FiveCardsFlushStraight,
+        SevenCardsPairInFlush,
+        EightCardsStraight,
+        FiveOfKind,
+        SevenCardsFlush,
+        SevenCardsTwoPairsInFlush,
+        SixCardsFlushStraight,
+        SixCardsThreePairsInFlush,
+        EightCardsPairInFlush,
+        SevenCardsThreePairsInFlush,
+        EightCardsTwoPairsInFlush,
+        SixOfKind,
+        EightCardsFlush,
+        SevenCardsFlushStraight,
+        EightCardsThreePairsInFlush,
+        SevenOfKind,
+        EightCardsFlushStraight,
+        EightCardsFourPairsInFlush,
+        EightOfKind
+    }
+    
     
     public class BaseSubBattleHand<TCard>: IComparable<BaseSubBattleHand<TCard>> where TCard : BasePokerCard
     {

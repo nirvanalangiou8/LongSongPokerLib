@@ -2,7 +2,6 @@
 using System.Dynamic;
 using System.Linq;
 
-using GenericPoker.FourCard;
 using GenericPoker.EightCard;
 
 namespace GenericPoker

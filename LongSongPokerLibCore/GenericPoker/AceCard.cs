@@ -1,5 +1,4 @@
 ﻿using System;
-using GenericPoker.FourCard;
 using GenericPoker.EightCard;
 
 namespace GenericPoker
@@ -37,9 +36,10 @@ namespace GenericPoker
             _replacedNumber = number;
         }
         
+        /*
         public void CheckStraight()
         {
             throw new System.NotImplementedException();
-        }
+        }*/
     }
 }

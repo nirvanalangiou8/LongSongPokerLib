@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GenericPoker.FourCard;
 using GenericPoker.EightCard;
 
 namespace GenericPoker
@@ -45,13 +44,6 @@ namespace GenericPoker
 			{"♠️", PokerSuit.Spade}, {"⭐",  PokerSuit.Star}, {"🃏", PokerSuit.Wild},
 		};
 	}
-	/*
-	static class GlobalPokerDeckInfo
-	{
-		public static int totalPokerNumber = 13;
-		public static int totalPokerSuit = 4;
-		public static int totalTotalPokerCards = totalPokerNumber * totalPokerSuit;
-	}*/
 	
 	
     public class BasePokerCard :  IComparable<BasePokerCard> // IEquatable<PokerCard> // 

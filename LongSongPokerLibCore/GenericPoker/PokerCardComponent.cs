@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using GenericPoker.FourCard;
 using GenericPoker.EightCard;
 
 namespace GenericPoker
@@ -66,11 +65,11 @@ namespace GenericPoker
 			// if runs to here, it means all cards' number are equal, then check who has more nature way to form the combo.
 			foreach (var (cardA, cardB) in _cards.Zip(other.Cards, (A, B) => (A, B)))
 			{
-				if (cardA is JokerCard)
+				if (cardA is EightCardJokerCard)
 				{
-					if (cardB is JokerCard)
+					if (cardB is EightCardJokerCard)
 					{
-						compareRes = ((JokerCard)cardA).JokerPower.CompareTo(((JokerCard)cardB).JokerPower);
+						compareRes = ((EightCardJokerCard)cardA).JokerPower.CompareTo(((EightCardJokerCard)cardB).JokerPower);
 						if (compareRes != 0) 
 							return compareRes;
 					}
@@ -78,7 +77,7 @@ namespace GenericPoker
 					{
 						return -1;
 					}
-				} else if (cardB is JokerCard) { // A is not joker, and B is, So A win
+				} else if (cardB is EightCardJokerCard) { // A is not joker, and B is, So A win
 					return 1;
 				} // No need to check A and B are both no jokers, so continue the loop to find next one. 
 			}
