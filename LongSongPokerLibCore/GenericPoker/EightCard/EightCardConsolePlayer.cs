@@ -10,13 +10,7 @@ namespace GenericPoker.EightCard
         TPlayer Create(string name);
     }
     
-    public class EightCardPlayerFactory : IPlayerFactory<EightCardConsolePlayer>
-    {
-        public EightCardConsolePlayer Create(string name)
-        {
-            return new EightCardConsolePlayer(name);
-        }
-    }
+
     
     public class EightCardConsolePlayer : ConsolePlayer<EightCardPokerCard> 
     {
@@ -26,12 +20,17 @@ namespace GenericPoker.EightCard
         {
             _pokerHandCalculator = new PokerHandCalculator();
         }
+
         
+        
+/*
         public EightCardConsolePlayer() : base()
         {
             _pokerHandCalculator = new PokerHandCalculator();
         }
+*/
         
+
         public override List<PokerHandStructure> ProcessHands()
         {
             var castedList = _pokerCards.Cast<EightCardPokerCard>().ToList();
@@ -39,6 +38,15 @@ namespace GenericPoker.EightCard
             // TBR
             //_pokerHandCalculator.SetupCards(_pokerCards);
             return _pokerHandCalculator.Test8Cards();
+        }
+
+    }
+
+    public class EightCardPlayerFactory : IPlayerFactory<EightCardConsolePlayer>
+    {
+        public EightCardConsolePlayer Create(string name)
+        {
+            return new EightCardConsolePlayer(name);
         }
     }
 

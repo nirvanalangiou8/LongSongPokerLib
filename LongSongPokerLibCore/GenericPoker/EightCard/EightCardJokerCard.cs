@@ -13,9 +13,9 @@ namespace GenericPoker
     }
     
     
-    public class EightCardJokerCard : EightCardPokerCard
+    public class EightCardJokerCard : EightCardPokerCard, IJoker
     {
-        private JokerType _jokerType;
+        protected JokerType _jokerType;
 
         public override string CardStr => $"Joker";
         

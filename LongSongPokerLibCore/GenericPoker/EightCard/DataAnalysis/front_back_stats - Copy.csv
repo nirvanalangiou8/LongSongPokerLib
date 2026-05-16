@@ -1,0 +1,26 @@
+Hand Position,Rank,Count
+Front,FourCardsFlushStraight,620
+Front,FourOfKind,70
+Front,ThreeCardsFlushStraight,500650
+Front,ThreeOfKind,932280
+Front,TwoPairs,448500
+Front,Pair,213259250
+Back,EightCardsFlush,2210
+Back,SixCardsFlushStraight,15310
+Back,SevenCardsFlush,122300
+Back,EightCardsStraight,182010
+Back,FiveCardsFlushStraight,255200
+Back,SevenCardsStraight,2350950
+Back,SixCardsFlush,2795450
+Back,FourCardsFlushStraight,3194650
+Back,FourOfKind,952530
+Back,SixCardsStraight,15220000
+Back,ThreeCardsFlushStraightAndPair,2021890
+Back,FiveCardsFlush,31451360
+Back,ThreeCardsFlushStraight,30539060
+Back,FullHouse,2326270
+Back,FiveCardsStraight,64137520
+Back,ThreeOfKind,31988360
+Back,TwoPairs,26563920
+Back,Pair,195503250
+Back,Nothing,85663960

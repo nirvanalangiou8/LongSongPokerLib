@@ -6,6 +6,7 @@ namespace GenericPoker
     public class AceCard : EightCardPokerCard , IJokerStraightable
     {
         private int _replacedNumber = 0;
+        public int JokerPower => 100; // High value means low priority in sorting compared to real jokers
         
         public override int Number => _replacedNumber != 0 ? _replacedNumber : _number;
 
@@ -15,6 +16,7 @@ namespace GenericPoker
             _replacedNumber = number;
         }
         
+/*
         public override int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
         {
             var retPts = 0;
@@ -29,6 +31,7 @@ namespace GenericPoker
 
             return retPts;
         }
+*/
         
         public void SetStraightSub(int number)
         {

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace GenericPoker
 {
+/*
     static class IListExtensions
     {
         public static void Swap<T>(
@@ -25,6 +26,7 @@ namespace GenericPoker
             list[secondIndex] = temp;
         }
     }
+*/
 
     public class UtilFunc
     {
@@ -36,6 +38,7 @@ namespace GenericPoker
             return rng.Next(min, max+1);
         }
         
+/*
         public static void Shuffle<T>(List<T> list)
         {
             // Iterate over the list from last to first
@@ -49,6 +52,7 @@ namespace GenericPoker
                 (list[i], list[j]) = (list[j], list[i]);
             }
         }
+*/
         
         public static List<List<T>> GetPermutation<T>(List<T> inputList, int selectCount)
         {
@@ -93,6 +97,7 @@ namespace GenericPoker
         }
         
         
+/*
         public static int SelectRange(int inputValue, Dictionary<(int, int), int> rangeDict) 
         {
             foreach (var kvp in rangeDict)
@@ -105,7 +110,9 @@ namespace GenericPoker
             }
             return 0;
         }
+*/
         
+/*
         public static void CustomPrint(bool verbose = true, params object[] args)
         {
             if (verbose)
@@ -113,6 +120,7 @@ namespace GenericPoker
                 Console.WriteLine(string.Join(" ", args));
             }
         }
+*/
         
     }
 }

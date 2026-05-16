@@ -53,11 +53,7 @@ namespace GenericPoker.EightCard
         {
             foreach (var player in _players)
             {
-                /*var ret = new List<PokerHandStructure>();
-                if (player is EightCardConsolePlayer eightPlayer)
-                {
-                    ret = eightPlayer.ProcessHands();
-                }*/
+
                 var ret = player.ProcessHands();
                 
                 if (ret.Count == 0)
@@ -85,3 +81,4 @@ namespace GenericPoker.EightCard
         }
     }
 }
+

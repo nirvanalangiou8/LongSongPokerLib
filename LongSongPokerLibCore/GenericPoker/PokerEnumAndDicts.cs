@@ -1,6 +1,7 @@
 ﻿
 namespace GenericPoker
 {
+	/*
 	public enum PokerBitTypes
 	{
 		BitPair = 0b_0000_0001,
@@ -10,7 +11,7 @@ namespace GenericPoker
 		BitFlush = 0b_0001_0000,
 		BitFourOfKind = 0b_0010_0000,
 		BitFiveOfKind = 0b_0100_0000
-	}
+	}*/
 
 	public enum EightCardsPokerRank
 	{
@@ -42,57 +43,7 @@ namespace GenericPoker
 	}
 
 
-	public enum EightCardsComboType_old
-	{
-		OnePair,
-		TwoPairs,
-		ThreePairs,
-		FourPairs,
-		ThreeOfKind,
-		TwoThreeOfKinds,
-		OnePairAndThreeOfKind,
-		TwoPairsAndThreeOfKind,
-		OnePairAndTwoThreeOfKinds,
-		FourOfKind,
-		OnePairAndFourOfKind,
-		TwoPairsAndFourOfKind,
-		ThreeOfKindAndFourOfKind,
-		TwoFourOfKinds,
-
-		ThreeCardFlush,
-		ThreeCardStraight,
-		ThreeCardFlushStraight,
-		TwoThreeCardFlushes,
-		TwoThreeCardStraights,
-		TwoThreeCardFlushStraights,
-	}
-
-	/*
-	public enum EightCardsComboType_Old_With_3_flush_straight
-	{
-		Pair,
-		ThreeOfKind,
-		FourOfKind,
-		ThreeCardsFlush,
-		ThreeCardStraight,
-		ThreeCardsFlushStraight,
-		FourCardsFlush,
-		FourCardStraight,
-		FourCardsFlushStraight,
-		FiveCardsFlush,
-		FiveCardsStraight,
-		FiveCardsFlushStraight,
-		SixCardsFlush,
-		SixCardsStraight,
-		SixCardsFlushStraight,
-		SevenCardsFlush,
-		SevenCardsStraight,
-		SevenCardsFlushStraight,
-		EightCardsFlush,
-		EightCardsStraight,
-		EightCardsFlushStraight,
-	}*/
-
+	
 
 	public enum EightCardsCompType
 	{
@@ -139,55 +90,68 @@ namespace GenericPoker
 		None,
 	}
 	
-	/*
-	public enum EightCardsBackHandRank
+	
+	public enum EightCardFrontHandQualifiedHandAndRank
 	{
-		EightCardsFourPairsInFlush,
-		EightCardsFlushStraight,
-		SevenOfKind,
-		EightCardsThreePairsInFlush,
-		SevenCardsFlushStraight,
-		EightCardsFlush,
-		SixOfKind,
-		EightCardsTwoPairsInFlush,
-		SevenCardsThreePairsInFlush,
-		EightCardsPairInFlush,
-		SixCardsThreePairsInFlush,
-		SixCardsFlushStraight,
-		SevenCardsTwoPairsInFlush,
-		SevenCardsFlush,
-		FiveOfKind,
-		EightCardsStraight,
-		SevenCardsPairInFlush,
-		FiveCardsFlushStraight,
-		SixCardsTwoPairsInFlush,
-		FiveCardsTwoPairsInFlush,
-		FourCardsTwoPairsInFlush,
-		SevenCardsStraight,
-		SixCardsPairInFlush,
+		Nothing,
+		Pair,
+		ThreeOfKind,
+		TwoPairs,
+		ThreeCardsFlushStraight,
+		FourCardsFlushStraight,
+		FourOfKind
+	}
+	
+	public enum EightCardBackHandQualifiedHandAndRank
+	{
+		Nothing,
+		Pair,
+		TwoPairs,
+		ThreeOfKind,
+		ThreeCardsFlushStraight,
+		FiveCardsStraight,
+		FiveCardsFlush,
+		FullHouse,
+		ThreeCardsFlushStraightAndPair,
+		SixCardsStraight,
 		SixCardsFlush,
+		SevenCardsStraight,
 		FourCardsFlushStraight,
 		FourOfKind,
-		SixCardsStraight,
-		FiveCardsPairInFlush,
-		ThreeCardsFlushStraightAndPair,
-		FiveCardsFlush,
-		ThreeCardsFlushStraight,
-		ThreeOfKindAndPair,
-		FiveCardsStraight,
-		FourCardsPairInFlush,
-		ThreeCardsPairInFlushAndPair,
-		ThreeOfKind,
-		ThreeCardsPairInFlush,
-		FourCardsFlush,
-		FourCardStraight,
-		TwoPairs,
-		Pair,
+		FiveCardsFlushStraight,
+		EightCardsStraight,
+		SevenCardsFlush,
+		SixCardsFlushStraight,
+		EightCardsFlush
 	}
-	*/
-
+	
+	public enum EightCardOverAllHandRank
+	{
+		Nothing,
+		Pair,
+		TwoPairs,
+		ThreeOfKind,
+		ThreeCardsFlushStraight,
+		FiveCardsStraight,
+		FiveCardsFlush,
+		FullHouse,
+		ThreeCardsFlushStraightAndPair,
+		SixCardsStraight,
+		SixCardsFlush,
+		SevenCardsStraight,
+		FourCardsFlushStraight,
+		FourOfKind,
+		FiveCardsFlushStraight,
+		EightCardsStraight,
+		SevenCardsFlush,
+		SixCardsFlushStraight,
+		EightCardsFlush
+	}
+	
+	
 	public enum EightCardQualifiedExceptionalBackHand
 	{
+		Nothing,
 		EightCardsFourPairsInFlush,
 		EightCardsFlushStraight,
 		SevenOfKind,
@@ -308,3 +272,51 @@ public enum PokerRankTypes
 	}
 		
 }
+
+
+/*
+	public enum EightCardsBackHandRank
+	{
+		EightCardsFourPairsInFlush,
+		EightCardsFlushStraight,
+		SevenOfKind,
+		EightCardsThreePairsInFlush,
+		SevenCardsFlushStraight,
+		EightCardsFlush,
+		SixOfKind,
+		EightCardsTwoPairsInFlush,
+		SevenCardsThreePairsInFlush,
+		EightCardsPairInFlush,
+		SixCardsThreePairsInFlush,
+		SixCardsFlushStraight,
+		SevenCardsTwoPairsInFlush,
+		SevenCardsFlush,
+		FiveOfKind,
+		EightCardsStraight,
+		SevenCardsPairInFlush,
+		FiveCardsFlushStraight,
+		SixCardsTwoPairsInFlush,
+		FiveCardsTwoPairsInFlush,
+		FourCardsTwoPairsInFlush,
+		SevenCardsStraight,
+		SixCardsPairInFlush,
+		SixCardsFlush,
+		FourCardsFlushStraight,
+		FourOfKind,
+		SixCardsStraight,
+		FiveCardsPairInFlush,
+		ThreeCardsFlushStraightAndPair,
+		FiveCardsFlush,
+		ThreeCardsFlushStraight,
+		ThreeOfKindAndPair,
+		FiveCardsStraight,
+		FourCardsPairInFlush,
+		ThreeCardsPairInFlushAndPair,
+		ThreeOfKind,
+		ThreeCardsPairInFlush,
+		FourCardsFlush,
+		FourCardStraight,
+		TwoPairs,
+		Pair,
+	}
+	*/

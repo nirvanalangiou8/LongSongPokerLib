@@ -7,16 +7,17 @@ using GenericPoker.EightCard;
 namespace GenericPoker
 {
 	
-    public struct PokerCardComponent<TEnum> : IComparable<PokerCardComponent<TEnum>> where TEnum : Enum
-	    //, IEqualityComparer<PokerCardCombo<TEnum>> 
+    public struct PokerCardComponent<TEnum, TCard> : IComparable<PokerCardComponent<TEnum, TCard>> 
+        where TEnum : Enum
+        where TCard : BasePokerCard
 	{
 		public TEnum CompRank;
-		private List<EightCardPokerCard> _cards;
+		private List<TCard> _cards;
 
 		public int CardCount => _cards.Count;
 		public string CompString => string.Join("#", _cards.Select(o => o.CardUnitTestStr));
 		
-		public List<EightCardPokerCard> Cards
+		public List<TCard> Cards
 		{
 			get => _cards;
 			set
@@ -27,7 +28,7 @@ namespace GenericPoker
 		
 		public override bool Equals(object obj)
 		{
-			if (obj is not PokerCardComponent<TEnum> other)
+			if (obj is not PokerCardComponent<TEnum, TCard> other)
 				return false;
 			
 			bool rankEqualRes = ((IComparable)CompRank).Equals(other.CompRank);
@@ -40,13 +41,15 @@ namespace GenericPoker
 			return true;
 		}
 
-		public int GetHashCode(PokerCardComponent<TEnum> obj)
+/*
+		public int GetHashCode(PokerCardComponent<TEnum, TCard> obj)
 		{
 			return 1;
 		}
+*/
 		
 		
-		public int CompareTo(PokerCardComponent<TEnum> other)
+		public int CompareTo(PokerCardComponent<TEnum, TCard> other)
 		{
 			var compareRes = 0;
 			
@@ -65,21 +68,23 @@ namespace GenericPoker
 			// if runs to here, it means all cards' number are equal, then check who has more nature way to form the combo.
 			foreach (var (cardA, cardB) in _cards.Zip(other.Cards, (A, B) => (A, B)))
 			{
-				if (cardA is EightCardJokerCard)
+				bool isAJoker = cardA is IJoker;
+				bool isBJoker = cardB is IJoker;
+				
+				if (isAJoker && isBJoker)
 				{
-					if (cardB is EightCardJokerCard)
-					{
-						compareRes = ((EightCardJokerCard)cardA).JokerPower.CompareTo(((EightCardJokerCard)cardB).JokerPower);
-						if (compareRes != 0) 
-							return compareRes;
-					}
-					else // A is joker, B is not, so B win. 
-					{
-						return -1;
-					}
-				} else if (cardB is EightCardJokerCard) { // A is not joker, and B is, So A win
+					compareRes = ((IJoker)cardA).JokerPower.CompareTo(((IJoker)cardB).JokerPower);
+					if (compareRes != 0) 
+						return compareRes;
+				}
+				else if (isAJoker) // A is joker, B is not, so B win (A is smaller, nature way win)
+				{
+					return -1;
+				}
+				else if (isBJoker) // B is joker, A is not, so A win (A is larger)
+				{
 					return 1;
-				} // No need to check A and B are both no jokers, so continue the loop to find next one. 
+				}
 			}
 			
 			// If runs to here, it means all equal even with jokers. so return 0 (equal).

@@ -101,10 +101,12 @@ namespace GenericPoker
 		}
 
 		
+/*
 		public virtual bool MatchSuit(PokerSuit inputSuit)
 		{
 			return ((int)_suit & (int)inputSuit) != 0;
 		}
+*/
 
 		//public virtual bool IsNumberable => true;
 		

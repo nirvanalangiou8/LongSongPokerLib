@@ -3,21 +3,18 @@ namespace GenericPoker
 
 
     
-    public interface IJokerFlushable 
+    public interface IJoker
     {
-        /*bool MatchSuit(PokerSuit inputSuit)
-        {
-            var retBool = ((int)_suit & (int)inputSuit) != 0;
-            if (retBool) SetSuitSub(inputSuit);
-            return retBool;
-        }*/
-        void SetSuitSub(PokerSuit inputSuit);
-        
+        int JokerPower { get; }
     }
 
-    public interface IJokerStraightable 
+    public interface IJokerFlushable : IJoker
     {
-        //void CheckStraight();
+        void SetSuitSub(PokerSuit inputSuit);
+    }
+
+    public interface IJokerStraightable : IJoker
+    {
         void SetStraightSub(int number);
     }
     

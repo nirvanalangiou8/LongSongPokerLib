@@ -35,6 +35,12 @@ namespace GenericPoker
 					    BasePokerCard newPokerCard;
   			    if (typeof(TCard) == typeof(EightCardPokerCard)) {
 						    newPokerCard = EightCardPokerCard.CreateInstance(id, number, pokerSuit, deckID: i+1);
+					    } else if (typeof(TCard).Name == "SevenCardPokerCard") {
+                            // Using reflection or dynamic to avoid circular dependency if SevenCardPokerCard is in SevenCard namespace
+                            // but since it is in same assembly, it should be fine if we add the namespace.
+                            // For now, let's assume we'll add the namespace.
+                            newPokerCard = (BasePokerCard)typeof(TCard).GetMethod("CreateInstance", new[] { typeof(int), typeof(int), typeof(PokerSuit), typeof(int), typeof(int) })
+                                .Invoke(null, new object[] { id, number, pokerSuit, 0, i + 1 });
 					    } else {
 						    throw new InvalidOperationException($"Unsupported card type: {typeof(TCard).Name}");
 					    }

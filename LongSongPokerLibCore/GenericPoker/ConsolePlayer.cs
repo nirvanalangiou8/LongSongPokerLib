@@ -21,9 +21,12 @@ namespace GenericPoker
             _pokerCards = new List<TCard>();
         }
         
+/*
         public ConsolePlayer()
         {
+            _pokerCards = new List<TCard>();
         }
+*/
         
         public void SetCards(List<TCard> inputCards)
         {
@@ -36,10 +39,12 @@ namespace GenericPoker
         }
         
         
+
         public virtual List<PokerHandStructure> ProcessHands()
         {
             return null;
         }
+
         
     }
 }

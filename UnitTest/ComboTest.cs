@@ -10,7 +10,7 @@ namespace EightCardsProbTest
     public class ComboTest
     {
 
-        public List<string> ConvertCombosToStr(List<PokerCardComponent<PokerCardCompRank>> combos)
+        public List<string> ConvertCombosToStr(List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>> combos)
         {
             var retList = new List<string>();
             

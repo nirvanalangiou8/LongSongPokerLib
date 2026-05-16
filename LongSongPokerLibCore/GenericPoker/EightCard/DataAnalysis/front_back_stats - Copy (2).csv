@@ -1,0 +1,27 @@
+Hand Position,Rank,Count,Probablities,Win/NoLose probablity
+Front,FourCardsFlushStraight,620,0.0001%,100.0000%
+Front,FourOfKind,70,0.0000%,99.9999%
+Front,ThreeCardsFlushStraight,500650,0.1011%,99.9999%
+Front,ThreeOfKind,932280,0.1882%,99.8988%
+Front,TwoPairs,448500,0.0906%,99.7105%
+Front,Pair,213259250,43.0578%,99.6200%
+Front,Nothing,280144830,56.5622%,56.5622%
+Back,EightCardsFlush,2210,0.0004%,100.0000%
+Back,SixCardsFlushStraight,15310,0.0031%,99.9996%
+Back,SevenCardsFlush,122300,0.0247%,99.9965%
+Back,EightCardsStraight,182010,0.0367%,99.9718%
+Back,FiveCardsFlushStraight,255200,0.0515%,99.9350%
+Back,SevenCardsStraight,2350950,0.4747%,99.8835%
+Back,SixCardsFlush,2795450,0.5644%,99.4088%
+Back,FourCardsFlushStraight,3194650,0.6450%,98.8444%
+Back,FourOfKind,952530,0.1923%,98.1994%
+Back,SixCardsStraight,15220000,3.0730%,98.0071%
+Back,ThreeCardsFlushStraightAndPair,2021890,0.4082%,94.9341%
+Back,FiveCardsFlush,31451360,6.3501%,94.5259%
+Back,ThreeCardsFlushStraight,30539060,6.1659%,88.1758%
+Back,FullHouse,2326270,0.4697%,82.0098%
+Back,FiveCardsStraight,64137520,12.9496%,81.5401%
+Back,ThreeOfKind,31988360,6.4586%,68.5905%
+Back,TwoPairs,26563920,5.3633%,62.1320%
+Back,Pair,195503250,39.4728%,56.7686%
+Back,Nothing,85663960,17.2959%,17.2959%

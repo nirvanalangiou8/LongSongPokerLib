@@ -9,7 +9,10 @@ namespace GenericPoker.EightCard
         private EightCardSubBattleHand _secondHand;
         
         public int TotalPower => _firstHand.HandPower + _secondHand.HandPower;
-         
+        
+        public EightCardSubBattleHand FrontHand => _firstHand;
+        public EightCardSubBattleHand BackHand => _secondHand;
+
         public EightCardHands(EightCardSubBattleHand firstHand, EightCardSubBattleHand secondHand)
         {
             _firstHand = firstHand;

@@ -90,25 +90,25 @@ namespace GenericPoker.EightCard
 		
 		private static readonly Dictionary<string, EightCardsCompType> EightCardsCompTypeDict = new()
 			{
-				{ ("2_Kind"), EightCardsCompType.Pair },
+				{ "2_Kind", EightCardsCompType.Pair },
 				{ "3_Kind", EightCardsCompType.ThreeOfKind },
 				{ "4_Kind", EightCardsCompType.FourOfKind },
 				{ "5_Kind", EightCardsCompType.FiveOfKind },
 				{ "6_Kind", EightCardsCompType.SixOfKind },
 				{ "7_Kind", EightCardsCompType.SevenOfKind },
 				{ "8_Kind", EightCardsCompType.EightOfKind },
-				{ "3_Flush", EightCardsCompType.ThreeCardsFlush },
-				{ "3_Straight", EightCardsCompType.ThreeCardsStraight },
-				{ "3_PairInFlush", EightCardsCompType.ThreeCardsPairInFlush},
+				//{ "3_Flush", EightCardsCompType.ThreeCardsFlush },
+				//{ "3_Straight", EightCardsCompType.ThreeCardsStraight },
+				//{ "3_PairInFlush", EightCardsCompType.ThreeCardsPairInFlush},
 				{ "3_FlushStraight", EightCardsCompType.ThreeCardsFlushStraight },
-				{ "4_Flush", EightCardsCompType.FourCardsFlush },
-				{ "4_PairInFlush", EightCardsCompType.FourCardsPairInFlush},
-				{ "4_TwoPairsInFlush", EightCardsCompType.FourCardsTwoPairsInFlush},
-				{ "4_Straight", EightCardsCompType.FourCardStraight },
+				//{ "4_Flush", EightCardsCompType.FourCardsFlush },
+				//{ "4_PairInFlush", EightCardsCompType.FourCardsPairInFlush},
+				//{ "4_TwoPairsInFlush", EightCardsCompType.FourCardsTwoPairsInFlush},
+				//{ "4_Straight", EightCardsCompType.FourCardStraight },
 				{ "4_FlushStraight", EightCardsCompType.FourCardsFlushStraight },
 				{ "5_Flush", EightCardsCompType.FiveCardsFlush },
-				{ "5_PairInFlush", EightCardsCompType.FiveCardsPairInFlush},
-				{ "5_TwoPairsInFlush", EightCardsCompType.FiveCardsTwoPairsInFlush},
+				//{ "5_PairInFlush", EightCardsCompType.FiveCardsPairInFlush},
+				//{ "5_TwoPairsInFlush", EightCardsCompType.FiveCardsTwoPairsInFlush},
 				{ "5_Straight", EightCardsCompType.FiveCardsStraight },
 				{ "5_FlushStraight", EightCardsCompType.FiveCardsFlushStraight },
 				{ "6_Flush", EightCardsCompType.SixCardsFlush },
@@ -140,7 +140,7 @@ namespace GenericPoker.EightCard
 
 			_bestRank = PokerRankTypes.Nothing;
 
-			var test = new List<PokerCardComponent<EightCardsCompType>>();
+			var test = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
 		     var b = new PokerHandStructure(test);
 
 		     //InitTempEvaluateData();
@@ -192,14 +192,17 @@ namespace GenericPoker.EightCard
 			data.SetupCards(newCardList);
 			return data;
 		}
-
+		
+/*
 		public List<EightCardPokerCard> SortWithSuits()
 		{
 			var sortedSubLists = _evaluateFlushGroups(1, _allPokerCards);
 			var flattenedList = sortedSubLists.SelectMany(sublist => sublist).ToList();
 			return flattenedList;
 		}
+*/
 
+/*
 		public List<EightCardPokerCard> SortWithKinds()
 		{
 
@@ -210,18 +213,26 @@ namespace GenericPoker.EightCard
 
 			return allSortedCards;
 		}
+*/
 
-		private List<PokerCardComponent<PokerCardCompRank> > ListsToPokerComp(List<List<EightCardPokerCard>> inputListInList,
+		private List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard> > ListsToPokerComp(List<List<EightCardPokerCard>> inputListInList,
 			PokerCardCompRank pokerCardCompRank)
 		{
 			return inputListInList
-				.Select(subList => new PokerCardComponent<PokerCardCompRank> { CompRank = pokerCardCompRank, Cards = subList }).ToList();
+				.Select(subList => new PokerCardComponent<PokerCardCompRank, EightCardPokerCard> { CompRank = pokerCardCompRank, Cards = subList }).ToList();
 		}
 
 
-		public List<PokerCardComponent<PokerCardCompRank>> GetAllFlushStraightComps(int cardCountInComp)
+		/// <summary>
+		/// Retrieves all possible flush-straight combinations of a specified card count.
+		/// It evaluates flush groups first and then searches for straight sequences within those groups,
+		/// accounting for jokers that can act as both straight and flush fillers.
+		/// </summary>
+		/// <param name="cardCountInComp">The number of cards required for the flush-straight component.</param>
+		/// <returns>A list of poker card components representing all valid flush-straight hands, sorted by power.</returns>
+		public List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>> GetAllFlushStraightComps(int cardCountInComp)
 		{
-			var allComps = new List<PokerCardComponent<PokerCardCompRank>>();
+			var allComps = new List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>>();
 			var permutes = new List<List<EightCardPokerCard>>();
 
 			// process flush
@@ -258,9 +269,16 @@ namespace GenericPoker.EightCard
 			return allComps;
 		}
 
-		public List<PokerCardComponent<PokerCardCompRank>> GetAllStraightComps(int cardCountInComp)
+		/// <summary>
+		/// Retrieves all possible straight combinations of a specified card count.
+		/// It uses the ProcessPermuteStraight logic to find sequences across all available card ranks,
+		/// including those completed using straightable jokers.
+		/// </summary>
+		/// <param name="cardCountInComp">The number of cards required for the straight component.</param>
+		/// <returns>A list of poker card components representing all valid straight hands, sorted by power.</returns>
+		public List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>> GetAllStraightComps(int cardCountInComp)
 		{
-			var allComps = new List<PokerCardComponent<PokerCardCompRank>>();
+			var allComps = new List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>>();
 			var permutes = new List<List<EightCardPokerCard>>();
 
 
@@ -303,9 +321,10 @@ namespace GenericPoker.EightCard
 			
 			allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
 			var uniqueCandidates = allCandidateComps.Distinct().ToList();
-			var allPokerHands = new List<EightCardHands>();
 			var arrangeStrategy = new BalancedStrategy();
 			
+			
+			var allPokerHands = new List<EightCardHands>();
 			foreach (var pokerStructure in uniqueCandidates)
 				allPokerHands.Add(pokerStructure.ArrangeHands(arrangeStrategy));
 			
@@ -355,10 +374,17 @@ namespace GenericPoker.EightCard
 			return retCompPermutes;
 		}
 		
-		public List<PokerCardComponent<PokerCardCompRank>> GetAllFlushComps(int cardCountInComp)
+		/// <summary>
+		/// Retrieves all possible flush combinations of a specified card count.
+		/// It identifies suit groups and generates combinations within each suit, 
+		/// incorporating flushable jokers to complete the required card count.
+		/// </summary>
+		/// <param name="cardCountInComp">The number of cards required for the flush component.</param>
+		/// <returns>A list of poker card components representing all valid flush hands, sorted by power.</returns>
+		public List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>> GetAllFlushComps(int cardCountInComp)
 		{
 
-			var allComps = new List<PokerCardComponent<PokerCardCompRank>>();
+			var allComps = new List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>>();
 			var permutes = new List<List<EightCardPokerCard>>();
 
 			// process flush
@@ -395,7 +421,16 @@ namespace GenericPoker.EightCard
 			return allComps;
 		}
 
-		// Conisder multiple jokers on your hand.
+		/// <summary>
+		/// Processes and generates all valid straight permutations from given card groups and jokers.
+		/// This function handles gap filling with jokers, Ace-low (1) straight logic, 
+		/// and optionally restricts the cards to a specific suit for flush-straights.
+		/// </summary>
+		/// <param name="straightCount">The target length of the straight.</param>
+		/// <param name="kindGroupList">List of card groups grouped by rank.</param>
+		/// <param name="straightableJokerCards">Available jokers that can be used in a straight.</param>
+		/// <param name="permutes">Output list where valid straight combinations will be added.</param>
+		/// <param name="assignedSuit">Optional suit restriction for flush-straights.</param>
 		private void ProcessPermuteStraight(int straightCount, List<List<EightCardPokerCard>> kindGroupList,
 			List<EightCardPokerCard> straightableJokerCards, List<List<EightCardPokerCard>> permutes,
 			PokerSuit assignedSuit = PokerSuit.NoSuit)
@@ -480,6 +515,13 @@ namespace GenericPoker.EightCard
 		}
 
 		
+		/// <summary>
+		/// Identifies clusters of consecutive card ranks that are long enough to potentially form straights.
+		/// It handles Ace-low logic by duplicating Ace groups as rank 1 if necessary.
+		/// </summary>
+		/// <param name="straightCount">The minimum required length for a straight.</param>
+		/// <param name="kindGroupList">List of cards grouped by their numerical rank.</param>
+		/// <returns>A list of clusters, where each cluster is a list of consecutive rank groups.</returns>
 		private List<List<List<EightCardPokerCard>>> GetAllStraightCluster(int straightCount, List<List<EightCardPokerCard>> kindGroupList)
 		{
 			if (kindGroupList.Count == 0)
@@ -522,11 +564,15 @@ namespace GenericPoker.EightCard
 		
 		
 
-		// Evaluate the string is a bit of tricky. 
-		// First step, evaluate call kind groups with at least 1 count, so the return looks like Ex: if cardCountInComp=3
-		// (A-spade), (K-spade, K-club), (Q-Diamond, Q-club), (J-heart, J-Club), (10-Club).
-		// Then we have (A-spade, K-spade, Q-Diamond), (A-spade, K-spade, Q-Club), (A-spade, K-club, Q-Diamond), 
-		// (A-spade, K-club, Q-club) ...
+		/// <summary>
+		/// Recursively generates all possible card combinations for a straight sequence.
+		/// It navigates through rank groups to ensure consecutive numbers and collects 
+		/// all valid permutations of length equal to straightCount.
+		/// </summary>
+		/// <param name="straightCount">The target number of cards in the straight.</param>
+		/// <param name="kindGroupList">Available card groups to pick from.</param>
+		/// <param name="currentList">The current accumulation of cards in the recursion.</param>
+		/// <param name="resultList">Output list to store completed straight combinations.</param>
 		private static void RecursivePermuteStraight(int straightCount, List<List<EightCardPokerCard>> kindGroupList,
 			List<EightCardPokerCard> currentList, List<List<EightCardPokerCard>> resultList)
 		{
@@ -566,6 +612,12 @@ namespace GenericPoker.EightCard
 		}
 
 
+		/// <summary>
+		/// Groups all provided cards by their suit and filters those that meet the minimum count requirement.
+		/// </summary>
+		/// <param name="minCardCountInGroup">Minimum number of cards of the same suit required.</param>
+		/// <param name="allPokerCards">The collection of cards to evaluate.</param>
+		/// <returns>A list of card groups, each containing cards of the same suit, ordered by group size.</returns>
 		private List<List<EightCardPokerCard>> _evaluateFlushGroups(int minCardCountInGroup, List<EightCardPokerCard> allPokerCards)
 		{
 
@@ -604,71 +656,14 @@ namespace GenericPoker.EightCard
 		}
 
 		
-		// search all possible "minCardCountInGroup" cards of kind group. Ex: minCardCountInGroup = 2, means at least 2 same cards, which is pair.
-		private List<List<EightCardPokerCard>> GetNumberGroups_old(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
-		{
-			var rankGroupsDict = new Dictionary<int, List<EightCardPokerCard>>();
 
-			var preSortedList = noneJokerCards.OrderByDescending(item => item.PokerCardPower).ToList();
-			// Setp1 : place number in dictionary to achieve grouping concept.
-			foreach (var card in preSortedList)
-			{
-				if (!rankGroupsDict.ContainsKey(card.Number))
-					rankGroupsDict[card.Number] = new List<EightCardPokerCard>();
-
-				rankGroupsDict[card.Number].Add(card);
-			}
-
-			// Step2 : in each group, each has same poker rank/number, but not in suit order, so that compare than in suit order.
-			// sort kind group with suit colors, which means spade->heart->diamond->club
-			foreach (var kvp in rankGroupsDict)
-			{
-				// reverse sort, (y compare x), so that higher is in front.
-				kvp.Value.Sort((x, y) => y.CompareTo(x));
-			}
-
-			// Step3 : sort the dictionary key (which is rank/number), and convert to a list because the dictionary is hash-based and nor gurantee the order.	
-			//var sortedList = rankGroupsDict.OrderByDescending(kv => kv.Value.Count)
-			//	.ThenByDescending(kv => kv.Value[0].Number).ToList();
-			var sortedList = rankGroupsDict.OrderByDescending(kv => kv.Value[0].Number).ToList();
-
-			// step 4, only group member counts >= minCardCountInGroup
-			return sortedList.Select(pair => pair.Value).Where(subList => subList.Count >= minCardCountInGroup)
-				.ToList();
-		}
 		
-		/*
-		private List<List<EightCardPokerCard>> GetNumberGroups(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
-		{
-			// Use a dictionary to group cards by their number
-			var rankGroupsDict = new Dictionary<int, List<EightCardPokerCard>>();
-
-			// Avoid creating a new sorted list; group and sort in one pass
-			foreach (var card in noneJokerCards)
-			{
-				if (!rankGroupsDict.TryGetValue(card.Number, out var group))
-				{
-					group = new List<EightCardPokerCard>();
-					rankGroupsDict[card.Number] = group;
-				}
-				group.Add(card);
-			}
-
-			// Sort each group in-place to minimize memory allocations
-			foreach (var group in rankGroupsDict.Values)
-			{
-				group.Sort((x, y) => y.CompareTo(x)); // Higher cards first
-			}
-
-			// Filter and sort the groups in one step, using yield to minimize intermediate lists
-			return rankGroupsDict
-				.Where(kv => kv.Value.Count >= minCardCountInGroup) // Filter groups
-				.OrderByDescending(kv => kv.Key) // Sort by number descending
-				.Select(kv => kv.Value) // Select the groups
-				.ToList(); // Materialize the result as a list
-		}
-		*/
-		
+		/// <summary>
+		/// Groups cards by their numerical rank (number) and filters based on a minimum count per rank.
+		/// </summary>
+		/// <param name="minCardCountInGroup">Minimum number of cards of the same rank required.</param>
+		/// <param name="noneJokerCards">The collection of cards (excluding jokers) to group.</param>
+		/// <returns>A list of card groups, each containing cards of the same rank, ordered by rank descending.</returns>
 		private List<List<EightCardPokerCard>> GetNumberGroups(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
 		{
 			// 使用 Dictionary 根據牌面點數（Number）進行分組
@@ -707,18 +702,46 @@ namespace GenericPoker.EightCard
 			numberGroups.Sort((x, y) => y.Count.CompareTo(x.Count));
 			return numberGroups;
 		}
-
-		private EightCardsCompType EvaluteEightCardsCompType(int numCards, CompType CompType, int pairsInFlush = 0)
+		/*
+		private EightCardsCompType DetermineCompTypeWithPairInFlush(int numCards, CompType compType, int pairsInFlush)
 		{
+			if (pairsInFlush <= 0) return EightCardsCompType.None;
 			var keyStr = "";
 			Dictionary<int, string> localDict = new Dictionary<int, string>{{1, "PairIn"}, {2, "TwoPairsIn"},  {3, "ThreePairsIn"}, {4, "FourPairsIn"}};
+			keyStr = $"{numCards}_{localDict[pairsInFlush]}{compType.ToString()}";
+			var retCompType = EightCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : EightCardsCompType.None;
+			
+			return retCompType;
+		}*/
+		
+		private EightCardsCompType DetermineCompTypeWithPairInFlush(int numCards, CompType CompType, int pairsInFlush = 0)
+		{
+			/*var keyStr = "";
+			Dictionary<int, string> localDict = new Dictionary<int, string>{{1, "PairIn"}, {2, "TwoPairsIn"},  {3, "ThreePairsIn"}, {4, "FourPairsIn"}};
 			keyStr = pairsInFlush == 0 ? $"{numCards}_{CompType.ToString()}" : 
-				$"{numCards}_{localDict[pairsInFlush]}{CompType.ToString()}";
+				$"{numCards}_{localDict[pairsInFlush]}{CompType.ToString()}";*/
+
+			var keyStr = $"{numCards}_{CompType.ToString()}";
 			var retCompType = EightCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : EightCardsCompType.None;
 			
 			return retCompType;
 		}
+		
+		
+		private EightCardsCompType  DetermineCompType(int numCards, CompType compType)
+		{
+			var keyStr = $"{numCards}_{compType.ToString()}";
+			var retCompType = EightCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : EightCardsCompType.None;
+			return retCompType;
+		}
 
+		/// <summary>
+		/// Recursively evaluates the best possible partitioning of cards into poker hand components.
+		/// It uses a backtracking approach to explore different combinations of flushes, straights, and kinds.
+		/// </summary>
+		/// <param name="remainingCards">The list of cards still available to be grouped.</param>
+		/// <param name="currentHandStructure">The current hand structure being built.</param>
+		/// <param name="results">The list of all valid complete hand structures found.</param>
 		private void RecursiveEvaluateCards(List<EightCardPokerCard> remainingCards,
 			PokerHandStructure currentHandStructure, List<PokerHandStructure> results)
 		{
@@ -747,11 +770,11 @@ namespace GenericPoker.EightCard
 					ProcessPermuteStraight(desiredCount, wrapperListInList, new List<EightCardPokerCard>(), flushStraightPermutes);
 
 					if (flushStraightPermutes.Count > 0) { // Yes we have straight in suit group which implies @@flush-straight@@
-						var handType = EvaluteEightCardsCompType(desiredCount, CompType.FlushStraight);
+						var handType = DetermineCompType(desiredCount, CompType.FlushStraight);
 						if (handType == EightCardsCompType.None) continue;
 						foreach (var permute in flushStraightPermutes)
 						{
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType>
+       var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard>
 								{ CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							var newRemainCards =
@@ -760,7 +783,7 @@ namespace GenericPoker.EightCard
 							currentHandStructure.RemoveLastComp();
 							hasRank = true;
 						}
-					} else { // Yes we have straight in suit group which implies @@flush@@
+					} else { // No, we don't have straight in suit group which implies @@flush@@
 						
 						flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<EightCardPokerCard>(flushGroup, desiredCount));
 						
@@ -770,11 +793,11 @@ namespace GenericPoker.EightCard
 								.GroupBy(x => x)                // Group by item value
 								.Count(g => g.Count() >= 2);
 							
-							var handType = EvaluteEightCardsCompType(desiredCount, CompType.Flush, pairCount);
+							var handType = DetermineCompTypeWithPairInFlush(desiredCount, CompType.Flush, pairCount);
 							if (handType == EightCardsCompType.None) continue;
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType> { CompRank = handType, Cards = permute };
+							var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard> { CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
-							// TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
+							// TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other because 
 							// when do hash set, two J-spade will become single one.
 							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 							RecursiveEvaluateCards(newRemainCards, currentHandStructure, results);
@@ -798,12 +821,12 @@ namespace GenericPoker.EightCard
 					{
 						var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
 						var allPermutes = new List<List<EightCardPokerCard>>();
-						var handType = EvaluteEightCardsCompType(targetStraightCluster.Count, CompType.Straight);
+						var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
 						if (handType == EightCardsCompType.None) continue;
 						RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster, new List<EightCardPokerCard>(), allPermutes);
 						foreach (var permute in allPermutes)
 						{
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType> { CompRank = handType, Cards = permute };
+							var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard> { CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 							RecursiveEvaluateCards(newRemainCards, currentHandStructure, results);
@@ -822,11 +845,11 @@ namespace GenericPoker.EightCard
 			{
 				for (var groupCardNum = kindGroup.Count; groupCardNum >= 2 ; groupCardNum--) {
 					//var allPermutes = new List<List<PokerCard>>();
-					var handType = EvaluteEightCardsCompType(groupCardNum, CompType.Kind);
+					var handType = DetermineCompType(groupCardNum, CompType.Kind);
 					var allPermutes = UtilFunc.GetPermutation<EightCardPokerCard>(kindGroup, groupCardNum);
 					foreach (var permute in allPermutes)
 					{
-						var newHandCandidateData = new PokerCardComponent<EightCardsCompType> { CompRank = handType, Cards = permute };
+						var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard> { CompRank = handType, Cards = permute };
 						currentHandStructure.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 						RecursiveEvaluateCards(newRemainCards, currentHandStructure, results);
@@ -843,6 +866,16 @@ namespace GenericPoker.EightCard
 			}
 		}
 
+		/// <summary>
+		/// Attempts to arrange remaining cards into flush or flush-straight components.
+		/// Part of the recursive hand-splitting logic.
+		/// </summary>
+		/// <param name="flushGroups">Pre-evaluated suit groups.</param>
+		/// <param name="remainingCards">Available cards.</param>
+		/// <param name="currentHandStructure">Current state of hand composition.</param>
+		/// <param name="results">Output list of complete hand structures.</param>
+		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeFlushOrFlushStraight(List<List<EightCardPokerCard>> flushGroups, List<EightCardPokerCard> remainingCards,
             PokerHandStructure currentHandStructure, List<PokerHandStructure> results, bool hasRank)
         {
@@ -863,11 +896,11 @@ namespace GenericPoker.EightCard
 					ProcessPermuteStraight(desiredCount, wrapperListInList, new List<EightCardPokerCard>(), flushStraightPermutes);
 
 					if (flushStraightPermutes.Count > 0) { // Yes we have straight in suit group which implies @@flush-straight@@
-						var handType = EvaluteEightCardsCompType(desiredCount, CompType.FlushStraight);
+						var handType = DetermineCompType(desiredCount, CompType.FlushStraight);
 						if (handType == EightCardsCompType.None) continue;
 						foreach (var permute in flushStraightPermutes)
 						{
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType>
+							var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard>
 								{ CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							var newRemainCards =
@@ -887,9 +920,9 @@ namespace GenericPoker.EightCard
 								.GroupBy(x => x)                // Group by item value
 								.Count(g => g.Count() >= 2);
 							
-							var handType = EvaluteEightCardsCompType(desiredCount, CompType.Flush, pairCount);
+							var handType = DetermineCompTypeWithPairInFlush(desiredCount, CompType.Flush, pairCount);
 							if (handType == EightCardsCompType.None) continue;
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType> { CompRank = handType, Cards = permute };
+							var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard> { CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							// TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
 							// when do hash set, two J-spade will become single one.
@@ -905,6 +938,16 @@ namespace GenericPoker.EightCard
         }
 		
 		
+		/// <summary>
+		/// Attempts to arrange remaining cards into straight components based on pre-calculated clusters.
+		/// Part of the recursive hand-splitting logic.
+		/// </summary>
+		/// <param name="allStraightClusters">Groups of consecutive ranks.</param>
+		/// <param name="remainingCards">Available cards.</param>
+		/// <param name="currentHandCandidates">Current state of hand composition.</param>
+		/// <param name="results">Output list of complete hand structures.</param>
+		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeStraightComps(List<List<List<EightCardPokerCard>>> allStraightClusters, List<EightCardPokerCard> remainingCards,
             PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool hasRank)
         {
@@ -920,12 +963,12 @@ namespace GenericPoker.EightCard
                     {
                         var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
                         var allPermutes = new List<List<EightCardPokerCard>>();
-                        var handType = EvaluteEightCardsCompType(targetStraightCluster.Count, CompType.Straight);
+                        var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
                         if (handType == EightCardsCompType.None) continue;
                         RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster, new List<EightCardPokerCard>(), allPermutes);
                         foreach (var permute in allPermutes)
                         {
-                            var newHandCandidateData = new PokerCardComponent<EightCardsCompType> { CompRank = handType, Cards = permute };
+                            var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard> { CompRank = handType, Cards = permute };
                             currentHandCandidates.AddComp(newHandCandidateData);
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
@@ -939,6 +982,16 @@ namespace GenericPoker.EightCard
             return hasRank;
         }
 		
+		/// <summary>
+		/// Attempts to arrange remaining cards into kind-based components (pairs, triples, etc.).
+		/// Part of the recursive hand-splitting logic.
+		/// </summary>
+		/// <param name="allKindGroups">Cards grouped by rank with at least 2 cards.</param>
+		/// <param name="remainingCards">Available cards.</param>
+		/// <param name="currentHandCandidates">Current state of hand composition.</param>
+		/// <param name="results">Output list of complete hand structures.</param>
+		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeKindComps(List<List<EightCardPokerCard>> allKindGroups, List<EightCardPokerCard> remainingCards,
 			PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool hasRank)
 		{
@@ -947,11 +1000,11 @@ namespace GenericPoker.EightCard
 				for (var groupCardNum = kindGroup.Count; groupCardNum >= 2; groupCardNum--)
 				{
 					//var allPermutes = new List<List<PokerCard>>();
-					var handType = EvaluteEightCardsCompType(groupCardNum, CompType.Kind);
+					var handType = DetermineCompType(groupCardNum, CompType.Kind);
 					var allPermutes = UtilFunc.GetPermutation<EightCardPokerCard>(kindGroup, groupCardNum);
 					foreach (var permute in allPermutes)
 					{
-						var newHandCandidateData = new PokerCardComponent<EightCardsCompType> { CompRank = handType, Cards = permute };
+						var newHandCandidateData = new PokerCardComponent<EightCardsCompType, EightCardPokerCard> { CompRank = handType, Cards = permute };
 						currentHandCandidates.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 						RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
@@ -963,6 +1016,13 @@ namespace GenericPoker.EightCard
 			return hasRank;
 		}
 		
+		/// <summary>
+		/// Main recursive entry point for partitioning a set of cards into various valid poker hand components.
+		/// It sequentially tries flushes, straights, and kinds to find all possible valid hand layouts.
+		/// </summary>
+		/// <param name="remainingCards">The list of cards remaining to be partitioned.</param>
+		/// <param name="currentHandCandidates">The current hand structure being built.</param>
+		/// <param name="results">The list of all valid complete hand structures found.</param>
 		private void RecursiveArrangeHands(List<EightCardPokerCard> remainingCards,
 			PokerHandStructure currentHandCandidates, List<PokerHandStructure> results)
 		{
@@ -997,9 +1057,9 @@ namespace GenericPoker.EightCard
 
 
 		/*
-		public List<PokerCardComponent<PokerCardCompRank>> GetAllPermuteComps(int cardCountInComp)
+  public List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>> GetAllPermuteComps(int cardCountInComp)
 		{
-			var allPokerCardComps = new List<PokerCardComponent<PokerCardCompRank>>();
+			var allPokerCardComps = new List<PokerCardComponent<PokerCardCompRank, EightCardPokerCard>>();
 			var permutes = new List<List<EightCardPokerCard>>();
 
 			//=============================
@@ -1075,3 +1135,69 @@ namespace GenericPoker.EightCard
 			return allPokerCardComps;
 		}
 	    */
+/*
+		// search all possible "minCardCountInGroup" cards of kind group. Ex: minCardCountInGroup = 2, means at least 2 same cards, which is pair.
+		private List<List<EightCardPokerCard>> GetNumberGroups_old(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
+		{
+			var rankGroupsDict = new Dictionary<int, List<EightCardPokerCard>>();
+
+			var preSortedList = noneJokerCards.OrderByDescending(item => item.PokerCardPower).ToList();
+			// Setp1 : place number in dictionary to achieve grouping concept.
+			foreach (var card in preSortedList)
+			{
+				if (!rankGroupsDict.ContainsKey(card.Number))
+					rankGroupsDict[card.Number] = new List<EightCardPokerCard>();
+
+				rankGroupsDict[card.Number].Add(card);
+			}
+
+			// Step2 : in each group, each has same poker rank/number, but not in suit order, so that compare than in suit order.
+			// sort kind group with suit colors, which means spade->heart->diamond->club
+			foreach (var kvp in rankGroupsDict)
+			{
+				// reverse sort, (y compare x), so that higher is in front.
+				kvp.Value.Sort((x, y) => y.CompareTo(x));
+			}
+
+			// Step3 : sort the dictionary key (which is rank/number), and convert to a list because the dictionary is hash-based and nor gurantee the order.	
+			//var sortedList = rankGroupsDict.OrderByDescending(kv => kv.Value.Count)
+			//	.ThenByDescending(kv => kv.Value[0].Number).ToList();
+			var sortedList = rankGroupsDict.OrderByDescending(kv => kv.Value[0].Number).ToList();
+
+			// step 4, only group member counts >= minCardCountInGroup
+			return sortedList.Select(pair => pair.Value).Where(subList => subList.Count >= minCardCountInGroup)
+				.ToList();
+		}
+*/
+		
+		/*
+		private List<List<EightCardPokerCard>> GetNumberGroups(int minCardCountInGroup, List<EightCardPokerCard> noneJokerCards)
+		{
+			// Use a dictionary to group cards by their number
+			var rankGroupsDict = new Dictionary<int, List<EightCardPokerCard>>();
+
+			// Avoid creating a new sorted list; group and sort in one pass
+			foreach (var card in noneJokerCards)
+			{
+				if (!rankGroupsDict.TryGetValue(card.Number, out var group))
+				{
+					group = new List<EightCardPokerCard>();
+					rankGroupsDict[card.Number] = group;
+				}
+				group.Add(card);
+			}
+
+			// Sort each group in-place to minimize memory allocations
+			foreach (var group in rankGroupsDict.Values)
+			{
+				group.Sort((x, y) => y.CompareTo(x)); // Higher cards first
+			}
+
+			// Filter and sort the groups in one step, using yield to minimize intermediate lists
+			return rankGroupsDict
+				.Where(kv => kv.Value.Count >= minCardCountInGroup) // Filter groups
+				.OrderByDescending(kv => kv.Key) // Sort by number descending
+				.Select(kv => kv.Value) // Select the groups
+				.ToList(); // Materialize the result as a list
+		}
+		*/

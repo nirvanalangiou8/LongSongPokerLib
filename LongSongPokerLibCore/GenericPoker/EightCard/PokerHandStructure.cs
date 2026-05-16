@@ -7,59 +7,10 @@ using System.Linq;
 namespace GenericPoker.EightCard
 {
 	
-	public interface IBattleHandArrangeStrategy
-	{
-		(EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeThreeComps(PokerCardComponent<EightCardsCompType> comp1, 
-			PokerCardComponent<EightCardsCompType> comp2, PokerCardComponent<EightCardsCompType> comp3);
-		(EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeTwoComps(PokerCardComponent<EightCardsCompType> comp1, 
-			PokerCardComponent<EightCardsCompType> comp2);
-	}
-	
-	public class BalancedStrategy : IBattleHandArrangeStrategy
-	{
-		public (EightCardSubBattleHand , EightCardSubBattleHand ) ArrangeThreeComps(
-			PokerCardComponent<EightCardsCompType> comp1,
-			PokerCardComponent<EightCardsCompType> comp2, PokerCardComponent<EightCardsCompType> comp3)
-		{
-
-			EightCardSubBattleHand firstEightCardSubBattleHand = null;
-			EightCardSubBattleHand secondEightCardSubBattleHand = null;
-			
-			if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue((comp2.CompRank, comp3.CompRank), out EightCardsBattleHandRank newBattleRank))
-			{
-				// Q-Pair, 3-Pair, 2-pair 
-				// 3-three of kind, Q-pair, 2-Pair (firsthand three of kind larger than second, so need to reverse.
-				//var mergedCards = comp2.Cards.Concat(comp3.Cards).ToList();
-				// return (newBattleHand, (BattleHand)newBattleHand);
-				firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerHandStructure.ConvertCompRankToBattleRank(comp1.CompRank), comp1); 
-				secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, comp2, comp3);
-				if (firstEightCardSubBattleHand > secondEightCardSubBattleHand)
-				{
-					(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = (secondEightCardSubBattleHand, firstEightCardSubBattleHand);	
-				}
-			}
-			else
-			{
-				Console.WriteLine("Fatal error in Battle Hand arrange of strategy.");
-			}
-			return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
-		}
-		
-		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeTwoComps(
-			PokerCardComponent<EightCardsCompType> comp1,
-			PokerCardComponent<EightCardsCompType> comp2)
-		{
-			//BattleHandEnum.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank));
-			var firstBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerHandStructure.ConvertCompRankToBattleRank(comp2.CompRank), comp2);
-			var secondBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, PokerHandStructure.ConvertCompRankToBattleRank(comp1.CompRank), comp1);	
-			return (firstBattleHand, secondBattleHand);
-		}
-	}
-	
 	// This class is for analyzed poker structure, to breaking the hand down into small components, such as pair, three of kind, flush, straight, etc..
 	public class PokerHandStructure : IComparable<PokerHandStructure>
 	{
-		public readonly List<PokerCardComponent<EightCardsCompType>> Components;
+		public readonly List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> Components;
 		public List<EightCardPokerCard> remainingCards;
 		
 		public string FinalCompsStr = "";
@@ -169,24 +120,24 @@ namespace GenericPoker.EightCard
 		}
 		public PokerHandStructure()
 		{
-			Components = new List<PokerCardComponent<EightCardsCompType>>();
+			Components = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
 			Init();
 		}
 
 		public PokerHandStructure(PokerHandStructure other)
 		{
-			Components = new List<PokerCardComponent<EightCardsCompType>>();
+			Components = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
 			Components.AddRange(other.Components);
 			Init();
 		}
 
-		public PokerHandStructure(List<PokerCardComponent<EightCardsCompType>> components)
+		public PokerHandStructure(List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> components)
 		{
 			Components = components;
 			Init();
 		}
 
-		public void AddComp(PokerCardComponent<EightCardsCompType> newComponent)
+		public void AddComp(PokerCardComponent<EightCardsCompType, EightCardPokerCard> newComponent)
 		{
 			Components.Add(newComponent);
 		}
@@ -201,10 +152,12 @@ namespace GenericPoker.EightCard
 			Components.RemoveAt(Components.Count - 1);
 		}
 
+/*
 		public void ClearComps()
 		{
 			Components.Clear();
 		}
+*/
 
 
 		[SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH")]

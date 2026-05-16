@@ -125,18 +125,18 @@ namespace GenericPoker.EightCard
         private BattleHandEnum _battleHandEnum;
         //private List<PokerCard> _cards;
         private EightCardsBattleHandRank _battleHandRank;
-        private List<PokerCardComponent<EightCardsCompType>> _components;
+        private List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> _components;
 
         //public override int HandPower => EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
         public EightCardsBattleHandRank BattleHandRank => _battleHandRank;
-        public List<PokerCardComponent<EightCardsCompType>> Components => _components;
+        public List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> Components => _components;
         
         private void Init()
         {
-            _components = new List<PokerCardComponent<EightCardsCompType>>();
+            _components = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
         }
         public EightCardSubBattleHand(BattleHandEnum battleHandEnum, EightCardsBattleHandRank inputRank, 
-            params PokerCardComponent<EightCardsCompType>[] inputCombos)
+            params PokerCardComponent<EightCardsCompType, EightCardPokerCard>[] inputCombos)
         {
             Init();
             foreach(var comp in inputCombos)

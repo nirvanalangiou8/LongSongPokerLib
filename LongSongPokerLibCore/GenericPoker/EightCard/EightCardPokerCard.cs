@@ -43,19 +43,6 @@ namespace GenericPoker.EightCard
 		// This is majorly used for count the hand power whenever need to compare card to card by using decimal concepts.
 		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*PokerHandCalculator.MaxPokerNumber;
 		
-		public virtual int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
-		{
-			if (anotherCard is AceCard)
-			{
-				var totalPts1 = (Number + 14 ) % 10;
-				var totalPts2 = (Number + 1) % 10;
-				return Math.Max(totalPts1, totalPts2);
-			} else {
-				
-				return  (Number + anotherCard.Number) % 10;
-			}
-		}
-
 		
 		public virtual bool IsNumberable => true;
 		
@@ -100,22 +87,7 @@ namespace GenericPoker.EightCard
 			return (value, suit);
 		}
 		
-		// Convert 10♣️ to 10_Club, etc.
-		public static string CardSymbolToStr(string symbolStr)
-		{
-			var (numStr, suitSymbol) = SplitCard(symbolStr);
-			return $"{numStr}_{PokerConst.SymbolToPokerSuit[suitSymbol].ToString()}";
-		}
-		
-		// Convert 10_Club to 10♣️
-		public static string CardStrToSymbol(string cardStr)
-		{
-			string[] parts = cardStr.Split('_');
-			var numStr = parts[0];
-			var suit = (PokerSuit)Enum.Parse(typeof(PokerSuit), parts[1]);
-			
-			return $"{numStr}_{PokerConst.PokerSuitToSymbol[suit]}";
-		}
+
 		
 		// The input pokerCardStr needs to be in the form like 10♣️, or A❤️, etc.
 		public static EightCardPokerCard CreateInstance(string pokerCardStr, int objectID = 0, int deckID = 1)
@@ -138,16 +110,8 @@ namespace GenericPoker.EightCard
 			return CreateInstance(another._cardID, another._number, another._suit, another.ObjectID, deckID: another.DeckID);
 		}
 		
-		/*
-		protected void Init(int id, int number, PokerSuit suit, int objectID, int deckID)
-		{
-			_cardID = id;
-			this._number = number;
-			this._suit = suit;
-			_objectID = objectID;
-			_deckID = deckID;
-			_computePokerRangeGroup();
-		}*/
+		
+		
 
 		private void _computePokerRangeGroup()
 		{
@@ -169,9 +133,59 @@ namespace GenericPoker.EightCard
 			}
 		}
 		
+	}
+}
+
+/*
 		public bool CheckInRangeGroup(PokerCardRangeGroup pokerCardRangeGroup)
 		{
 			return (_pokerRangeGroupBits & (int)pokerCardRangeGroup) != 0;
 		}
-	}
+*/
+
+
+/*
+		protected void Init(int id, int number, PokerSuit suit, int objectID, int deckID)
+		{
+			_cardID = id;
+			this._number = number;
+			this._suit = suit;
+			_objectID = objectID;
+			_deckID = deckID;
+			_computePokerRangeGroup();
+		}*/
+		
+/*
+// Convert 10♣️ to 10_Club, etc.
+public static string CardSymbolToStr(string symbolStr)
+{
+	var (numStr, suitSymbol) = SplitCard(symbolStr);
+	return $"{numStr}_{PokerConst.SymbolToPokerSuit[suitSymbol].ToString()}";
 }
+*/
+		
+/*
+// Convert 10_Club to 10♣️
+public static string CardStrToSymbol(string cardStr)
+{
+	string[] parts = cardStr.Split('_');
+	var numStr = parts[0];
+	var suit = (PokerSuit)Enum.Parse(typeof(PokerSuit), parts[1]);
+
+	return $"{numStr}_{PokerConst.PokerSuitToSymbol[suit]}";
+}*/
+
+/*
+		public virtual int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
+		{
+			if (anotherCard is AceCard)
+			{
+				var totalPts1 = (Number + 14 ) % 10;
+				var totalPts2 = (Number + 1) % 10;
+				return Math.Max(totalPts1, totalPts2);
+			} else {
+
+				return  (Number + anotherCard.Number) % 10;
+			}
+		}
+*/

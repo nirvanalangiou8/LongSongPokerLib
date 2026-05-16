@@ -65,21 +65,19 @@ namespace GenericPoker
     {
         private Xoshiro256PlusPlus _rng;
 
+        [ThreadStatic]
         private static XRandom _instance;
+
         public static XRandom Instance
         {
             get
             {
                 if (_instance == null)
-                    throw new InvalidOperationException("XRandom.Instance was accessed before being initialized. Call Init(seed) first.");
+                    Init(); // Automatically initialize with default seed if accessed without Init
                 return _instance;
             }
         }
         
-        // Singleton instance
-        //private static XRandom _instance;
-        //public static XRandom Instance => _instance ??= new XRandom(42);
-
         public XRandom(ulong seed)
         {
             _rng = new Xoshiro256PlusPlus(seed);
@@ -87,15 +85,15 @@ namespace GenericPoker
 
         public static void Init(ulong seed = 1234567)
         {
-            if (_instance != null)
-                throw new InvalidOperationException("XRandom is already initialized.");
             _instance = new XRandom(seed);
         }
         
+/*
         public void Seed(ulong seed)
         {
             _rng = new Xoshiro256PlusPlus(seed);
         }
+*/
 
         public ulong Next()
         {
@@ -111,10 +109,12 @@ namespace GenericPoker
         }
 
 
+/*
         public float NextFloat()
         {
             return (float)((_rng.Next() >> 11) * (1.0 / (1UL << 53)));
         }
+*/
 
         public void Shuffle<T>(List<T> list)
         {
@@ -125,11 +125,13 @@ namespace GenericPoker
             }
         }
 
+/*
         public T Choice<T>(List<T> list)
         {
             if (list == null || list.Count == 0)
                 throw new InvalidOperationException("Cannot choose from an empty list");
             return list[NextInt(0, list.Count - 1)];
         }
+*/
     }
 }
