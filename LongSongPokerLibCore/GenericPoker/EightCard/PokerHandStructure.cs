@@ -8,6 +8,7 @@ namespace GenericPoker.EightCard
 {
 	
 	// This class is for analyzed poker structure, to breaking the hand down into small components, such as pair, three of kind, flush, straight, etc..
+	// That is this class constitutied the PokerCardCompoenents, and the remaining nothing cards. The atomic/smallest component is a pair.
 	public class PokerHandStructure : IComparable<PokerHandStructure>
 	{
 		public readonly List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> Components;
@@ -15,7 +16,7 @@ namespace GenericPoker.EightCard
 		
 		public string FinalCompsStr = "";
 
-		private List<EightCardSubBattleHand> _battleHands;
+		//private List<EightCardSubBattleHand> _battleHands;
 
 		private IBattleHandArrangeStrategy _strategy;
 		
@@ -68,14 +69,9 @@ namespace GenericPoker.EightCard
 
 					break;
 				case 3:
-					(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = strategy.ArrangeThreeComps(Components[0], Components[1], Components[2]);
-					_battleHands.Add(firstEightCardSubBattleHand);
-					_battleHands.Add(secondEightCardSubBattleHand);
-					break;
-				case 2: 
-					(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = strategy.ArrangeTwoComps(Components[0], Components[1]);
-					_battleHands.Add(firstEightCardSubBattleHand);
-					_battleHands.Add(secondEightCardSubBattleHand);
+				case 2:
+					(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = strategy.ArrangeComps(Components);
+
 					break;
 				case 1:
 					// Add first hand
@@ -116,7 +112,7 @@ namespace GenericPoker.EightCard
 		private void Init()
 		{
 			remainingCards = new List<EightCardPokerCard>();
-			_battleHands = new List<EightCardSubBattleHand>();
+			//_battleHands = new List<EightCardSubBattleHand>();
 		}
 		public PokerHandStructure()
 		{
@@ -209,38 +205,3 @@ namespace GenericPoker.EightCard
 		
 	}
 }
-
-
-
-
-/*
-for (var i = 0; i < Components.Count; i++)
-{
-	var component = Components[i];
-	if (component.CardCount >= 4) { // directly set as second hand.
-		var newBattleHand = new BattleHand(component.Cards, BattleHandEnum.SecondHand,
-			ConvertCompRankToBattleRank(component.CompRank));
-		_battleHands.Add(newBattleHand);
-	} else if (component.CardCount <= 3) {
-		// try to find sub set to achieve combo, like Pair + Pair or ThreeCardsFlushStraight + Pair
-		for (var j = i + 1; j < component.CardCount; j++) {
-			var nextComp = Components[j];
-			if (component.CardCount + nextComp.CardCount <= 5) {
-
-			}
-		}
-	} else {
-
-	}
-}*/
-
-
-/*
-		private static readonly Dictionary<(EightCardsCompType, EightCardsCompType), EightCardsBattleHandRank> EightCardsCompComboToBattleRankDict =
-			new()
-			{
-				{ (EightCardsCompType.Pair, EightCardsCompType.Pair ), EightCardsBattleHandRank.TwoPairs},
-				{ (EightCardsCompType.ThreeCardsPairInFlush, EightCardsCompType.Pair ), EightCardsBattleHandRank.TownHouse},
-				{ (EightCardsCompType.ThreeOfKind, EightCardsCompType.Pair ), EightCardsBattleHandRank.FullHouse},
-				{ (EightCardsCompType.ThreeCardsFlushStraight, EightCardsCompType.Pair ), EightCardsBattleHandRank.Mansion},
-			};*/

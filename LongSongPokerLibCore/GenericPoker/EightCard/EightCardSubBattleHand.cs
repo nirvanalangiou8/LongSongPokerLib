@@ -133,7 +133,7 @@ namespace GenericPoker.EightCard
         
         private void Init()
         {
-            _components = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
+            _components = [];
         }
         public EightCardSubBattleHand(BattleHandEnum battleHandEnum, EightCardsBattleHandRank inputRank, 
             params PokerCardComponent<EightCardsCompType, EightCardPokerCard>[] inputCombos)
@@ -178,16 +178,45 @@ namespace GenericPoker.EightCard
             if (other is not EightCardSubBattleHand otherEightCard)
                 throw new ArgumentException("Cannot compare different hand types");
             
-            if (BattleHandRank.Equals(otherEightCard.BattleHandRank)) {
-                foreach (var (comp1, comp2) in 
-                         _components.Zip(otherEightCard.Components, (comp1, comp2) => (comp1, comp2)))
-                {
-                    return comp1.CompareTo(comp2);
-                }
-            } else {
+            if (BattleHandRank != otherEightCard.BattleHandRank)
+            {
+                int myPower = EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
+                int otherPower = EightCardsBattleHandPowerDict[(otherEightCard._battleHandEnum, otherEightCard.BattleHandRank)];
+                if (myPower != otherPower) return myPower.CompareTo(otherPower);
                 return BattleHandRank.CompareTo(otherEightCard.BattleHandRank);
             }
-            return 0;
+
+            // If BattleHandRank are same, check components
+            int componentCount = Math.Min(_components.Count, otherEightCard.Components.Count);
+            for (int i = 0; i < componentCount; i++)
+            {
+                int cmp = _components[i].CompareTo(otherEightCard.Components[i]);
+                if (cmp != 0) return cmp;
+            }
+            
+            if (_components.Count != otherEightCard.Components.Count)
+                return _components.Count.CompareTo(otherEightCard.Components.Count);
+
+            // If components are also same (or both empty as in 'Nothing' rank), compare all cards
+            var mySortedCards = Cards.OrderByDescending(c => c.Number == 1 ? 14 : c.Number).ThenByDescending(c => c.Suit).ToList();
+            var otherSortedCards = otherEightCard.Cards.OrderByDescending(c => c.Number == 1 ? 14 : c.Number).ThenByDescending(c => c.Suit).ToList();
+            
+            // Debug check for the specific problematic case
+            if (mySortedCards.Count == 3 && mySortedCards[0].Number == 13 && otherSortedCards.Count == 5 && otherSortedCards[0].Number == 12)
+            {
+                 // Console.WriteLine($"Comparing Front K-high with Back Q-high: {mySortedCards[0].Number} vs {otherSortedCards[0].Number}");
+            }
+
+            for (int i = 0; i < Math.Min(mySortedCards.Count, otherSortedCards.Count); i++)
+            {
+                int myNum = mySortedCards[i].Number == 1 ? 14 : mySortedCards[i].Number;
+                int otherNum = otherSortedCards[i].Number == 1 ? 14 : otherSortedCards[i].Number;
+                
+                if (myNum > otherNum) return 1;
+                if (myNum < otherNum) return -1;
+            }
+
+            return mySortedCards.Count.CompareTo(otherSortedCards.Count);
         }
         
         

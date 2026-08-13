@@ -95,10 +95,12 @@ namespace GenericPoker
             wholeSet.ExceptWith(excludeSet);
             return new List<T>(wholeSet);
         }
-        
-        
+    }
+}
+
+
 /*
-        public static int SelectRange(int inputValue, Dictionary<(int, int), int> rangeDict) 
+        public static int SelectRange(int inputValue, Dictionary<(int, int), int> rangeDict)
         {
             foreach (var kvp in rangeDict)
             {
@@ -121,6 +123,3 @@ namespace GenericPoker
             }
         }
 */
-        
-    }
-}

@@ -183,7 +183,7 @@ namespace EightCardsProbTest
         public void TestThreeCardsStraight(string inputCardStr, List<string>  expected)
         {
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allThreeCardsStraightCombo = pokerHand.GetAllStraightComps(3);
+            var allThreeCardsStraightCombo = pokerHand.GetAllStraightComps_ForUnitTest(3);
             List<string> objectStrs = allThreeCardsStraightCombo.Select(o => o.CompString).ToList();
             Assert.That(objectStrs, Is.EqualTo(expected));
         }
@@ -192,7 +192,7 @@ namespace EightCardsProbTest
         public void Test13CardsStraight(string inputCardStr, List<string>  expected)
         {
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps(13);
+            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps_ForUnitTest(13);
             List<string> objectStrs = allThreeCardsStraightComp.Select(o => o.CompString).ToList();
             Assert.That(objectStrs, Is.EqualTo(expected));
         }
@@ -201,7 +201,7 @@ namespace EightCardsProbTest
         public void TestFourCardsStraight(string inputCardStr, List<string>  expected)
         {
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps(4);
+            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps_ForUnitTest(4);
             List<string> objectStrs = allThreeCardsStraightComp.Select(o => o.CompString).ToList();
             Assert.That(objectStrs, Is.EqualTo(expected));
         }
@@ -210,7 +210,7 @@ namespace EightCardsProbTest
         public void TestThreeCardsFlush(string inputCardStr, List<string>  expected)
         {
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allComps = pokerHand.GetAllFlushComps(3);
+            var allComps = pokerHand.GetAllFlushComps_ForUnitTest(3);
             List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
             Assert.That(objectStrs, Is.EqualTo(expected));
         }
@@ -219,7 +219,7 @@ namespace EightCardsProbTest
         public void TestThreeCardsFlushStraight(string inputCardStr, List<string>  expected)
         {
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allComps = pokerHand.GetAllFlushStraightComps(3);
+            var allComps = pokerHand.GetAllFlushStraightComps_ForUnitTest(3);
             List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
             Assert.That(objectStrs, Is.EqualTo(expected));
         }

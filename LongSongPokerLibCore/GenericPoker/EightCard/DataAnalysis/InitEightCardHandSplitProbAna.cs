@@ -54,7 +54,19 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     continue;
                 }
 
+                if (handName == "ThreeOfKind_Pair*2")
+                {
+                    Console.WriteLine("ThreeOfKind_Pair*2");
+                }
+
                 var components = ParseHandName(handName);
+                
+                //ThreeOfKind_Pair*2EightCardsCompType.Pair) return 1;
+                if (components.Count == 3 && components[0] == EightCardsCompType.Pair && components[1] == EightCardsCompType.Pair && components[2] == EightCardsCompType.ThreeOfKind)
+                {
+                    Console.WriteLine("ThreeOfKind_Pair*2");
+                }
+                
                 var (front, back) = SplitHand(components);
 
                 if (front.HasValue) 
@@ -193,7 +205,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
         {
             // Combined rank logic
             if (comp == EightCardsCompType.ThreeOfKind && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.FullHouse;
-            if (comp == EightCardsCompType.ThreeCardsFlushStraight && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraightAndPair;
+            if (comp == EightCardsCompType.ThreeCardsFlushStraight && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Mansion;
             if (comp == EightCardsCompType.Pair && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.TwoPairs;
 
             // Single rank mapping
@@ -256,7 +268,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 case EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraight: return 32;
                 case EightCardBackHandQualifiedHandAndRank.FiveCardsStraight: return 24;
                 case EightCardBackHandQualifiedHandAndRank.FiveCardsFlush: return 40;
-                case EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraightAndPair: return 48; // Mansion-like
+                case EightCardBackHandQualifiedHandAndRank.Mansion: return 48; // Mansion-like
                 case EightCardBackHandQualifiedHandAndRank.SixCardsStraight: return 62;
                 case EightCardBackHandQualifiedHandAndRank.FourOfKind: return 80;
                 case EightCardBackHandQualifiedHandAndRank.FourCardsFlushStraight: return 100;
@@ -291,7 +303,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     var entry = sortedFront[i];
                     double prob = totalFront > 0 ? (double)entry.Value / totalFront : 0;
                     cumulativeFront += prob;
-                    frontLines.Add($"Front,{entry.Key},{entry.Value},{prob:P4},{cumulativeFront:P4}");
+                    frontLines.Add($"Front,{entry.Key},{entry.Value},{prob:P8},{cumulativeFront:P8}");
                 }
                 
                 // Reverse to have strongest at top
@@ -308,7 +320,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     var entry = sortedBack[i];
                     double prob = totalBack > 0 ? (double)entry.Value / totalBack : 0;
                     cumulativeBack += prob;
-                    backLines.Add($"Back,{entry.Key},{entry.Value},{prob:P4},{cumulativeBack:P4}");
+                    backLines.Add($"Back,{entry.Key},{entry.Value},{prob:P8},{cumulativeBack:P8}");
                 }
 
                 backLines.Reverse();
