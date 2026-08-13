@@ -68,16 +68,8 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 }
                 
                 var (front, back) = SplitHand(components);
-
-                if (front.HasValue) 
-                    frontHandStats[front.Value] += count;
-                else
-                    frontHandStats[EightCardFrontHandQualifiedHandAndRank.Nothing] += count;
-
-                if (back.HasValue) 
-                    backHandStats[back.Value] += count;
-                else
-                    backHandStats[EightCardBackHandQualifiedHandAndRank.Nothing] += count;
+                frontHandStats[front] += count;
+                backHandStats[back] += count;
             }
 
             SaveStats(outputPath, frontHandStats, backHandStats);
@@ -122,12 +114,12 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             return (int)comp; 
         }
 
-        static (EightCardFrontHandQualifiedHandAndRank?, EightCardBackHandQualifiedHandAndRank?) SplitHand(List<EightCardsCompType> comps)
+        static (EightCardFrontHandQualifiedHandAndRank, EightCardBackHandQualifiedHandAndRank) SplitHand(List<EightCardsCompType> comps)
         {
             // The ground rule is back hand > front hand.
             // Balanced strategy: if you can split components, always split them but follow rules.
             
-            if (comps.Count == 0) return (null, EightCardBackHandQualifiedHandAndRank.Nothing);
+            if (comps.Count == 0) return (EightCardFrontHandQualifiedHandAndRank.Nothing, EightCardBackHandQualifiedHandAndRank.Nothing);
 
             // Special case for 4 components (usually 4 pairs)
             if (comps.Count == 4 && comps.All(c => c == EightCardsCompType.Pair))
@@ -181,14 +173,14 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             if (comps.Count == 1)
             {
                 // Cannot split. All goes to back.
-                return (null, MapToBackRank(comps[0], EightCardsCompType.None));
+                return (EightCardFrontHandQualifiedHandAndRank.Nothing, MapToBackRank(comps[0], EightCardsCompType.None));
             }
 
             // Default fallback
-            return (null, EightCardBackHandQualifiedHandAndRank.Nothing);
+            return (EightCardFrontHandQualifiedHandAndRank.Nothing, EightCardBackHandQualifiedHandAndRank.Nothing);
         }
 
-        static EightCardFrontHandQualifiedHandAndRank? MapToFrontRank(EightCardsCompType comp)
+        static EightCardFrontHandQualifiedHandAndRank MapToFrontRank(EightCardsCompType comp)
         {
             if (comp == EightCardsCompType.Pair) return EightCardFrontHandQualifiedHandAndRank.Pair;
             if (comp == EightCardsCompType.ThreeOfKind) return EightCardFrontHandQualifiedHandAndRank.ThreeOfKind;
@@ -198,10 +190,10 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             
             // If it's something like Two Pairs (split from components)
             // But components here are single types.
-            return null;
+            return EightCardFrontHandQualifiedHandAndRank.Nothing;
         }
 
-        static EightCardBackHandQualifiedHandAndRank? MapToBackRank(EightCardsCompType comp, EightCardsCompType extra)
+        static EightCardBackHandQualifiedHandAndRank MapToBackRank(EightCardsCompType comp, EightCardsCompType extra)
         {
             // Combined rank logic
             if (comp == EightCardsCompType.ThreeOfKind && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.FullHouse;

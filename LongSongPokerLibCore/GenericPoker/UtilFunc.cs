@@ -97,29 +97,3 @@ namespace GenericPoker
         }
     }
 }
-
-
-/*
-        public static int SelectRange(int inputValue, Dictionary<(int, int), int> rangeDict)
-        {
-            foreach (var kvp in rangeDict)
-            {
-                var range = kvp.Key;
-                if (inputValue >= range.Item1 && inputValue < range.Item2)
-                {
-                    return kvp.Value;
-                }
-            }
-            return 0;
-        }
-*/
-        
-/*
-        public static void CustomPrint(bool verbose = true, params object[] args)
-        {
-            if (verbose)
-            {
-                Console.WriteLine(string.Join(" ", args));
-            }
-        }
-*/

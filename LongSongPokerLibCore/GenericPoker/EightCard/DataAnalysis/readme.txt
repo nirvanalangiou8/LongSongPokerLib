@@ -33,4 +33,15 @@ The core logic resides in `SplitHand`. It simulates how a player would divide th
 In short, this script **takes raw 8-card hand 
 
 Also for multiple split solutions:
-Please save below work request into md file. "In InitEightCardHandSplitProbAna, when explore the split hand, please try all possible split arrangement as long as it follow ground rule of back hand >= front hand, and also the front hand name and back hand name are in the list of  EightCardFrontHandQualifiedHandAndRank and EightCardBackHandQualifiedHandAndRank. And if there are more than one solution, the appearrance count should be dividen by how many solutions and add those count into invidial front/hand stat. For example. if we have ThreeOfKind + 2 pairs. We can split  pair : full house, or two pairs : three of kind. Then if this ThreeOfkind +2 pairs has X appear count, then the front stat acount for pair should add X/2, and back stat of full house should also add X/2, also, for other solution the two pairs of front hand should add X/2 into stat, and three of kind of back hand should also add X/2 count. 
+Please save below work request into md file. 
+"In InitEightCardHandSplitProbAna, when explore the split hand, please try all possible split arrangement 
+as long as it follow ground rule of back hand >= front hand, and also the front hand name and back hand name 
+are in the list of  EightCardFrontHandQualifiedHandAndRank and EightCardBackHandQualifiedHandAndRank. 
+And if there are more than one solution, the appearrance count should be dividen by how many solutions and 
+add those counts into individual front/hand stat. For example. if we have ThreeOfKind + 2 pairs. 
+We can split as pair->full house, or two pairs->ThreeOfKind. Then if this input statitical entry of ThreeOfkind+2 pairs 
+have X appear count, then the front stat acount for Pair should add X/2, and back stat of full house should also add X/2, 
+also, for other solution the two pairs of front hand should add X/2 into stat, and three of kind of back hand should also add X/2 count.
+** About how to find  the possible split solution: 
+1) Try to use components only.
+2)  
