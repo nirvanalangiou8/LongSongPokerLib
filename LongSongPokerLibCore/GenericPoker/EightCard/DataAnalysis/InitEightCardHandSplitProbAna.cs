@@ -29,12 +29,6 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             var frontHandStats = new Dictionary<EightCardFrontHandQualifiedHandAndRank, double>();
             var backHandStats = new Dictionary<EightCardBackHandQualifiedHandAndRank, double>();
 
-            // Initialize stats dictionaries
-            foreach (EightCardFrontHandQualifiedHandAndRank rank in Enum.GetValues(typeof(EightCardFrontHandQualifiedHandAndRank)))
-                frontHandStats[rank] = 0;
-            foreach (EightCardBackHandQualifiedHandAndRank rank in Enum.GetValues(typeof(EightCardBackHandQualifiedHandAndRank)))
-                backHandStats[rank] = 0;
-
             var lines = File.ReadAllLines(inputPath);
             foreach (var line in lines)
             {
@@ -49,8 +43,8 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
                 if (handName == "Nothing")
                 {
-                    backHandStats[EightCardBackHandQualifiedHandAndRank.Nothing] += count;
-                    frontHandStats[EightCardFrontHandQualifiedHandAndRank.Nothing] += count;
+                    backHandStats[EightCardBackHandQualifiedHandAndRank.Nothing] = backHandStats.GetValueOrDefault(EightCardBackHandQualifiedHandAndRank.Nothing) + count;
+                    frontHandStats[EightCardFrontHandQualifiedHandAndRank.Nothing] = frontHandStats.GetValueOrDefault(EightCardFrontHandQualifiedHandAndRank.Nothing) + count;
                     continue;
                 }
                 // change below check to if handName contains FourCardsFlushStraight 
@@ -59,9 +53,9 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     Console.WriteLine("FourCardsFlushStraight*2");
                 }
                 
-                if (handName.Contains("ThreeOfKind_Pair*2"))
+                if (handName.Contains("SevenCardsFlushStraight"))
                 {
-                    Console.WriteLine("ThreeOfKind_Pair*2");
+                    Console.WriteLine("SevenCardsFlushStraight");
                 }
                
 
@@ -74,15 +68,16 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     double perSolutionCount = (double)count / solutions.Count;
                     foreach (var sol in solutions)
                     {
-                        frontHandStats[sol.Item1] += perSolutionCount;
-                        backHandStats[sol.Item2] += perSolutionCount;
+                        frontHandStats[sol.Item1] = frontHandStats.GetValueOrDefault(sol.Item1) + perSolutionCount;
+                        backHandStats[sol.Item2] = backHandStats.GetValueOrDefault(sol.Item2) + perSolutionCount;
                     }
                 }
                 else
                 {
                     // If no valid split found (should not happen with legal hands), fallback to None
-                    frontHandStats[EightCardFrontHandQualifiedHandAndRank.None] += count;
-                    backHandStats[EightCardBackHandQualifiedHandAndRank.None] += count;
+                    // This is for sanity check
+                    frontHandStats[EightCardFrontHandQualifiedHandAndRank.None] = frontHandStats.GetValueOrDefault(EightCardFrontHandQualifiedHandAndRank.None) + count;
+                    backHandStats[EightCardBackHandQualifiedHandAndRank.None] = backHandStats.GetValueOrDefault(EightCardBackHandQualifiedHandAndRank.None) + count;
                 }
             }
 
@@ -182,7 +177,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     }
                 }
             }
-            
+
             return solutions.Distinct().ToList();
         }
 
@@ -195,12 +190,10 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
             if (comps.Count == 1)
             {
-                var comp = comps[0];
-                if (comp == EightCardsCompType.Pair) return EightCardFrontHandQualifiedHandAndRank.Pair;
-                if (comp == EightCardsCompType.ThreeOfKind) return EightCardFrontHandQualifiedHandAndRank.ThreeOfKind;
-                if (comp == EightCardsCompType.ThreeCardsFlushStraight) return EightCardFrontHandQualifiedHandAndRank.ThreeCardsFlushStraight;
-                if (comp == EightCardsCompType.FourCardsFlushStraight) return EightCardFrontHandQualifiedHandAndRank.FourCardsFlushStraight;
-                if (comp == EightCardsCompType.FourOfKind) return EightCardFrontHandQualifiedHandAndRank.FourOfKind;
+                if (Enum.TryParse<EightCardFrontHandQualifiedHandAndRank>(comps[0].ToString(), out var result))
+                {
+                    return result;
+                }
             }
             
             if (comps.Count == 2)
@@ -234,34 +227,10 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             } else if (comps.Count == 1)
             {
                 // Single rank mapping
-                var comp = comps[0];
-                if (comp == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Pair;
-                if (comp == EightCardsCompType.ThreeOfKind) return EightCardBackHandQualifiedHandAndRank.ThreeOfKind;
-                if (comp == EightCardsCompType.ThreeCardsFlushStraight)
-                    return EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraight;
-                if (comp == EightCardsCompType.FourCardsFlushStraight)
-                    return EightCardBackHandQualifiedHandAndRank.FourCardsFlushStraight;
-                if (comp == EightCardsCompType.FourOfKind) return EightCardBackHandQualifiedHandAndRank.FourOfKind;
-                if (comp == EightCardsCompType.FiveCardsStraight)
-                    return EightCardBackHandQualifiedHandAndRank.FiveCardsStraight;
-                if (comp == EightCardsCompType.FiveCardsFlush)
-                    return EightCardBackHandQualifiedHandAndRank.FiveCardsFlush;
-                if (comp == EightCardsCompType.SixCardsStraight)
-                    return EightCardBackHandQualifiedHandAndRank.SixCardsStraight;
-                if (comp == EightCardsCompType.SixCardsFlush)
-                    return EightCardBackHandQualifiedHandAndRank.SixCardsFlush;
-                if (comp == EightCardsCompType.SevenCardsStraight)
-                    return EightCardBackHandQualifiedHandAndRank.SevenCardsStraight;
-                if (comp == EightCardsCompType.SevenCardsFlush)
-                    return EightCardBackHandQualifiedHandAndRank.SevenCardsFlush;
-                if (comp == EightCardsCompType.EightCardsStraight)
-                    return EightCardBackHandQualifiedHandAndRank.EightCardsStraight;
-                if (comp == EightCardsCompType.EightCardsFlush)
-                    return EightCardBackHandQualifiedHandAndRank.EightCardsFlush;
-                if (comp == EightCardsCompType.FiveCardsFlushStraight)
-                    return EightCardBackHandQualifiedHandAndRank.FiveCardsFlushStraight;
-                if (comp == EightCardsCompType.SixCardsFlushStraight)
-                    return EightCardBackHandQualifiedHandAndRank.SixCardsFlushStraight;
+                if (Enum.TryParse<EightCardBackHandQualifiedHandAndRank>(comps[0].ToString(), out var result))
+                {
+                    return result;
+                }
             }
 
             return EightCardBackHandQualifiedHandAndRank.None;
