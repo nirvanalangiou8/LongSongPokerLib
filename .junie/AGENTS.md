@@ -59,6 +59,11 @@ namespace UnitTest
 - **Poker Card Representation**: Cards are represented by strings like `A♠️`, `10❤️`, `Joker`.
 - **Core Logic**: `PokerHandCalculator` is the central class for hand evaluation and splitting in Eight Card poker.
 
+### Task Management and Rollbacks
+- **Granularity**: When performing multiple requested tasks, Junie should aim to complete and verify one task before starting the next.
+- **Checkpointing**: Use the `update_status` tool to document completion of sub-tasks.
+- **Minimizing Rollback Impact**: To prevent `undo_edit` from reverting too much, avoid using `multi_edit` across unrelated tasks. Prefer separate edit calls for distinct logical changes.
+
 ### Instruction Files for Junie
 Junie (the AI agent) can be guided using Markdown files at different levels:
 
