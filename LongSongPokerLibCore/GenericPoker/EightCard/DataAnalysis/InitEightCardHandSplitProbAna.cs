@@ -26,8 +26,8 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 return;
             }
 
-            var frontHandStats = new Dictionary<EightCardFrontHandQualifiedHandAndRank, long>();
-            var backHandStats = new Dictionary<EightCardBackHandQualifiedHandAndRank, long>();
+            var frontHandStats = new Dictionary<EightCardFrontHandQualifiedHandAndRank, double>();
+            var backHandStats = new Dictionary<EightCardBackHandQualifiedHandAndRank, double>();
 
             // Initialize stats dictionaries
             foreach (EightCardFrontHandQualifiedHandAndRank rank in Enum.GetValues(typeof(EightCardFrontHandQualifiedHandAndRank)))
@@ -58,18 +58,32 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 {
                     Console.WriteLine("FourCardsFlushStraight*2");
                 }
-
-                var components = ParseHandName(handName);
                 
-                //ThreeOfKind_Pair*2EightCardsCompType.Pair) return 1;
-                if (components.Count == 3 && components[0] == EightCardsCompType.Pair && components[1] == EightCardsCompType.Pair && components[2] == EightCardsCompType.ThreeOfKind)
+                if (handName.Contains("ThreeOfKind_Pair*2"))
                 {
                     Console.WriteLine("ThreeOfKind_Pair*2");
                 }
+               
+
+                var components = ParseHandName(handName);
                 
-                var (front, back) = SplitHand(components);
-                frontHandStats[front] += count;
-                backHandStats[back] += count;
+
+                var solutions = SplitHand(components);
+                if (solutions.Count > 0)
+                {
+                    double perSolutionCount = (double)count / solutions.Count;
+                    foreach (var sol in solutions)
+                    {
+                        frontHandStats[sol.Item1] += perSolutionCount;
+                        backHandStats[sol.Item2] += perSolutionCount;
+                    }
+                }
+                else
+                {
+                    // If no valid split found (should not happen with legal hands), fallback to None
+                    frontHandStats[EightCardFrontHandQualifiedHandAndRank.None] += count;
+                    backHandStats[EightCardBackHandQualifiedHandAndRank.None] += count;
+                }
             }
 
             SaveStats(outputPath, frontHandStats, backHandStats);
@@ -114,9 +128,9 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             return (int)comp; 
         }
 
-        static (EightCardFrontHandQualifiedHandAndRank, EightCardBackHandQualifiedHandAndRank) SplitHand(List<EightCardsCompType> comps)
+        static List<(EightCardFrontHandQualifiedHandAndRank, EightCardBackHandQualifiedHandAndRank)> SplitHand(List<EightCardsCompType> comps)
         {
-            if (comps == null || comps.Count == 0) return (EightCardFrontHandQualifiedHandAndRank.None, EightCardBackHandQualifiedHandAndRank.None);
+            if (comps == null || comps.Count == 0) return new List<(EightCardFrontHandQualifiedHandAndRank, EightCardBackHandQualifiedHandAndRank)>();
 
             // 4. Input for this function is a list of comp, and you can sort the components 
             // from high comp to low to easier for you to map which valid hand based on combo components.
@@ -169,20 +183,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 }
             }
             
-            solutions = solutions.Distinct().ToList();
-            
-            if (solutions.Count > 0)
-            {
-                // Always return the first solution as placeholder.
-                // Prioritize solutions that have a FrontHand better than Nothing if possible.
-                var best = solutions.FirstOrDefault(s => s.Item1 != EightCardFrontHandQualifiedHandAndRank.Nothing && s.Item1 != EightCardFrontHandQualifiedHandAndRank.None);
-                if (best.Item1 != EightCardFrontHandQualifiedHandAndRank.None) return best;
-                
-                return solutions[0];
-            }
-
-            // Default fallback
-            return (EightCardFrontHandQualifiedHandAndRank.None, EightCardBackHandQualifiedHandAndRank.None);
+            return solutions.Distinct().ToList();
         }
 
         static EightCardFrontHandQualifiedHandAndRank MapToFrontRank(List<EightCardsCompType> comps)
@@ -218,8 +219,9 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             // Sort high to low
             comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
 
+               
             // Handle combinations first
-            if (comps.Count >= 2)
+            if (comps.Count == 2)
             {
                 var c1 = comps[0];
                 var c2 = comps[1];
@@ -229,25 +231,38 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 if (c1 == EightCardsCompType.Pair && c2 == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.TwoPairs;
                 // if none of above cases, return None.
                 return EightCardBackHandQualifiedHandAndRank.None;
+            } else if (comps.Count == 1)
+            {
+                // Single rank mapping
+                var comp = comps[0];
+                if (comp == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Pair;
+                if (comp == EightCardsCompType.ThreeOfKind) return EightCardBackHandQualifiedHandAndRank.ThreeOfKind;
+                if (comp == EightCardsCompType.ThreeCardsFlushStraight)
+                    return EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraight;
+                if (comp == EightCardsCompType.FourCardsFlushStraight)
+                    return EightCardBackHandQualifiedHandAndRank.FourCardsFlushStraight;
+                if (comp == EightCardsCompType.FourOfKind) return EightCardBackHandQualifiedHandAndRank.FourOfKind;
+                if (comp == EightCardsCompType.FiveCardsStraight)
+                    return EightCardBackHandQualifiedHandAndRank.FiveCardsStraight;
+                if (comp == EightCardsCompType.FiveCardsFlush)
+                    return EightCardBackHandQualifiedHandAndRank.FiveCardsFlush;
+                if (comp == EightCardsCompType.SixCardsStraight)
+                    return EightCardBackHandQualifiedHandAndRank.SixCardsStraight;
+                if (comp == EightCardsCompType.SixCardsFlush)
+                    return EightCardBackHandQualifiedHandAndRank.SixCardsFlush;
+                if (comp == EightCardsCompType.SevenCardsStraight)
+                    return EightCardBackHandQualifiedHandAndRank.SevenCardsStraight;
+                if (comp == EightCardsCompType.SevenCardsFlush)
+                    return EightCardBackHandQualifiedHandAndRank.SevenCardsFlush;
+                if (comp == EightCardsCompType.EightCardsStraight)
+                    return EightCardBackHandQualifiedHandAndRank.EightCardsStraight;
+                if (comp == EightCardsCompType.EightCardsFlush)
+                    return EightCardBackHandQualifiedHandAndRank.EightCardsFlush;
+                if (comp == EightCardsCompType.FiveCardsFlushStraight)
+                    return EightCardBackHandQualifiedHandAndRank.FiveCardsFlushStraight;
+                if (comp == EightCardsCompType.SixCardsFlushStraight)
+                    return EightCardBackHandQualifiedHandAndRank.SixCardsFlushStraight;
             }
-
-            // Single rank mapping
-            var comp = comps[0];
-            if (comp == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Pair;
-            if (comp == EightCardsCompType.ThreeOfKind) return EightCardBackHandQualifiedHandAndRank.ThreeOfKind;
-            if (comp == EightCardsCompType.ThreeCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraight;
-            if (comp == EightCardsCompType.FourCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.FourCardsFlushStraight;
-            if (comp == EightCardsCompType.FourOfKind) return EightCardBackHandQualifiedHandAndRank.FourOfKind;
-            if (comp == EightCardsCompType.FiveCardsStraight) return EightCardBackHandQualifiedHandAndRank.FiveCardsStraight;
-            if (comp == EightCardsCompType.FiveCardsFlush) return EightCardBackHandQualifiedHandAndRank.FiveCardsFlush;
-            if (comp == EightCardsCompType.SixCardsStraight) return EightCardBackHandQualifiedHandAndRank.SixCardsStraight;
-            if (comp == EightCardsCompType.SixCardsFlush) return EightCardBackHandQualifiedHandAndRank.SixCardsFlush;
-            if (comp == EightCardsCompType.SevenCardsStraight) return EightCardBackHandQualifiedHandAndRank.SevenCardsStraight;
-            if (comp == EightCardsCompType.SevenCardsFlush) return EightCardBackHandQualifiedHandAndRank.SevenCardsFlush;
-            if (comp == EightCardsCompType.EightCardsStraight) return EightCardBackHandQualifiedHandAndRank.EightCardsStraight;
-            if (comp == EightCardsCompType.EightCardsFlush) return EightCardBackHandQualifiedHandAndRank.EightCardsFlush;
-            if (comp == EightCardsCompType.FiveCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.FiveCardsFlushStraight;
-            if (comp == EightCardsCompType.SixCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.SixCardsFlushStraight;
 
             return EightCardBackHandQualifiedHandAndRank.None;
         }
@@ -281,10 +296,10 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             return EightCardOverAllHandRank.None;
         }
 
-        static void SaveStats(string path, Dictionary<EightCardFrontHandQualifiedHandAndRank, long> front, Dictionary<EightCardBackHandQualifiedHandAndRank, long> back)
+        static void SaveStats(string path, Dictionary<EightCardFrontHandQualifiedHandAndRank, double> front, Dictionary<EightCardBackHandQualifiedHandAndRank, double> back)
         {
-            long totalFront = front.Values.Sum();
-            long totalBack = back.Values.Sum();
+            double totalFront = front.Values.Sum();
+            double totalBack = back.Values.Sum();
 
             using (var writer = new StreamWriter(path))
             {
@@ -299,9 +314,9 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 for (int i = sortedFront.Count - 1; i >= 0; i--)
                 {
                     var entry = sortedFront[i];
-                    double prob = totalFront > 0 ? (double)entry.Value / totalFront : 0;
+                    double prob = totalFront > 0 ? entry.Value / totalFront : 0;
                     cumulativeFront += prob;
-                    frontLines.Add($"Front,{entry.Key},{entry.Value},{prob:P8},{cumulativeFront:P8}");
+                    frontLines.Add($"Front,{entry.Key},{entry.Value:F2},{prob:P8},{cumulativeFront:P8}");
                 }
                 
                 // Reverse to have strongest at top
@@ -316,9 +331,9 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 for (int i = sortedBack.Count - 1; i >= 0; i--)
                 {
                     var entry = sortedBack[i];
-                    double prob = totalBack > 0 ? (double)entry.Value / totalBack : 0;
+                    double prob = totalBack > 0 ? entry.Value / totalBack : 0;
                     cumulativeBack += prob;
-                    backLines.Add($"Back,{entry.Key},{entry.Value},{prob:P8},{cumulativeBack:P8}");
+                    backLines.Add($"Back,{entry.Key},{entry.Value:F2},{prob:P8},{cumulativeBack:P8}");
                 }
 
                 backLines.Reverse();
