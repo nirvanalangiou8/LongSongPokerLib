@@ -53,10 +53,10 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                     frontHandStats[EightCardFrontHandQualifiedHandAndRank.Nothing] += count;
                     continue;
                 }
-
-                if (handName == "ThreeOfKind_Pair*2")
+                // change below check to if handName contains FourCardsFlushStraight 
+                if (handName.Contains("FourCardsFlushStraight*2")  || handName.Contains("FourOfKind_FourCardsFlushStraight"))
                 {
-                    Console.WriteLine("ThreeOfKind_Pair*2");
+                    Console.WriteLine("FourCardsFlushStraight*2");
                 }
 
                 var components = ParseHandName(handName);
@@ -116,91 +116,123 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
         static (EightCardFrontHandQualifiedHandAndRank, EightCardBackHandQualifiedHandAndRank) SplitHand(List<EightCardsCompType> comps)
         {
-            // The ground rule is back hand > front hand.
-            // Balanced strategy: if you can split components, always split them but follow rules.
+            if (comps == null || comps.Count == 0) return (EightCardFrontHandQualifiedHandAndRank.None, EightCardBackHandQualifiedHandAndRank.None);
+
+            // 4. Input for this function is a list of comp, and you can sort the components 
+            // from high comp to low to easier for you to map which valid hand based on combo components.
+            comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
+
+            // 1. Explore all possible legal split hand solutions based on input hand components.
+            var solutions = new List<(EightCardFrontHandQualifiedHandAndRank, EightCardBackHandQualifiedHandAndRank)>();
+
+            // 2. Use UtilFunc.GetPermutation to get all possible split component groups.
+            // Always select no more half number of components count.
+            int maxFrontCount = comps.Count / 2;
+
+            for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
+            {
+                var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(comps, selectCount);
+                foreach (var group in possibleGroups)
+                {
+                    var frontGroup = group.Selected;
+                    var backGroup = group.Remaining;
+
+                    var frontRank = MapToFrontRank(frontGroup);
+                    var backRank = MapToBackRank(backGroup);
+
+                    // 3. check the return for MaptoFront/BackRank , if they are None, then it's invalid, skip this solution.
+                    if (frontRank == EightCardFrontHandQualifiedHandAndRank.None && frontGroup.Count > 0) continue;
+                    if (backRank == EightCardBackHandQualifiedHandAndRank.None) continue;
+
+                    // 5. in the inner loop always check if front > back, if it is, then swap the front and back as valid solution.
+                    if (!IsBackStronger(frontRank, backRank))
+                    {
+                        // Try swapping
+                        var swappedFrontRank = MapToFrontRank(backGroup);
+                        var swappedBackRank = MapToBackRank(frontGroup);
+
+                        if (swappedFrontRank != EightCardFrontHandQualifiedHandAndRank.None || backGroup.Count == 0)
+                        {
+                            if (swappedBackRank != EightCardBackHandQualifiedHandAndRank.None)
+                            {
+                                if (IsBackStronger(swappedFrontRank, swappedBackRank))
+                                {
+                                    solutions.Add((swappedFrontRank, swappedBackRank));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        solutions.Add((frontRank, backRank));
+                    }
+                }
+            }
             
-            if (comps.Count == 0) return (EightCardFrontHandQualifiedHandAndRank.Nothing, EightCardBackHandQualifiedHandAndRank.Nothing);
-
-            // Special case for 4 components (usually 4 pairs)
-            if (comps.Count == 4 && comps.All(c => c == EightCardsCompType.Pair))
+            solutions = solutions.Distinct().ToList();
+            
+            if (solutions.Count > 0)
             {
-                // Two pairs in front, two pairs in back.
-                // But FrontHand only has 'TwoPairs', and BackHand has 'TwoPairs'.
-                return (EightCardFrontHandQualifiedHandAndRank.TwoPairs, EightCardBackHandQualifiedHandAndRank.TwoPairs);
-            }
-
-            if (comps.Count == 3)
-            {
-                // Try splitting: 1 comp in front, 2 in back? Or 1 in front, 1 in back (leaving 1)?
-                // The issue description says "if you can split your components, always split them".
-                // Usually this means Front hand gets 1 component, Back hand gets 1 or 2.
+                // Always return the first solution as placeholder.
+                // Prioritize solutions that have a FrontHand better than Nothing if possible.
+                var best = solutions.FirstOrDefault(s => s.Item1 != EightCardFrontHandQualifiedHandAndRank.Nothing && s.Item1 != EightCardFrontHandQualifiedHandAndRank.None);
+                if (best.Item1 != EightCardFrontHandQualifiedHandAndRank.None) return best;
                 
-                // Try Front = comps[1], Back = comps[0] + comps[2]? 
-                // Wait, components are sorted descending. comps[0] is strongest.
-                // To keep Back > Front, we should put comps[0] in Back.
-                // To split: maybe Front = comps[1], Back = comps[0]?
-                
-                var frontComp = comps[1];
-                var backComp = comps[0];
-                
-                var frontRank = MapToFrontRank(frontComp);
-                var backRank = MapToBackRank(backComp, comps.Count > 2 ? comps[2] : EightCardsCompType.None);
-                
-                if (IsBackStronger(frontRank, backRank))
-                {
-                    return (frontRank, backRank);
-                }
-                
-                // If not stronger, try putting stronger one in back and nothing in front? 
-                // But balanced says split if possible.
-            }
-
-            if (comps.Count == 2)
-            {
-                // Split 1 and 1
-                var frontComp = comps[1];
-                var backComp = comps[0];
-                
-                var frontRank = MapToFrontRank(frontComp);
-                var backRank = MapToBackRank(backComp, EightCardsCompType.None);
-                
-                if (IsBackStronger(frontRank, backRank))
-                {
-                    return (frontRank, backRank);
-                }
-            }
-
-            if (comps.Count == 1)
-            {
-                // Cannot split. All goes to back.
-                return (EightCardFrontHandQualifiedHandAndRank.Nothing, MapToBackRank(comps[0], EightCardsCompType.None));
+                return solutions[0];
             }
 
             // Default fallback
-            return (EightCardFrontHandQualifiedHandAndRank.Nothing, EightCardBackHandQualifiedHandAndRank.Nothing);
+            return (EightCardFrontHandQualifiedHandAndRank.None, EightCardBackHandQualifiedHandAndRank.None);
         }
 
-        static EightCardFrontHandQualifiedHandAndRank MapToFrontRank(EightCardsCompType comp)
+        static EightCardFrontHandQualifiedHandAndRank MapToFrontRank(List<EightCardsCompType> comps)
         {
-            if (comp == EightCardsCompType.Pair) return EightCardFrontHandQualifiedHandAndRank.Pair;
-            if (comp == EightCardsCompType.ThreeOfKind) return EightCardFrontHandQualifiedHandAndRank.ThreeOfKind;
-            if (comp == EightCardsCompType.ThreeCardsFlushStraight) return EightCardFrontHandQualifiedHandAndRank.ThreeCardsFlushStraight;
-            if (comp == EightCardsCompType.FourCardsFlushStraight) return EightCardFrontHandQualifiedHandAndRank.FourCardsFlushStraight;
-            if (comp == EightCardsCompType.FourOfKind) return EightCardFrontHandQualifiedHandAndRank.FourOfKind;
+            if (comps == null || comps.Count == 0) return EightCardFrontHandQualifiedHandAndRank.Nothing;
             
-            // If it's something like Two Pairs (split from components)
-            // But components here are single types.
-            return EightCardFrontHandQualifiedHandAndRank.Nothing;
+            // Sort high to low
+            comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
+
+            if (comps.Count == 1)
+            {
+                var comp = comps[0];
+                if (comp == EightCardsCompType.Pair) return EightCardFrontHandQualifiedHandAndRank.Pair;
+                if (comp == EightCardsCompType.ThreeOfKind) return EightCardFrontHandQualifiedHandAndRank.ThreeOfKind;
+                if (comp == EightCardsCompType.ThreeCardsFlushStraight) return EightCardFrontHandQualifiedHandAndRank.ThreeCardsFlushStraight;
+                if (comp == EightCardsCompType.FourCardsFlushStraight) return EightCardFrontHandQualifiedHandAndRank.FourCardsFlushStraight;
+                if (comp == EightCardsCompType.FourOfKind) return EightCardFrontHandQualifiedHandAndRank.FourOfKind;
+            }
+            
+            if (comps.Count == 2)
+            {
+                if (comps[0] == EightCardsCompType.Pair && comps[1] == EightCardsCompType.Pair) 
+                    return EightCardFrontHandQualifiedHandAndRank.TwoPairs;
+            }
+
+            return EightCardFrontHandQualifiedHandAndRank.None;
         }
 
-        static EightCardBackHandQualifiedHandAndRank MapToBackRank(EightCardsCompType comp, EightCardsCompType extra)
+        static EightCardBackHandQualifiedHandAndRank MapToBackRank(List<EightCardsCompType> comps)
         {
-            // Combined rank logic
-            if (comp == EightCardsCompType.ThreeOfKind && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.FullHouse;
-            if (comp == EightCardsCompType.ThreeCardsFlushStraight && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Mansion;
-            if (comp == EightCardsCompType.Pair && extra == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.TwoPairs;
+            if (comps == null || comps.Count == 0) return EightCardBackHandQualifiedHandAndRank.Nothing;
+
+            // Sort high to low
+            comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
+
+            // Handle combinations first
+            if (comps.Count >= 2)
+            {
+                var c1 = comps[0];
+                var c2 = comps[1];
+
+                if (c1 == EightCardsCompType.ThreeOfKind && c2 == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.FullHouse;
+                if (c1 == EightCardsCompType.ThreeCardsFlushStraight && c2 == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Mansion;
+                if (c1 == EightCardsCompType.Pair && c2 == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.TwoPairs;
+                // if none of above cases, return None.
+                return EightCardBackHandQualifiedHandAndRank.None;
+            }
 
             // Single rank mapping
+            var comp = comps[0];
             if (comp == EightCardsCompType.Pair) return EightCardBackHandQualifiedHandAndRank.Pair;
             if (comp == EightCardsCompType.ThreeOfKind) return EightCardBackHandQualifiedHandAndRank.ThreeOfKind;
             if (comp == EightCardsCompType.ThreeCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraight;
@@ -216,63 +248,37 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
             if (comp == EightCardsCompType.EightCardsFlush) return EightCardBackHandQualifiedHandAndRank.EightCardsFlush;
             if (comp == EightCardsCompType.FiveCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.FiveCardsFlushStraight;
             if (comp == EightCardsCompType.SixCardsFlushStraight) return EightCardBackHandQualifiedHandAndRank.SixCardsFlushStraight;
-            
-            return EightCardBackHandQualifiedHandAndRank.Nothing;
+
+            return EightCardBackHandQualifiedHandAndRank.None;
         }
 
-        static bool IsBackStronger(EightCardFrontHandQualifiedHandAndRank? front, EightCardBackHandQualifiedHandAndRank? back)
+        static bool IsBackStronger(EightCardFrontHandQualifiedHandAndRank front, EightCardBackHandQualifiedHandAndRank back)
         {
-            if (!front.HasValue) return true;
-            if (!back.HasValue) return false;
+            if (front == EightCardFrontHandQualifiedHandAndRank.None) return true;
+            if (back == EightCardBackHandQualifiedHandAndRank.None) return false;
 
-            // Use the Power Dict from EightCardSubBattleHand if possible, or a simplified one here.
-            // Since we can't easily access the internal Dict without instantiation or making it public.
-            // Let's use a simplified heuristic based on the enum order (assuming higher value = stronger)
-            // or explicit values from EightCardSubBattleHand.
+            var frontOverall = MapToOverallRank(front);
+            var backOverall = MapToOverallRank(back);
             
-            int frontPower = GetFrontPower(front.Value);
-            int backPower = GetBackPower(back.Value);
-            
-            return backPower >= frontPower; 
+            return (int)backOverall >= (int)frontOverall; 
         }
 
-        static int GetFrontPower(EightCardFrontHandQualifiedHandAndRank rank)
+        static EightCardOverAllHandRank MapToOverallRank(EightCardFrontHandQualifiedHandAndRank rank)
         {
-            switch(rank) {
-                case EightCardFrontHandQualifiedHandAndRank.Pair: return 1;
-                case EightCardFrontHandQualifiedHandAndRank.TwoPairs: return 2;
-                case EightCardFrontHandQualifiedHandAndRank.ThreeOfKind: return 15;
-                case EightCardFrontHandQualifiedHandAndRank.ThreeCardsFlushStraight: return 24;
-                case EightCardFrontHandQualifiedHandAndRank.FourOfKind: return 32;
-                case EightCardFrontHandQualifiedHandAndRank.FourCardsFlushStraight: return 40;
-                default: return 0;
+            if (Enum.TryParse<EightCardOverAllHandRank>(rank.ToString(), out var result))
+            {
+                return result;
             }
+            return EightCardOverAllHandRank.None;
         }
 
-        static int GetBackPower(EightCardBackHandQualifiedHandAndRank rank)
+        static EightCardOverAllHandRank MapToOverallRank(EightCardBackHandQualifiedHandAndRank rank)
         {
-            switch(rank) {
-                case EightCardBackHandQualifiedHandAndRank.Nothing: return 0;
-                case EightCardBackHandQualifiedHandAndRank.Pair: return 1;
-                case EightCardBackHandQualifiedHandAndRank.TwoPairs: return 2;
-                case EightCardBackHandQualifiedHandAndRank.ThreeOfKind: return 10;
-                case EightCardBackHandQualifiedHandAndRank.FullHouse: return 28;
-                case EightCardBackHandQualifiedHandAndRank.ThreeCardsFlushStraight: return 32;
-                case EightCardBackHandQualifiedHandAndRank.FiveCardsStraight: return 24;
-                case EightCardBackHandQualifiedHandAndRank.FiveCardsFlush: return 40;
-                case EightCardBackHandQualifiedHandAndRank.Mansion: return 48; // Mansion-like
-                case EightCardBackHandQualifiedHandAndRank.SixCardsStraight: return 62;
-                case EightCardBackHandQualifiedHandAndRank.FourOfKind: return 80;
-                case EightCardBackHandQualifiedHandAndRank.FourCardsFlushStraight: return 100;
-                case EightCardBackHandQualifiedHandAndRank.SixCardsFlush: return 120;
-                case EightCardBackHandQualifiedHandAndRank.SevenCardsStraight: return 200;
-                case EightCardBackHandQualifiedHandAndRank.FiveCardsFlushStraight: return 360;
-                case EightCardBackHandQualifiedHandAndRank.EightCardsStraight: return 500;
-                case EightCardBackHandQualifiedHandAndRank.SevenCardsFlush: return 800;
-                case EightCardBackHandQualifiedHandAndRank.SixCardsFlushStraight: return 1000;
-                case EightCardBackHandQualifiedHandAndRank.EightCardsFlush: return 2000;
-                default: return 0;
+            if (Enum.TryParse<EightCardOverAllHandRank>(rank.ToString(), out var result))
+            {
+                return result;
             }
+            return EightCardOverAllHandRank.None;
         }
 
         static void SaveStats(string path, Dictionary<EightCardFrontHandQualifiedHandAndRank, long> front, Dictionary<EightCardBackHandQualifiedHandAndRank, long> back)
@@ -285,7 +291,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 writer.WriteLine("Hand Position,Rank,Count,Probablities,Win/NoLose probablity");
                 
                 // Front Hand
-                var sortedFront = front.OrderByDescending(e => GetFrontPower(e.Key)).ToList();
+                var sortedFront = front.OrderByDescending(e => (int)MapToOverallRank(e.Key)).ToList();
                 double cumulativeFront = 0;
                 var frontLines = new List<string>();
                 
@@ -303,7 +309,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
                 foreach (var line in frontLines) writer.WriteLine(line);
 
                 // Back Hand
-                var sortedBack = back.OrderByDescending(e => GetBackPower(e.Key)).ToList();
+                var sortedBack = back.OrderByDescending(e => (int)MapToOverallRank(e.Key)).ToList();
                 double cumulativeBack = 0;
                 var backLines = new List<string>();
 

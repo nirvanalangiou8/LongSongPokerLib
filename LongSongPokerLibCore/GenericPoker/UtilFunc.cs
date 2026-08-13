@@ -95,5 +95,38 @@ namespace GenericPoker
             wholeSet.ExceptWith(excludeSet);
             return new List<T>(wholeSet);
         }
+
+        public static List<(List<T> Selected, List<T> Remaining)> GetPermutationAllowedDuplicated<T>(List<T> inputList, int selectCount)
+        {
+            var resultList = new List<(List<T> Selected, List<T> Remaining)>();
+            RecursivePermuteAllowedDuplicated(inputList, 0, selectCount, new List<T>(), new List<T>(inputList), resultList);
+            return resultList;
+        }
+
+        private static void RecursivePermuteAllowedDuplicated<T>(List<T> wholeList, int startIndex, int selectCount, List<T> currentSelected, List<T> currentRemaining, List<(List<T> Selected, List<T> Remaining)> resultList)
+        {
+            if (currentSelected.Count == selectCount)
+            {
+                resultList.Add((new List<T>(currentSelected), new List<T>(currentRemaining)));
+                return;
+            }
+
+            for (int i = startIndex; i < wholeList.Count; i++)
+            {
+                var item = wholeList[i];
+                currentSelected.Add(item);
+                
+                var nextRemaining = new List<T>(currentRemaining);
+                int indexInRemaining = nextRemaining.IndexOf(item); 
+                if (indexInRemaining >= 0)
+                {
+                    nextRemaining.RemoveAt(indexInRemaining);
+                }
+
+                RecursivePermuteAllowedDuplicated(wholeList, i + 1, selectCount, currentSelected, nextRemaining, resultList);
+                
+                currentSelected.RemoveAt(currentSelected.Count - 1);
+            }
+        }
     }
 }

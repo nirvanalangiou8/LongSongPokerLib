@@ -92,30 +92,6 @@ namespace GenericPoker
 	
 	
 	/*
-	public enum EightCardOverAllHandRank
-	{
-		Nothing,
-		Pair,
-		TwoPairs,
-		ThreeOfKind,
-		ThreeCardsFlushStraight,
-		FiveCardsStraight,
-		FiveCardsFlush,
-		FullHouse,
-		Mansion,
-		SixCardsStraight,
-		SixCardsFlush,
-		SevenCardsStraight,
-		FourCardsFlushStraight,
-		FourOfKind,
-		FiveCardsFlushStraight,
-		EightCardsStraight,
-		SevenCardsFlush,
-		SixCardsFlushStraight,
-		EightCardsFlush
-	}
-	
-	
 	public enum EightCardQualifiedExceptionalBackHand
 	{
 		Nothing,
