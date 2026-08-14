@@ -12,39 +12,39 @@ Here is a breakdown of what it does:
 - **Parsing**: It takes hand names like `Pair*2_ThreeOfKind` and converts them into a list of components: `[Pair, Pair, ThreeOfKind]`.
 - **Power Mapping**: It assigns a power value to each component (`GetCompPower`) so it can sort them. Stronger components are prioritized for the split strategy.
 
-#### 3. Hand Splitting Strategy ("Balanced Strategy")
-The core logic resides in `SplitHand`. It simulates how a player would divide their 8 cards into a Front Hand (usually 3 cards) and a Back Hand (usually 5 cards), following the rule that the **Back Hand must be stronger than or equal to the Front Hand**.
+#### 3. Hand Splitting Strategy (Exploring all possible solutions.")
+The core logic resides in `SplitHand`. It simulates how a player would divide their 8 cards into a Front Hand (usually 3 cards) 
+and a Back Hand (usually 5 cards), following the rule that 
+- **1 first rule the **Back Hand must be stronger than or equal to the Front Hand**.
+- **2 the second rule was the front hand name must in front valid hand name list. This rule had been removed as the rule can be totally covered by fist rule.
+  so now,we dont have seperate validate qualied front or back hand name, but has the universal alloverall hand. 
+  Example why second rule is not needed. If we have fullhouse+pair, if we place fullhouse in front, we don't need the second rule to disqualified this rule, but the
+  first ground will automatically do it, the it violated the backhand >= fronthand.   
 
-- **4 Components**: If you have 4 pairs, it puts 2 pairs in the Front and 2 pairs in the Back.
-- **3 Components**: It tries to put the 2nd strongest component in the Front and the strongest + weakest in the Back.
-- **2 Components**: It puts the weaker component in the Front and the stronger in the Back.
-- **1 Component**: The component must go to the Back Hand (Front Hand becomes "Nothing").
-
+- **3 We recusively explore all possible solution by permuate all the hand compoenets. for example, if we have 3 compoenents, then we try select C(3, 0), C(3,1), etc. we don't
+      need to select C(3,2) as it will be covered by C(3,1). as we have mechanism to swap the solution is front > back. 
+- **4, in the final, there might be duplicated solutions due to recustively symmetry, so we do extra unique selections before return solutions. 
+      
 #### 4. Rank Mapping and Power Calculation
 - It maps these components to specific game ranks (e.g., `ThreeOfKind`, `FullHouse`, `Mansion`, `SixCardsFlush`).
-- It uses internal power values (`GetFrontPower` and `GetBackPower`) to verify if a split is valid (Back $\ge$ Front).
 
-#### 5. Output and Statistics
-- The results are saved to `front_back_stats.csv`.
-- **Probabilities**: It calculates the individual probability of hitting each rank in both the Front and Back positions.
-- **Cumulative Probabilities**: The "Win/NoLose probability" column shows the cumulative chance of having a hand of that rank or better. This is useful for determining how "strong" a specific hand is relative to the entire population of possible hands.
-
-### Summary
-In short, this script **takes raw 8-card hand 
-
-Also for multiple split solutions:
-Please save below work request into md file. 
-"In InitEightCardHandSplitProbAna, when explore the split hand, please try all possible split arrangement 
-as long as it follow ground rule of back hand >= front hand, and also the front hand name and back hand name 
-are in the list of  EightCardFrontHandQualifiedHandAndRank and EightCardBackHandQualifiedHandAndRank. 
-And if there are more than one solution, the appearrance count should be dividen by how many solutions and 
+### 5. Multi solutions appearrnace count treatment.
+-- If there are more than one solution, the appearrance count should be dividen by how many solutions and 
 add those counts into individual front/hand stat. For example. if we have ThreeOfKind + 2 pairs. 
 We can split as pair->full house, or two pairs->ThreeOfKind. Then if this input statitical entry of ThreeOfkind+2 pairs 
 have X appear count, then the front stat acount for Pair should add X/2, and back stat of full house should also add X/2, 
 also, for other solution the two pairs of front hand should add X/2 into stat, and three of kind of back hand should also add X/2 count.
-** About how to find  the possible split solution: 
-1) Try to use components only.
-2)  
+ 
+#### 5. Output and Statistics
+- Once all the appearrance counts versus to front/back hand rank was calculated, we sum all front total count and it individsual hand rank probability. 
+- Then we calculate the cumulative probability of each rank and the physical meaning of this cumlative probabiliy can be regarded as winning probability if you place that kinf od hand in front or back hand respectively. 
+ - **Probabilities**: It calculates the individual probability of hitting each rank in both the Front and Back positions.
+- **Cumulative Probabilities**: The "Win/NoLose probability" column shows the cumulative chance of having a hand of that rank or better. 
+- This is useful for determining how "strong" a specific hand is relative to the entire population of possible hands.
+- For example, nothing in front has 72% appearance probablity, and pair in front has 26% appearance probability, since "front" win "nothing" by rule, so if
+you place pair in front, you will have roughly winning probability 72+26%=98%. which is cumuliated prob from nothing to pair. of course, it depends on which pair you place
+then, in upper program to read this table can inteeploate the winning rate from 72% (lower band) to 98 % upper band.
 
+- The results are saved to `front_back_stats.csv`.
 
-Review the current MapToFront/BackRank function, and understand the current setup. and also review the funtion of SplitHand, and now it should have a universal and elegent way to implement this function. **1. revise the SplitHand to explore all possible legal split hand solutions based on input hand compoenents and always return the first solution (tempoeraly return first as placeholder, as later we have other implement for caller to return all solution). **2. Use Util.GetPermutation to get all possible split compnenet groups. For example, if we have 3 components, then try C(3,3) select any 3 for front and 0 compoenent for back, then try C(3,2) for front and remaining for back hand. ... always select no more half number of components count. For example for 3 components, always select up to 1 count as 3/2 = 1.5. **3, when loop through these possible compoenent arrangement, check the return for MaptoFron/BakcRank , if they are None, then it's invalid, skip this solution. **4, in MapToFront/BackRank implement it as return any rank, if return None Rank, it's protocal to let caller know this input has no valid map rank so they can skip the solution. and the input for this function is a list of comp, and you can sort the compoenents from high comp to low to easiler for you to map which valid hand based on combo components. **5, in the inner loop always check if front > back, if it is, then swap the front and back as valid solution. in task point of **2, we intentiaonl not let the selection count over half of input componenets count is becasue we still have swap front/back check to catch some missing cases. 
+### Summary
