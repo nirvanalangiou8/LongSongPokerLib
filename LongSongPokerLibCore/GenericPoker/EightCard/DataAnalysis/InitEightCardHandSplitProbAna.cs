@@ -28,6 +28,7 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
             var frontHandStats = new Dictionary<EightCardOverAllHandRank, double>();
             var backHandStats = new Dictionary<EightCardOverAllHandRank, double>();
+            long totalInputCount = 0;
 
             var lines = File.ReadAllLines(inputPath);
             foreach (var line in lines)
@@ -40,6 +41,8 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
                 string handName = parts[0];
                 if (!long.TryParse(parts[1], out long count)) continue;
+
+                totalInputCount += count;
 
                 if (handName == "Nothing")
                 {
@@ -83,6 +86,25 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
             SaveStats(outputPath, frontHandStats, backHandStats);
             Console.WriteLine($"Analysis completed. Results saved to {outputPath}");
+
+            double totalFront = frontHandStats.Values.Sum();
+            double totalBack = backHandStats.Values.Sum();
+            Console.WriteLine($"Total Input Appearance Count: {totalInputCount}");
+            Console.WriteLine($"Total Front Stat Count: {totalFront:F2}");
+            Console.WriteLine($"Total Back Stat Count: {totalBack:F2}");
+
+            bool frontMatch = Math.Abs(totalFront - totalInputCount) < 0.001;
+            bool backMatch = Math.Abs(totalBack - totalInputCount) < 0.001;
+
+            if (frontMatch && backMatch)
+            {
+                Console.WriteLine("input and stat count check sum correct.");
+            }
+            else
+            {
+                if (!frontMatch) Console.WriteLine($"ERROR: Front stat count ({totalFront:F2}) does not match input count ({totalInputCount})!");
+                if (!backMatch) Console.WriteLine($"ERROR: Back stat count ({totalBack:F2}) does not match input count ({totalInputCount})!");
+            }
         }
 
         static List<EightCardsCompType> ParseHandName(string handName)

@@ -12,7 +12,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "test"
-            var runOption = "analyze"; 
+            var runOption = "test"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
