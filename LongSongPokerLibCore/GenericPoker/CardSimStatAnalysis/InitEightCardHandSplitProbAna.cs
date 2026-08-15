@@ -5,7 +5,7 @@ using System.Linq;
 using GenericPoker;
 using GenericPoker.EightCard;
 
-namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
+namespace LongSongPokerLibCore.GenericPoker.CardSimStatAnalysis
 {
     class InitEightCardHandSplitProbAna
     {
@@ -16,9 +16,20 @@ namespace LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis
 
         static void Main(string[] args)
         {
+            
             string projectRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
-            string inputPath = Path.Combine(projectRoot, "stats_result.csv");
-            string outputPath = Path.Combine(projectRoot, "GenericPoker", "EightCard", "DataAnalysis", "front_back_stats.csv");
+            // inputPath is at LongSongPokerLibCore/stats_result.csv
+            string inputPath = Path.Combine(projectRoot, "LongSongPokerLibCore", "stats_result.csv");
+            
+            // Resolve outputPath to the directory where this source file resides.
+            string sourceFileDir = Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis");
+            string outputPath = Path.Combine(sourceFileDir, "front_back_stats.csv");
+
+            if (!File.Exists(inputPath))
+            {
+                // Fallback to projectRoot/stats_result.csv if it's there
+                inputPath = Path.Combine(projectRoot, "stats_result.csv");
+            }
 
             if (!File.Exists(inputPath))
             {

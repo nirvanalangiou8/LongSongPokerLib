@@ -12,7 +12,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "test"
-            var runOption = "test"; 
+            var runOption = "analyze"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -22,7 +22,7 @@ namespace LongSongPokerLibCore
             switch (runOption)
             {
                 case "analyze":
-                    LongSongPokerLibCore.GenericPoker.EightCard.DataAnalysis.InitEightCardHandSplitProbAna.Run();
+                    LongSongPokerLibCore.GenericPoker.CardSimStatAnalysis.InitEightCardHandSplitProbAna.Run();
                     break;
 
                 case "hand":
@@ -39,7 +39,7 @@ namespace LongSongPokerLibCore
                     break;
 
                 case "game":
-                    global::GenericPoker.XRandom.Init(12345678uL);
+                    XRandom.Init(12345678uL);
                     RunSimpleEightCardGame();
                     break;
 
@@ -48,7 +48,7 @@ namespace LongSongPokerLibCore
                     break;
 
                 case "test":
-                    global::GenericPoker.XRandom.Init(12345678uL);
+                    XRandom.Init(12345678uL);
                     EightCardGameTest();
                     break;
 
@@ -84,7 +84,7 @@ namespace LongSongPokerLibCore
             // 牌堆 (尚未發出的牌) 與棄牌堆 (已用過的牌)。
             var deck = new System.Collections.Generic.List<string>(fullDeck);
             var discard = new System.Collections.Generic.List<string>();
-            global::GenericPoker.XRandom.Instance.Shuffle(deck);
+            XRandom.Instance.Shuffle(deck);
 
             int round = 0;
             while (true)
@@ -97,7 +97,7 @@ namespace LongSongPokerLibCore
                     Console.WriteLine("牌堆不足 8 張，將棄牌重新洗牌補回牌堆... (reshuffle)\n");
                     deck.AddRange(discard);
                     discard.Clear();
-                    global::GenericPoker.XRandom.Instance.Shuffle(deck);
+                    XRandom.Instance.Shuffle(deck);
                 }
 
                 // 從牌堆頂端發出 8 張，其餘留在牌堆。
