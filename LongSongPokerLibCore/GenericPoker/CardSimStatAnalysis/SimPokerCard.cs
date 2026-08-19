@@ -1,47 +1,41 @@
-﻿using System;
+﻿using GenericPoker;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace GenericPoker.EightCard
+namespace GenericPoker.CardSimStatAnalysis
 {
-	
-	public enum PokerCardRangeGroup
-	{
-		Royal = 0b0100,
-		MiddleClass = 0b010,
-		LowerClass = 0b001,
-	}
-	
-	public class PokerCardComparer : IEqualityComparer<EightCardPokerCard>
-	{
-		public bool Equals(EightCardPokerCard x, EightCardPokerCard y)
-		{
-			bool retBool = x.Equals(y);
-			if (!retBool) return false;
-			return x.DeckID == y.DeckID; 
-		}
+    
+    public class PokerCardComparer : IEqualityComparer<SimPokerCard>
+    {
+        public bool Equals(SimPokerCard x, SimPokerCard y)
+        {
+            bool retBool = x.Equals(y);
+            if (!retBool) return false;
+            return x.DeckID == y.DeckID; 
+        }
 
-		public int GetHashCode(EightCardPokerCard obj)
-		{
-			return 1;
-		}
-	}
-	
-	public class EightCardPokerCard :  BasePokerCard  // IEquatable<PokerCard> //
+        public int GetHashCode(SimPokerCard obj)
+        {
+            return 1;
+        }
+    }
+    
+    public class SimPokerCard :  BasePokerCard  // IEquatable<PokerCard> //
 	{
-		
+		/*
 		public static readonly Dictionary<PokerCardRangeGroup, (int, int)> MatchCardRangeNumberGroupDict = new Dictionary<PokerCardRangeGroup, (int, int)>
 		{
 			{ PokerCardRangeGroup.Royal, (10,14) },
 			{ PokerCardRangeGroup.MiddleClass, (6,9)},
 			{ PokerCardRangeGroup.LowerClass, (1,5) },
-		};
+		};*/
     
 		
 		// Consider how many Joker's to count the maximum number of ModulatorScale.
 		// This is majorly used for count the hand power whenever need to compare card to card by using decimal concepts.
-		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*PokerHandCalculator.MaxPokerNumber;
+		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*SimPokerHandCalculator.MaxPokerNumber;
 		
 		
 		public virtual bool IsNumberable => true;
@@ -63,16 +57,13 @@ namespace GenericPoker.EightCard
 		// other card will only have 1 bit
 		private int _pokerRangeGroupBits;
 		
-		public static EightCardPokerCard CreateInstance(int id, int number, PokerSuit pokerSuit, int objectID = 0, int deckID = 1)
+		public static SimPokerCard CreateInstance(int id, int number, PokerSuit pokerSuit, int objectID = 0, int deckID = 1)
 		{
-			// TODO , will enable below remarks later.
-			return null;
-			/*
 			var data = number == PokerConst.AceBigNumber ? 
-				new AceCard() : new EightCardPokerCard();
+				new AcePokerCard() : new SimPokerCard();
 		
 			data.Init(id, number, pokerSuit, objectID, deckID);
-			return data;*/
+			return data;
 		}
 		
 		// The input string would be like 10♣️, or A♣️, since we don't know if first number has one or two chars, so
@@ -93,14 +84,11 @@ namespace GenericPoker.EightCard
 
 		
 		// The input pokerCardStr needs to be in the form like 10♣️, or A❤️, etc.
-		public static EightCardPokerCard CreateInstance(string pokerCardStr, int objectID = 0, int deckID = 1)
+		public static SimPokerCard CreateInstance(string pokerCardStr, int objectID = 0, int deckID = 1)
 		{
-			// TODO , will enable below remarks later.
-			return null;
-			/*
 			var (numStr, suitSymbol) = SplitCard(pokerCardStr);
 			
-			var data = numStr == "A" ? new AceCard() : new EightCardPokerCard();
+			var data = numStr == "A" ? new AcePokerCard() : new SimPokerCard();
 			
 			var number = PokerConst.PokerStringToNumberDict[numStr];
 			
@@ -108,10 +96,10 @@ namespace GenericPoker.EightCard
 			var id = ((int)suit - 1) * PokerConst.MaxTotalCountInSameSuit + number;
 			data.Init(id, number, suit, objectID, deckID);
 			data._computePokerRangeGroup();
-			return data; */
+			return data;
 		}
 		
-		public static EightCardPokerCard CreateInstance(EightCardPokerCard another)
+		public static SimPokerCard CreateInstance(SimPokerCard another)
 		{
 			return CreateInstance(another._cardID, another._number, another._suit, another.ObjectID, deckID: another.DeckID);
 		}
@@ -120,7 +108,7 @@ namespace GenericPoker.EightCard
 		
 
 		private void _computePokerRangeGroup()
-		{
+		{/*
 			_pokerRangeGroupBits = 0b0000;
 			if (_number == 1) // ace case
 			{
@@ -136,62 +124,80 @@ namespace GenericPoker.EightCard
 					_pokerRangeGroupBits |= (int)rangeGroup;
 					break;
 				}
-			}
+			}*/
 		}
 		
 	}
+    /*
+    public class SimCardPokerCard : BasePokerCard
+    {
+        public bool IsNumberable => true;
+        public SimCardPokerCard() : base() { }
+
+        public SimCardPokerCard(string cardStr)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(cardStr, @"^([2-9]|10|[JQKA]|Joker)(.*)$");
+            if (match.Success)
+            {
+                string numPart = match.Groups[1].Value;
+                string suitPart = match.Groups[2].Value;
+                int number = numPart == "Joker" ? 0 : PokerConst.PokerStringToNumberDict[numPart];
+                PokerSuit suit = PokerConst.SymbolToPokerSuit.TryGetValue(suitPart, out var s) ? s : PokerSuit.NoSuit;
+                Init(0, number, suit, 0, 0);
+            }
+        }
+
+        public static SimCardPokerCard CreateInstance(int id, int number, PokerSuit suit, int objectID, int deckID)
+        {
+            var card = new SimCardPokerCard();
+            card.Init(id, number, suit, objectID, deckID);
+            return card;
+        }
+
+        public static SimCardPokerCard CreateInstance(BasePokerCard other)
+        {
+            if (other is IJoker)
+            {
+                return new SimCardJokerCard(other.CardStr);
+            }
+            return new SimCardPokerCard(other.CardStr);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is SimCardPokerCard other)
+            {
+                return CardStr == other.CardStr;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return CardStr.GetHashCode();
+        }
+    }
+
+    public class SimCardJokerCard : SimCardPokerCard, IJoker
+    {
+        public new bool IsNumberable => true;
+        public int JokerPower => 100;
+        public SimCardJokerCard(string cardStr) : base(cardStr) { }
+    }
+
+    public class SimCardPokerCardComparer : IEqualityComparer<SimCardPokerCard>
+    {
+        public bool Equals(SimCardPokerCard x, SimCardPokerCard y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            if (ReferenceEquals(x, null)) return false;
+            if (ReferenceEquals(y, null)) return false;
+            return x.CardStr == y.CardStr;
+        }
+
+        public int GetHashCode(SimCardPokerCard obj)
+        {
+            return obj.CardStr.GetHashCode();
+        }
+    }*/
 }
-
-/*
-		public bool CheckInRangeGroup(PokerCardRangeGroup pokerCardRangeGroup)
-		{
-			return (_pokerRangeGroupBits & (int)pokerCardRangeGroup) != 0;
-		}
-*/
-
-
-/*
-		protected void Init(int id, int number, PokerSuit suit, int objectID, int deckID)
-		{
-			_cardID = id;
-			this._number = number;
-			this._suit = suit;
-			_objectID = objectID;
-			_deckID = deckID;
-			_computePokerRangeGroup();
-		}*/
-		
-/*
-// Convert 10♣️ to 10_Club, etc.
-public static string CardSymbolToStr(string symbolStr)
-{
-	var (numStr, suitSymbol) = SplitCard(symbolStr);
-	return $"{numStr}_{PokerConst.SymbolToPokerSuit[suitSymbol].ToString()}";
-}
-*/
-		
-/*
-// Convert 10_Club to 10♣️
-public static string CardStrToSymbol(string cardStr)
-{
-	string[] parts = cardStr.Split('_');
-	var numStr = parts[0];
-	var suit = (PokerSuit)Enum.Parse(typeof(PokerSuit), parts[1]);
-
-	return $"{numStr}_{PokerConst.PokerSuitToSymbol[suit]}";
-}*/
-
-/*
-		public virtual int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
-		{
-			if (anotherCard is AceCard)
-			{
-				var totalPts1 = (Number + 14 ) % 10;
-				var totalPts2 = (Number + 1) % 10;
-				return Math.Max(totalPts1, totalPts2);
-			} else {
-
-				return  (Number + anotherCard.Number) % 10;
-			}
-		}
-*/

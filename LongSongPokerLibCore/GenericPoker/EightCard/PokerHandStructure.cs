@@ -200,7 +200,7 @@ namespace GenericPoker.EightCard
 
 		public override int GetHashCode()
 		{
-			return 1;
+			return FinalCompsStr?.GetHashCode() ?? 0;
 		}
 		
 	}

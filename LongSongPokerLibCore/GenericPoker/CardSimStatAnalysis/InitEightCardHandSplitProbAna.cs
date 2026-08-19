@@ -5,7 +5,7 @@ using System.Linq;
 using GenericPoker;
 using GenericPoker.EightCard;
 
-namespace LongSongPokerLibCore.GenericPoker.CardSimStatAnalysis
+namespace LongSongPokerLibCore.GenericPoker
 {
     class InitEightCardHandSplitProbAna
     {

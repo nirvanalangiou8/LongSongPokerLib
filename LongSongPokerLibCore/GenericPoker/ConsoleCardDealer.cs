@@ -41,6 +41,10 @@ namespace GenericPoker
                             // For now, let's assume we'll add the namespace.
                             newPokerCard = (BasePokerCard)typeof(TCard).GetMethod("CreateInstance", new[] { typeof(int), typeof(int), typeof(PokerSuit), typeof(int), typeof(int) })
                                 .Invoke(null, new object[] { id, number, pokerSuit, 0, i + 1 });
+					    } else if (typeof(TCard).Name == "SimPokerCard") {
+						    var method = typeof(TCard).GetMethod("CreateInstance", new[] { typeof(int), typeof(int), typeof(PokerSuit), typeof(int), typeof(int) });
+						    if (method == null) throw new InvalidOperationException("SimPokerCard.CreateInstance method not found");
+						    newPokerCard = (BasePokerCard)method.Invoke(null, new object[] { id, number, pokerSuit, 0, i + 1 });
 					    } else {
 						    throw new InvalidOperationException($"Unsupported card type: {typeof(TCard).Name}");
 					    }

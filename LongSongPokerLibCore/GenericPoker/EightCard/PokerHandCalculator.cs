@@ -256,7 +256,7 @@ namespace GenericPoker.EightCard
 
 			// if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
 			// so that to let 3,2,1 straight become available.
-			if (kindGroupList[0][0] is AceCard)
+			if (kindGroupList[0][0] is AcePokerCard)
 			{
 				var newKindGroup = new List<EightCardPokerCard>();
 				foreach (var ace in kindGroupList[0])
@@ -348,7 +348,7 @@ namespace GenericPoker.EightCard
 			} 
 			// if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
 			// so that to let 3,2,1 straight become available.
-			if (kindGroupList[0][0] is AceCard)
+			if (kindGroupList[0][0] is AcePokerCard)
 			{
 				var newKindGroup = new List<EightCardPokerCard>();
 				foreach (var ace in kindGroupList[0])

@@ -125,7 +125,7 @@ namespace GenericPoker
 		
 		// This function is for straight evaluation.
 		// A-K is valid and also 2-A is valid. So we need to consider two special cases if we encounter A.
-		public bool IsNextNeighborNumber(EightCardPokerCard nextCard)
+		public bool IsNextNeighborNumber(BasePokerCard nextCard)
 		{
 			int leftNumber = (Number == 1) ? PokerConst.AceBigNumber : Number;
 			int rightNumber = nextCard.Number; // If rightNumber is Ace, it's just represent as "1"
@@ -204,8 +204,8 @@ namespace GenericPoker
 			var numberA = Number;
 			var numberB = other.Number;
 			
-			if (this is AceCard) numberA = PokerConst.AceBigNumber;
-			if (other is AceCard) numberB = PokerConst.AceBigNumber;
+			if (this is AcePokerCard) numberA = PokerConst.AceBigNumber;
+			if (other is AcePokerCard) numberB = PokerConst.AceBigNumber;
 			
 			return (numberA == numberB) && (_suit == other._suit);
 		}
@@ -214,7 +214,7 @@ namespace GenericPoker
 		{
 
 			int retNumber = Number;
-			if (this is AceCard)
+			if (this is AcePokerCard)
 			{
 				retNumber = PokerConst.AceBigNumber;
 			}

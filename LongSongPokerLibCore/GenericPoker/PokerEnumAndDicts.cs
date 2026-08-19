@@ -91,6 +91,52 @@ namespace GenericPoker
 	}
 	
 	
+	public enum SimCardsCompType
+	{
+		Pair,
+		ThreeCardsFlush,
+		ThreeCardsPairInFlush,
+		ThreeCardsStraight,
+		FourCardsFlush,
+		FourCardStraight,
+		FiveCardsStraight,
+		FiveCardsFlush,
+		FourCardsPairInFlush, //
+		FourCardsTwoPairsInFlush, //
+		ThreeOfKind,
+		FiveCardsPairInFlush,
+		FiveCardsTwoPairsInFlush,
+		ThreeCardsFlushStraight,
+		FourCardsFlushStraight,
+		FourOfKind,
+		FiveCardsFlushStraight,
+		SixCardsFlush,
+		SixCardsStraight,
+		SixCardsPairInFlush,
+		SixCardsTwoPairsInFlush,
+		SixCardsFlushStraight,
+		SixCardsThreePairsInFlush,
+		SevenCardsFlush,
+		SevenCardsStraight,
+		SevenCardsPairInFlush,
+		SevenCardsTwoPairsInFlush,
+		SevenCardsThreePairsInFlush,
+		SevenCardsFlushStraight,
+		EightCardsFlush,
+		EightCardsPairInFlush,
+		EightCardsTwoPairsInFlush,
+		EightCardsStraight,
+		FiveOfKind,
+		EightCardsFlushStraight,
+		EightCardsThreePairsInFlush,
+		EightCardsFourPairsInFlush,
+		SixOfKind,
+		SevenOfKind,
+		EightOfKind,
+		None,
+	}
+	
+	
 	/*
 	public enum EightCardQualifiedExceptionalBackHand
 	{
