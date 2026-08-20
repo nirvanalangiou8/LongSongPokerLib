@@ -53,7 +53,7 @@ namespace LongSongPokerLibCore
                     XRandom.Init(12345678uL);
                     //EightCardGameTest();
                     
-                    SimRunAndCalcComponentStat.SimCardRunStat(100000000, 8);
+                    SimRunAndCalcComponentStat.SimCardRunStat(1000000, 8);
                     //SimCardRunAndCalcComponentStat.SimCardRunStat(10000, 9);
                     //SimCardRunAndCalcComponentStat.SimCardRunStat(10000, 10);
                     break;

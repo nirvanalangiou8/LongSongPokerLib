@@ -414,7 +414,7 @@ namespace GenericPoker.CardSimStatAnalysis
 							
 							hasRank = true;
 						}
-					} else { // Yes we have straight in suit group which implies @@flush@@
+					} else { // no we don't have straight in suit group which implies @@flush@@
 
 						flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<SimPokerCard>(flushGroup, desiredCount));
 						

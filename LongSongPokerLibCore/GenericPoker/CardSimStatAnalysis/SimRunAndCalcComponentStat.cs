@@ -46,6 +46,7 @@ namespace GenericPoker.CardSimStatAnalysis
     {
         public static void SimCardRunStat(int totalIterations = 10000, int cardsPerHand = 8)
         {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             int workerCount = 10;
             bool useParallel = false;
 
@@ -143,7 +144,8 @@ namespace GenericPoker.CardSimStatAnalysis
                 UpdateStats(gameManager.statDict);
             }
 
-            Console.WriteLine($"{cardsPerHand}Card Game Test completed.");
+            sw.Stop();
+            Console.WriteLine($"{cardsPerHand}Card Game Test completed in {sw.ElapsedMilliseconds} ms.");
             
             var sortedStats = finalStats.OrderByDescending(x => x.Value).ToList();
             long totalHands = sortedStats.Sum(x => x.Value);
