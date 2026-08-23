@@ -6,16 +6,19 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class SimConsolePlayer : ConsolePlayer<SimPokerCard>
     {
-        private SimPokerHandCalculator _pokerHandCalculator;
+        //private SimPokerHandCalculator _pokerHandCalculator;
+        private SimStatEstimator _pokerHandCalculator;
 
         public SimConsolePlayer(string playerName) : base(playerName)
         {
-            _pokerHandCalculator = new SimPokerHandCalculator();
+            //_pokerHandCalculator = new SimPokerHandCalculator();
+            _pokerHandCalculator = new SimStatEstimator();
         }
 
         public List<SimPokerHandStructure> ProcessSimHands()
         {
             _pokerHandCalculator.SetupCards(_pokerCards);
+           
             return _pokerHandCalculator.TestSimCards();
         }
 

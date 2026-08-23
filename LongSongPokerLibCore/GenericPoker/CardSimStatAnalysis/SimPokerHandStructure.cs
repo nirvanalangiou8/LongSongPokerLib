@@ -22,12 +22,23 @@ namespace GenericPoker.CardSimStatAnalysis
             remainingCards = new List<SimPokerCard>(other.remainingCards);
         }
 
+        public void Clear()
+        {
+            Components.Clear();
+            remainingCards.Clear();
+        }
+        
         public void AddComp(PokerCardComponent<SimCardsCompType, SimPokerCard> newComponent)
         {
             Components.Add(newComponent);
         }
 
-       
+        public void RemoveLast(int count = 1)
+        {
+            Components.RemoveRange(Components.Count - count, count);
+        }
+
+        
         public void SortCompsAndClassify()
         {
             Components.Sort((c1, c2) => c2.CompareTo(c1));

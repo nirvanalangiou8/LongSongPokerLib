@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading.Tasks;
 using GenericPoker;
 using GenericPoker.EightCard;
@@ -13,8 +14,8 @@ namespace LongSongPokerLibCore
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
-            // Available options: "analyze", "hand", "game", "split", "test"
-            var runOption = "test"; 
+            // Available options: "analyze", "hand", "game", "split", "test", "debug"
+            var runOption = "debug"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -58,8 +59,12 @@ namespace LongSongPokerLibCore
                     //SimCardRunAndCalcComponentStat.SimCardRunStat(10000, 10);
                     break;
 
+                case "debug":
+                    DebugSimHandType();
+                    break;
+
                 default:
-                    Console.WriteLine("Unknown runOption. Available options: analyze, hand, game, split, test");
+                    Console.WriteLine("Unknown runOption. Available options: analyze, hand, game, split, test, debug");
                     break;
             }
         }
@@ -469,6 +474,23 @@ namespace LongSongPokerLibCore
             }
         }
 
+
+        static void DebugSimHandType()
+        {
+            var inputCardStr = "2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,4❤️,4♣️";
+            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
+            var calculator = new SimStatEstimator();
+            calculator.SetupCards(cards);
+            var results = calculator.TestSimCards();
+
+            string foundTypes = string.Join(", ", results.Select(r => r.FinalCompsStr));
+            Console.WriteLine($"Input Cards: {inputCardStr}");
+            Console.WriteLine($"Found types: {foundTypes}");
+            foreach (var r in results)
+            {
+                Console.WriteLine($"Result Hand Type: {r.FinalCompsStr}");
+            }
+        }
 
         static void TestHandSplit()
         {

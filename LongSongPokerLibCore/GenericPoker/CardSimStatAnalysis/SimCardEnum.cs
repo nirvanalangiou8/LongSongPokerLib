@@ -4,6 +4,7 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public enum SimCardsCompType
     {
+        Nothing,
         Pair,
         ThreeCardsFlush,
         ThreeCardsPairInFlush,

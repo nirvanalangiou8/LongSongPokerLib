@@ -12,6 +12,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
     {
         private static readonly object[] SimHandTypeTestData =
         {
+            new object[] { "2❤️,2♣️,3❤️,3♣️,4♠️,7🔶,7❤️,8♣️", "Nothing" },
             new object[] { "2❤️,2♣️,3❤️,3♣️,5♠️,7🔶,9❤️,J♣️", "Pair*2" },
             new object[] { "2❤️,3♣️,4♠️,5🔶,7❤️,9♣️,J♠️,K🔶", "Nothing" },
             new object[] { "2❤️,2♣️,3❤️,4♣️,5♠️,7🔶,9❤️,J♣️", "Pair" },
@@ -64,38 +65,39 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             new object[] { "2❤️,3❤️,4❤️,5❤️,7♠️,8♠️,9♠️,10♠️", "FourCardsFlushStraight*2" },
             new object[] { "2❤️,2♣️,2♠️,2🔶,4❤️,5❤️,6❤️,7❤️", "FourOfKind_FourCardsFlushStraight" },
             new object[] { "2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,3♠️,3🔶", "FourOfKind*2" },
-            new object[] { "2❤️,3❤️,4❤️,5❤️,6❤️,7❤️,8❤️,9❤️", "EightCardsFlushStraight" }
+            new object[] { "2❤️,3❤️,4❤️,5❤️,6❤️,7❤️,8❤️,9❤️", "EightCardsFlushStraight" },
+            new object[] { "8♠️,9♠️,10♠️,10🔶,J🔶,Q♣️,Q🔶,Q♠️", "Nothing"}
         };
 
         [Test, TestCaseSource(nameof(SimHandTypeTestData))]
         public void TestSimHandType(string inputCardStr, string expectedHandType)
         {
             var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
-            var calculator = new SimPokerHandCalculator();
+            //var calculator = new SimPokerHandCalculator();
+            var calculator = new SimStatEstimator();
             calculator.SetupCards(cards);
             var results = calculator.TestSimCards();
-            
-            if (expectedHandType == "Nothing" || expectedHandType == "Pair")
-            {
-                if (results.Count == 0)
-                {
-                    Assert.Pass($"Hand type {expectedHandType} correctly identified as simple component (empty structure list)");
-                    return;
-                }
-            }
 
-            Assert.IsNotEmpty(results, $"No results found for {inputCardStr}");
+            //"FourOfKind_Pair*2, ThreeCardsFlushStraight*2_Pair, ThreeCardsFlushStraight*2_Pair, ThreeOfKind, ThreeOfKind";
+            string runStr = string.Join(",", results.Select(r => r.FinalCompsStr));
+
+            Assert.That(runStr, Is.EqualTo(expectedHandType));
+            
+            //Assert.Fail($"Hand type '{expectedHandType}' not found in results for cards: {inputCardStr}. Found: {foundTypes}");
+
+
+            //Assert.IsNotEmpty(results, $"No results found for {inputCardStr}");
             
             // For simple types that might be found but not as the "best" partition in the results list,
             // we check if ANY result matches. But the stats come from ALL partitions.
             // However, the CSV usually lists the most prominent one.
-            bool found = results.Any(r => r.FinalCompsStr == expectedHandType);
-            
+            //bool found = results.Any(r => r.FinalCompsStr == expectedHandType);
+            /*
             if (!found)
             {
                 string foundTypes = string.Join(", ", results.Select(r => r.FinalCompsStr));
                 Assert.Fail($"Hand type '{expectedHandType}' not found in results for cards: {inputCardStr}. Found: {foundTypes}");
-            }
+            }*/
         }
     }
 }
