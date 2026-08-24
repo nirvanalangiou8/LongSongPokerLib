@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GenericPoker;
 
@@ -45,6 +46,8 @@ namespace GenericPoker.CardSimStatAnalysis
 				{ "7_TwoPairsInFlush", SimCardsCompType.SevenCardsTwoPairsInFlush},
 				{ "7_ThreePairsInFlush", SimCardsCompType.SevenCardsThreePairsInFlush},
 				{ "8_Flush", SimCardsCompType.EightCardsFlush },
+				{ "9_Flush", SimCardsCompType.NineCardsFlush },
+				{ "10_Flush", SimCardsCompType.TenCardsFlush },
 				{ "8_PairInFlush", SimCardsCompType.EightCardsPairInFlush},
 				{ "8_TwoPairsInFlush", SimCardsCompType.EightCardsTwoPairsInFlush},
 				{ "8_ThreePairsInFlush", SimCardsCompType.EightCardsThreePairsInFlush},
@@ -52,9 +55,13 @@ namespace GenericPoker.CardSimStatAnalysis
 				{ "6_Straight", SimCardsCompType.SixCardsStraight },
 				{ "7_Straight", SimCardsCompType.SevenCardsStraight },
 				{ "8_Straight", SimCardsCompType.EightCardsStraight },
+				{ "9_Straight", SimCardsCompType.NineCardsStraight },
+				{ "10_Straight", SimCardsCompType.TenCardsStraight },
 				{ "6_FlushStraight", SimCardsCompType.SixCardsFlushStraight },
 				{ "7_FlushStraight", SimCardsCompType.SevenCardsFlushStraight },
-				{ "8_FlushStraight", SimCardsCompType.EightCardsFlushStraight }
+				{ "8_FlushStraight", SimCardsCompType.EightCardsFlushStraight },
+				{ "9_FlushStraight", SimCardsCompType.NineCardsFlushStraight },
+				{ "10_FlushStraight", SimCardsCompType.TenCardsFlushStraight }
 			};
 
         public void SetupCards(List<SimPokerCard> inputPokerCardList)
@@ -81,6 +88,13 @@ namespace GenericPoker.CardSimStatAnalysis
             }
             
             allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
+            
+            /*
+            if (allCandidateComps.Count == 1 && allCandidateComps[0].FinalCompsStr == "None")
+            {
+	            var cardsString = string.Join(",", _allPokerCards.Select(card => card.CardStr));
+	            Console.WriteLine($"Debug output: {cardsString}");
+            }*/
             
             // remove the duplicate set of arrangement by their final comp str.
             var uniqueCandidates = allCandidateComps.DistinctBy(c => c.FinalCompsStr).ToList();

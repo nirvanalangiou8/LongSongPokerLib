@@ -10,7 +10,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
     [TestFixture]
     public class SimHandTypeTest
     {
-        private static readonly (string Cards, string Expected)[] RawTestData =
+        private static readonly (string Cards, string Expected)[] EightCardRawTestData =
         {
             ("2❤️,2♣️,3❤️,3♣️,4♠️,7🔶,7❤️,8♣️", "Pair*3"),
             ("2❤️,2♣️,3❤️,3♣️,5♠️,7🔶,9❤️,J♣️", "Pair*2"),
@@ -72,14 +72,35 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             ("2❤️,2♣️,2♠️,2🔶,4❤️,5❤️,6❤️,7❤️", "FourOfKind_FourCardsFlushStraight"),
             
         };
+        
+        private static readonly (string Cards, string Expected)[] NineCardRawTestData =
+        {
+            ("7♠️,5❤️,9♠️,4🔶,2♠️,10❤️,8❤️,6❤️,3🔶", "NineCardsStraight"),
+        };
+            
+        
 
-        public static IEnumerable<TestCaseData> SimHandTypeTestData
+        public static IEnumerable<TestCaseData> EightCardSimHandTypeTestData
         {
             get
             {
-                for (int i = 0; i < RawTestData.Length; i++)
+                for (int i = 0; i < EightCardRawTestData.Length; i++)
                 {
-                    var (cards, expected) = RawTestData[i];
+                    var (cards, expected) = EightCardRawTestData[i];
+                    yield return new TestCaseData(cards, expected)
+                        .SetProperty("Order", i)
+                        .SetName($"[{i + 1:D2}] {expected} ({cards})");
+                }
+            }
+        }
+        
+        public static IEnumerable<TestCaseData> NineCardSimHandTypeTestData
+        {
+            get
+            {
+                for (int i = 0; i < NineCardRawTestData.Length; i++)
+                {
+                    var (cards, expected) = NineCardRawTestData[i];
                     yield return new TestCaseData(cards, expected)
                         .SetProperty("Order", i)
                         .SetName($"[{i + 1:D2}] {expected} ({cards})");
@@ -87,8 +108,8 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             }
         }
 
-        [Test, TestCaseSource(nameof(SimHandTypeTestData))]
-        public void TestSimHandType(string inputCardStr, string expectedHandType)
+        [Test, TestCaseSource(nameof(EightCardSimHandTypeTestData))]
+        public void EightCardTestSimHandType(string inputCardStr, string expectedHandType)
         {
             var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
             //var calculator = new SimPokerHandCalculator();
@@ -100,8 +121,21 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             string runStr = string.Join(",", results.Select(r => r.FinalCompsStr));
 
             Assert.That(runStr, Is.EqualTo(expectedHandType));
-            
-          
+        }
+        
+        [Test, TestCaseSource(nameof(NineCardSimHandTypeTestData))]
+        public void NineCardTestSimHandType(string inputCardStr, string expectedHandType)
+        {
+            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
+            //var calculator = new SimPokerHandCalculator();
+            var calculator = new SimStatEstimator();
+            calculator.SetupCards(cards);
+            var results = calculator.TestSimCards();
+
+            //"FourOfKind_Pair*2, ThreeCardsFlushStraight*2_Pair, ThreeCardsFlushStraight*2_Pair, ThreeOfKind, ThreeOfKind";
+            string runStr = string.Join(",", results.Select(r => r.FinalCompsStr));
+
+            Assert.That(runStr, Is.EqualTo(expectedHandType));
         }
     }
 }

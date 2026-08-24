@@ -44,11 +44,11 @@ namespace GenericPoker.CardSimStatAnalysis
 
     public static class SimRunAndCalcComponentStat
     {
-        public static void SimCardRunStat(int totalIterations = 10000, int cardsPerHand = 8)
+        public static void SimCardRunStat(int totalIterations = 10000, int cardsPerHand = 8, bool useParallel = false)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
             int workerCount = 10;
-            bool useParallel = false;
+            //bool useParallel = false;
 
             Console.WriteLine($"Running {totalIterations} iterations for {cardsPerHand} cards (Parallel: {useParallel}, Workers: {workerCount})...");
 
