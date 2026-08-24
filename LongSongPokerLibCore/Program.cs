@@ -14,8 +14,8 @@ namespace LongSongPokerLibCore
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
-            // Available options: "analyze", "hand", "game", "split", "test", "debug"
-            var runOption = "debug"; 
+            // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
+            var runOption = "run_stat"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -50,13 +50,12 @@ namespace LongSongPokerLibCore
                     TestHandSplit();
                     break;
 
-                case "test":
+                case "run_stat":
                     XRandom.Init(12345678uL);
-                    //EightCardGameTest();
                     
-                    SimRunAndCalcComponentStat.SimCardRunStat(1000000, 8);
-                    //SimCardRunAndCalcComponentStat.SimCardRunStat(10000, 9);
-                    //SimCardRunAndCalcComponentStat.SimCardRunStat(10000, 10);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(1000000, 8);
+                    SimRunAndCalcComponentStat.SimCardRunStat(10000, 9);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(10000, 10);
                     break;
 
                 case "debug":

@@ -57,16 +57,20 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             ("2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,4❤️,4♣️", "FourOfKind_Pair*2,ThreeCardsFlushStraight*2_Pair,ThreeCardsFlushStraight_ThreeOfKind"),
             ("2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,3♠️,5❤️", "FourOfKind_ThreeOfKind"),
             ("2❤️,2♣️,2♠️,2🔶,3❤️,4❤️,5❤️,7♣️", "FourOfKind_ThreeCardsFlushStraight,FourCardsFlushStraight_ThreeOfKind"),
-            ("2❤️,4❤️,6❤️,8❤️,10❤️,Q❤️,A❤️,3❤️", "EightCardsFlush"),
             ("2❤️,3❤️,4❤️,5❤️,6❤️,7❤️,9♠️,9♣️", "SixCardsFlushStraight_Pair"),
             ("2❤️,3❤️,4❤️,5❤️,6❤️,8♠️,9♠️,10♠️", "FiveCardsFlushStraight_ThreeCardsFlushStraight"),
             ("2❤️,3❤️,4❤️,5❤️,6❤️,8♠️,8♣️,8🔶", "FiveCardsFlushStraight_ThreeOfKind"),
             ("2❤️,3❤️,4❤️,5❤️,6❤️,7❤️,8❤️,10♣️", "SevenCardsFlushStraight"),
             ("2❤️,3❤️,4❤️,5❤️,7♠️,8♠️,9♠️,10♠️", "FourCardsFlushStraight*2"),
-            ("2❤️,2♣️,2♠️,2🔶,4❤️,5❤️,6❤️,7❤️", "FourOfKind_FourCardsFlushStraight"),
             ("2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,3♠️,3🔶", "FourOfKind*2"),
             ("2❤️,3❤️,4❤️,5❤️,6❤️,7❤️,8❤️,9❤️", "EightCardsFlushStraight"),
-            ("8♠️,9♠️,10♠️,10🔶,J🔶,Q♣️,Q🔶,Q♠️", "ThreeCardsFlushStraight*2_Pair,ThreeCardsFlushStraight_ThreeOfKind,FiveCardsStraight_Pair")
+            // These are complicated and challenging cases and may need to adjust the result later.
+            // Temporarily below are intentionally make it test result compare failed due to we dont know if those rank order in 8 cards are still valid for 9 or 10 cards.
+            // will come back to later to review this.
+            ("8♠️,9♠️,10♠️,10🔶,J🔶,Q♣️,Q🔶,Q♠️", "ThreeCardsFlushStraight*2_Pair,ThreeCardsFlushStraight_ThreeOfKind,FiveCardsStraight_Pair"),
+            ("2❤️,4❤️,6❤️,8❤️,10❤️,Q❤️,A❤️,3❤️", "EightCardsFlush"),
+            ("2❤️,2♣️,2♠️,2🔶,4❤️,5❤️,6❤️,7❤️", "FourOfKind_FourCardsFlushStraight"),
+            
         };
 
         public static IEnumerable<TestCaseData> SimHandTypeTestData
