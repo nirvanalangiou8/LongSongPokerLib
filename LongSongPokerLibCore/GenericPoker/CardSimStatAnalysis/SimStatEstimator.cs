@@ -69,6 +69,58 @@ namespace GenericPoker.CardSimStatAnalysis
             _allPokerCards = new List<SimPokerCard>(inputPokerCardList);
         }
         
+        public string GetHandString()
+        {
+            return string.Join(",", _allPokerCards.Select(card => card.CardStr));
+        }
+
+        private bool checkCompsCardCount(List<SimPokerHandStructure> allComps)
+        {
+	        
+	        foreach (var structure in allComps)
+	        {
+		        var totalCards = 0;
+		        
+		        if (structure.FinalCompsStr == "None")
+		        {
+			        continue;
+		        }
+
+		        // Split by underscore to get individual composition patterns
+		        var compParts = structure.FinalCompsStr.Split('_');
+
+		        foreach (var compPart in compParts)
+		        {
+			        // Parse pattern like "Pair*2" or "ThreeCardsFlushStraight"
+			        var parts = compPart.Split('*');
+			        var compTypeName = parts[0];
+			        var multiplier = parts.Length > 1 ? int.Parse(parts[1]) : 1;
+
+			        // Find the card count from the composition type name
+			        // The key format is like "2_Kind" for Pair, "3_FlushStraight" for ThreeCardsFlushStraight
+			        var cardCount = 0;
+			        foreach (var kvp in SimCardsCompTypeDict)
+			        {
+				        if (kvp.Value.ToString() == compTypeName)
+				        {
+					        // Extract the number prefix from the key (e.g., "2" from "2_Kind")
+					        var keyParts = kvp.Key.Split('_');
+					        cardCount = int.Parse(keyParts[0]);
+					        break;
+				        }
+			        }
+
+			        totalCards += cardCount * multiplier;
+		        }
+		        if (totalCards > _allPokerCards.Count) 
+		        {
+			        Console.WriteLine("Structure final string is " + structure.FinalCompsStr + " where the hand string is " + GetHandString());
+			        return false;
+		        }
+	        }
+
+	        return true;
+        }
         
         public List<SimPokerHandStructure> TestSimCards()
         {
@@ -87,14 +139,13 @@ namespace GenericPoker.CardSimStatAnalysis
                 res.SortCompsAndClassify();
             }
             
+            if (!checkCompsCardCount(allCandidateComps))
+            {
+                Environment.Exit(1);
+            }
+            
             allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
             
-            /*
-            if (allCandidateComps.Count == 1 && allCandidateComps[0].FinalCompsStr == "None")
-            {
-	            var cardsString = string.Join(",", _allPokerCards.Select(card => card.CardStr));
-	            Console.WriteLine($"Debug output: {cardsString}");
-            }*/
             
             // remove the duplicate set of arrangement by their final comp str.
             var uniqueCandidates = allCandidateComps.DistinctBy(c => c.FinalCompsStr).ToList();
@@ -108,7 +159,7 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="minCardCountInGroup">Minimum number of cards of the same rank required.</param>
         /// <param name="noneJokerCards">The collection of cards (excluding jokers) to group.</param>
         /// <returns>A list of card groups, each containing cards of the same rank, ordered by rank descending.</returns>
-        private List<List<SimPokerCard>> GetNumberGroups(int minCardCountInGroup, List<SimPokerCard> noneJokerCards)
+        private List<List<SimPokerCard>> _getNumberGroups(int minCardCountInGroup, List<SimPokerCard> noneJokerCards)
         {
             // 使用 Dictionary 根據牌面點數（Number）進行分組
             var rankGroupsDict = new Dictionary<int, List<SimPokerCard>>();
@@ -160,7 +211,7 @@ namespace GenericPoker.CardSimStatAnalysis
 			
             // 2. Sort majorly for straight
             accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
-            var numberGroupList = GetNumberGroups(1, remainingCards);
+            var numberGroupList = _getNumberGroups(1, remainingCards);
             var allStraightClusters = GetAllStraightCluster(_minStraightCards, numberGroupList);
             hasRank = ArrangeStraightComps(allStraightClusters, remainingCards, accumHandStructures, results, hasRank);
           
@@ -301,26 +352,27 @@ namespace GenericPoker.CardSimStatAnalysis
 
 					//var accumHandStructuresCopy = new SimPokerHandStructure(accumHandStructures);
 
-					var accumAllRepresentedStraightCards = new List<SimPokerCard>();
-					var componentAddCount = 0;
+					//var accumAllRepresentedStraightCards = new List<SimPokerCard>();
+					//var componentAddCount = 0;
 					foreach (var straightCluster in allStraightClusters)
 					{
 						// Loop through allStraightClusters and select the first item from each sub list to form a straight
 						var straight = straightCluster.Select(subList => subList[0]).ToList();
-						accumAllRepresentedStraightCards.AddRange(straight);
+						//accumAllRepresentedStraightCards.AddRange(straight);
 						var handType = DetermineCompType(straight.Count, CompType.FlushStraight);
 						var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard>
 							{ CompRank = handType, Cards = straight };
 						accumHandStructures.AddComp(newHandCandidateData);
-						componentAddCount++;
+						//componentAddCount++;
+						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, straight,
+							new PokerCardComparer());
+					
+						RecursiveArrangeHands(newRemainCards, accumHandStructures, results);
+					
+						// need to roll back one from previous add, so that other loop member can have a clean start.
+						accumHandStructures.RemoveLast();
 					}
-					var newRemainCards = UtilFunc.GetExcludeList(remainingCards, accumAllRepresentedStraightCards,
-						new PokerCardComparer());
 					
-					RecursiveArrangeHands(newRemainCards, accumHandStructures, results);
-					
-					// need to roll back one from previous add, so that other loop member can have a clean start.
-					accumHandStructures.RemoveLast(componentAddCount);
 					
 					// if the first cluster's straight is not all flush count, it means, it has regular flush (not full long straight flush), 
 					// so set up this full flush count as flush.
@@ -332,7 +384,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard>
 							{ CompRank = handType, Cards = flushGroup };
 						accumHandStructures.AddComp(newHandCandidateData);
-						newRemainCards = UtilFunc.GetExcludeList(remainingCards, flushGroup,
+						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, flushGroup,
 							new PokerCardComparer());
 						RecursiveArrangeHands(newRemainCards, accumHandStructures, results);
 						accumHandStructures.RemoveLast();
@@ -390,9 +442,11 @@ namespace GenericPoker.CardSimStatAnalysis
 				var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard>
 						{ CompRank = handType, Cards = straight };
 				accumHandStructures.AddComp(newHandCandidateData);
+				var newRemainCards = UtilFunc.GetExcludeList(remainingCards, accumAllRepresentedStraightCards, new PokerCardComparer());
+				RecursiveArrangeHands(newRemainCards, accumHandStructures, results);
+				accumHandStructures.RemoveLast();
 	        }
-	        var newRemainCards = UtilFunc.GetExcludeList(remainingCards, accumAllRepresentedStraightCards, new PokerCardComparer());
-	        RecursiveArrangeHands(newRemainCards, accumHandStructures, results);
+	        
 	        
             return true;
         }
@@ -400,7 +454,7 @@ namespace GenericPoker.CardSimStatAnalysis
         
         private List<List<SimPokerCard>> GetKindGroups(int minCardCountInGroup, List<SimPokerCard> noneJokerCards)
         {
-	        var numberGroups = GetNumberGroups(minCardCountInGroup, noneJokerCards);
+	        var numberGroups = _getNumberGroups(minCardCountInGroup, noneJokerCards);
 	        numberGroups.Sort((x, y) => y.Count.CompareTo(x.Count));
 	        return numberGroups;
         }

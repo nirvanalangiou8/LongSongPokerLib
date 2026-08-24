@@ -64,6 +64,8 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             ("2❤️,3❤️,4❤️,5❤️,7♠️,8♠️,9♠️,10♠️", "FourCardsFlushStraight*2"),
             ("2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,3♠️,3🔶", "FourOfKind*2"),
             ("2❤️,3❤️,4❤️,5❤️,6❤️,7❤️,8❤️,9❤️", "EightCardsFlushStraight"),
+            ("A❤️,2❤️,3❤️,4❤️,5❤️,K❤️,Q❤️,J❤️", "EightCardsFlush,FiveCardsFlushStraight_ThreeCardsFlushStraight,FourCardsFlushStraight*2"),
+            ("A❤️,2♣️,3♣️,4❤️,5♠️,J❤️,K♠️,Q❤️", "FiveCardsStraight"),
             // These are complicated and challenging cases and may need to adjust the result later.
             // Temporarily below are intentionally make it test result compare failed due to we dont know if those rank order in 8 cards are still valid for 9 or 10 cards.
             // will come back to later to review this.
