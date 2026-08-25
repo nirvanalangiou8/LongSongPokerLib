@@ -53,8 +53,8 @@ namespace LongSongPokerLibCore
                 case "run_stat":
                     XRandom.Init(12345678uL);
                     
-                    SimRunAndCalcComponentStat.SimCardRunStat(500000000, 8, useParallel: true);
-                    //SimRunAndCalcComponentStat.SimCardRunStat(500000000, 9, useParallel: true);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(500000000, 8, useParallel: true);
+                    SimRunAndCalcComponentStat.SimCardRunStat(500000000, 9, useParallel: true);
                     //SimRunAndCalcComponentStat.SimCardRunStat(10000, 10);
                     break;
 
