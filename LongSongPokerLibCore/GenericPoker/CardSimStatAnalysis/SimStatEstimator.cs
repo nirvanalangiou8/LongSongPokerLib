@@ -344,7 +344,7 @@ namespace GenericPoker.CardSimStatAnalysis
 			{
 				var flushGroupForStraightFinding = flushGroup.Select(card => new List<SimPokerCard> { card }).ToList();
 
-				var stillFlushCandidate = false;
+				//var stillFlushCandidate = false;
 				var allStraightClusters = GetAllStraightCluster(_minFlushStraightCards, flushGroupForStraightFinding);
 
 				if (allStraightClusters.Count > 0)
