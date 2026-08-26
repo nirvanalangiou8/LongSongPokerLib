@@ -151,7 +151,22 @@ namespace GenericPoker.CardSimStatAnalysis
             long totalHands = sortedStats.Sum(x => x.Value);
             
             string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string targetPath = System.IO.Path.Combine(projectDirectory, "..", "..", "..", $"stats_result_{cardsPerHand}cards.csv");
+            string baseDir = System.IO.Path.Combine(projectDirectory, "..", "..", "..");
+            string dataDir;
+            if (System.IO.Directory.Exists(System.IO.Path.Combine(baseDir, "GenericPoker", "CardSimStatAnalysis", "Data")))
+            {
+                dataDir = System.IO.Path.Combine(baseDir, "GenericPoker", "CardSimStatAnalysis", "Data");
+            }
+            else if (System.IO.Directory.Exists(System.IO.Path.Combine(baseDir, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data")))
+            {
+                dataDir = System.IO.Path.Combine(baseDir, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data");
+            }
+            else
+            {
+                dataDir = System.IO.Path.Combine(baseDir, "GenericPoker", "CardSimStatAnalysis", "Data");
+                System.IO.Directory.CreateDirectory(dataDir);
+            }
+            string targetPath = System.IO.Path.Combine(dataDir, $"stats_result_{cardsPerHand}cards.csv");
             
             using (var writer = new System.IO.StreamWriter(targetPath))
             {

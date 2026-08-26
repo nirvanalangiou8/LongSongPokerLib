@@ -7,41 +7,111 @@ using GenericPoker.EightCard;
 
 namespace LongSongPokerLibCore.GenericPoker
 {
-    class InitEightCardHandSplitProbAna
+    public class InitEightCardHandSplitProbAna
     {
-        public static void Run()
+        public static (Dictionary<EightCardOverAllHandRank, double> FrontStats, Dictionary<EightCardOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null)
         {
-            Main(new string[0]);
+            return Analyze(inputPath, outputPath);
         }
 
-        static void Main(string[] args)
+        public static string ResolveInputPath(string? inputPath)
         {
-            
-            string projectRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..");
-            // inputPath is at LongSongPokerLibCore/stats_result.csv
-            string inputPath = Path.Combine(projectRoot, "LongSongPokerLibCore", "stats_result.csv");
-            
-            // Resolve outputPath to the directory where this source file resides.
-            string sourceFileDir = Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis");
-            string outputPath = Path.Combine(sourceFileDir, "front_back_stats.csv");
-
-            if (!File.Exists(inputPath))
+            if (!string.IsNullOrEmpty(inputPath))
             {
-                // Fallback to projectRoot/stats_result.csv if it's there
-                inputPath = Path.Combine(projectRoot, "stats_result.csv");
+                if (File.Exists(inputPath))
+                    return Path.GetFullPath(inputPath);
+
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string candidate = Path.GetFullPath(Path.Combine(baseDir, inputPath));
+                if (File.Exists(candidate))
+                    return candidate;
+
+                string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
+                candidate = Path.GetFullPath(Path.Combine(projectRoot, inputPath));
+                if (File.Exists(candidate))
+                    return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis", inputPath));
+                if (File.Exists(candidate))
+                    return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", inputPath));
+                if (File.Exists(candidate))
+                    return candidate;
+
+                string fileName = Path.GetFileName(inputPath);
+                candidate = Path.GetFullPath(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
+                if (File.Exists(candidate))
+                    return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
+                if (File.Exists(candidate))
+                    return candidate;
             }
 
-            if (!File.Exists(inputPath))
+            // Default fallback
+            string defaultBaseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string root = Path.GetFullPath(Path.Combine(defaultBaseDir, "..", "..", ".."));
+            string defaultCandidate = Path.GetFullPath(Path.Combine(root, "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
+            if (File.Exists(defaultCandidate))
+                return defaultCandidate;
+
+            defaultCandidate = Path.GetFullPath(Path.Combine(root, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
+            if (File.Exists(defaultCandidate))
+                return defaultCandidate;
+
+            defaultCandidate = Path.GetFullPath(Path.Combine(root, "LongSongPokerLibCore", "stats_result.csv"));
+            if (File.Exists(defaultCandidate))
+                return defaultCandidate;
+
+            defaultCandidate = Path.GetFullPath(Path.Combine(root, "stats_result.csv"));
+            if (File.Exists(defaultCandidate))
+                return defaultCandidate;
+
+            return inputPath ?? defaultCandidate;
+        }
+
+        public static string ResolveOutputPath(string? outputPath)
+        {
+            if (!string.IsNullOrEmpty(outputPath))
             {
-                Console.WriteLine($"Input file not found: {inputPath}");
-                return;
+                if (Path.IsPathRooted(outputPath))
+                    return outputPath;
+
+                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
+                string sourceFileDir = Directory.Exists(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis"))
+                    ? Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis")
+                    : Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis");
+
+                return Path.GetFullPath(Path.Combine(sourceFileDir, outputPath));
+            }
+
+            string defaultBaseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string root = Path.GetFullPath(Path.Combine(defaultBaseDir, "..", "..", ".."));
+            string sourceDir = Directory.Exists(Path.Combine(root, "GenericPoker", "CardSimStatAnalysis"))
+                ? Path.Combine(root, "GenericPoker", "CardSimStatAnalysis")
+                : Path.Combine(root, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis");
+
+            return Path.Combine(sourceDir, "front_back_stats.csv");
+        }
+
+        public static (Dictionary<EightCardOverAllHandRank, double> FrontStats, Dictionary<EightCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null)
+        {
+            string resolvedInputPath = ResolveInputPath(inputPath);
+            string resolvedOutputPath = ResolveOutputPath(outputPath);
+
+            if (!File.Exists(resolvedInputPath))
+            {
+                Console.WriteLine($"Input file not found: {resolvedInputPath}");
+                return (new Dictionary<EightCardOverAllHandRank, double>(), new Dictionary<EightCardOverAllHandRank, double>());
             }
 
             var frontHandStats = new Dictionary<EightCardOverAllHandRank, double>();
             var backHandStats = new Dictionary<EightCardOverAllHandRank, double>();
             long totalInputCount = 0;
 
-            var lines = File.ReadAllLines(inputPath);
+            var lines = File.ReadAllLines(resolvedInputPath);
             foreach (var line in lines)
             {
                 if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#") || line.StartsWith("Hand Type"))
@@ -61,20 +131,8 @@ namespace LongSongPokerLibCore.GenericPoker
                     frontHandStats[EightCardOverAllHandRank.Nothing] = frontHandStats.GetValueOrDefault(EightCardOverAllHandRank.Nothing) + count;
                     continue;
                 }
-                // change below check to if handName contains FourCardsFlushStraight 
-                if (handName.Contains("Pair*4"))
-                {
-                    Console.WriteLine("Pair*4");
-                }
-                
-                if (handName.Contains("SevenCardsFlushStraight"))
-                {
-                    Console.WriteLine("SevenCardsFlushStraight");
-                }
                
-
                 var components = ParseHandName(handName);
-                
 
                 var solutions = SplitHand(components);
                 if (solutions.Count > 0)
@@ -95,8 +153,11 @@ namespace LongSongPokerLibCore.GenericPoker
                 }
             }
 
-            SaveStats(outputPath, frontHandStats, backHandStats);
-            Console.WriteLine($"Analysis completed. Results saved to {outputPath}");
+            if (!string.IsNullOrEmpty(resolvedOutputPath))
+            {
+                SaveStats(resolvedOutputPath, frontHandStats, backHandStats);
+                Console.WriteLine($"Analysis completed. Results saved to {resolvedOutputPath}");
+            }
 
             double totalFront = frontHandStats.Values.Sum();
             double totalBack = backHandStats.Values.Sum();
@@ -116,6 +177,8 @@ namespace LongSongPokerLibCore.GenericPoker
                 if (!frontMatch) Console.WriteLine($"ERROR: Front stat count ({totalFront:F2}) does not match input count ({totalInputCount})!");
                 if (!backMatch) Console.WriteLine($"ERROR: Back stat count ({totalBack:F2}) does not match input count ({totalInputCount})!");
             }
+
+            return (frontHandStats, backHandStats);
         }
 
         static List<EightCardsCompType> ParseHandName(string handName)
@@ -235,8 +298,14 @@ namespace LongSongPokerLibCore.GenericPoker
             return EightCardOverAllHandRank.None;
         }
 
-        static void SaveStats(string path, Dictionary<EightCardOverAllHandRank, double> front, Dictionary<EightCardOverAllHandRank, double> back)
+        public static void SaveStats(string path, Dictionary<EightCardOverAllHandRank, double> front, Dictionary<EightCardOverAllHandRank, double> back)
         {
+            string? dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
             double totalFront = front.Values.Sum();
             double totalBack = back.Values.Sum();
 

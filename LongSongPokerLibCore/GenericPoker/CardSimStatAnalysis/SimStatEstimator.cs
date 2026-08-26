@@ -199,6 +199,53 @@ namespace GenericPoker.CardSimStatAnalysis
         private void RecursiveArrangeHands(List<SimPokerCard> remainingCards,
             SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results)
         {
+            var bFoundStructure = false;
+            
+            // make copy of input currentHandCandidates to prevent step one finding polute the other step initial clean currentHandCandidates.
+            var accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
+            
+            //1. Sort the number in each suit, try to find suits first and find straight by the way to see if we have flush Straight.
+            var flushGroups = _evaluateFlushGroups(_minFlushStraightCards, remainingCards);
+            bFoundStructure = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, accumHandStructures, results, bFoundStructure);
+           
+			
+            // 2. Continue to find Sort majorly for straight
+            accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
+            var numberGroupList = _getNumberGroups(1, remainingCards);
+            var allStraightClusters = GetAllStraightCluster(_minStraightCards, numberGroupList);
+            bFoundStructure = ArrangeStraightComps(allStraightClusters, remainingCards, accumHandStructures,
+	            results, bFoundStructure);
+            
+            // 3. Continue to find kinds. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
+            accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
+            var allKindGroups = GetKindGroups(2, remainingCards);
+            bFoundStructure = ArrangeKindComps(allKindGroups, remainingCards, accumHandStructures, results, bFoundStructure);
+          
+			
+            // When code comes here, it means there are nothing else worthy to record, so that put all current into Results.
+            // If bFoundStructure is true, it means those process function has already handled those RecursiveXXX for remaning.
+            // Only process if bFoundStructure is false, means notthing else to record, so formally process currentHandCandidates.
+            if (!bFoundStructure && accumHandStructures.Components.Count > 0)
+            {
+                var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
+                newCandidateComps.SetRemainingCards(remainingCards);
+                results.Add(newCandidateComps);
+            }
+            
+            // Process if all remaining cards are not touched (meaning = _allPokerCards.count), so it's nothing. 
+            if (!bFoundStructure && remainingCards.Count == _allPokerCards.Count)
+            {
+	            var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
+	            var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard>
+		            { CompRank = SimCardsCompType.Nothing, Cards = remainingCards };
+	            newCandidateComps.AddComp(newHandCandidateData);
+	            results.Add(newCandidateComps);
+            }
+        }
+        
+        private void RecursiveArrangeHands_old(List<SimPokerCard> remainingCards,
+            SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results)
+        {
             var hasRank = false;
             
             // make copy of input currentHandCandidates

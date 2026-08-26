@@ -15,7 +15,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "run_stat"; 
+            var runOption = "analyze"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -25,7 +25,21 @@ namespace LongSongPokerLibCore
             switch (runOption)
             {
                 case "analyze":
-                    InitEightCardHandSplitProbAna.Run();
+                    // Usage: Program.exe analyze [sourceDataPath] [outputPath]
+                    if (args.Length >= 3)
+                    {
+                        InitEightCardHandSplitProbAna.Run(args[1], args[2]);
+                    }
+                    else if (args.Length >= 2)
+                    {
+                        InitEightCardHandSplitProbAna.Run(args[1]);
+                    }
+                    else
+                    {
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib_Test\\LongSongPokerLibCore\\stats_result.csv");
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv");
+                        
+                    }
                     break;
 
                 case "hand":

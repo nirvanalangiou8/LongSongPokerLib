@@ -1,0 +1,23 @@
+# Total Iterations: 10000
+# Cards per Hand: 10
+Hand Type,Count,Probability
+Pair_Pair,23086,0.366125
+Pair_Pair_Pair,13858,0.219776
+Pair,10045,0.159305
+ThreeOfKind_Pair,6212,0.098517
+ThreeOfKind_Pair_Pair,3221,0.051082
+ThreeOfKind,2262,0.035873
+Pair_Pair_Pair_Pair,2016,0.031972
+,958,0.015193
+ThreeOfKind_ThreeOfKind,338,0.005360
+ThreeOfKind_Pair_Pair_Pair,300,0.004758
+FourOfKind_Pair,293,0.004647
+ThreeOfKind_ThreeOfKind_Pair,167,0.002648
+FourOfKind,162,0.002569
+FourOfKind_Pair_Pair,59,0.000936
+Pair_Pair_Pair_Pair_Pair,37,0.000587
+FourOfKind_ThreeOfKind,25,0.000396
+ThreeOfKind_ThreeOfKind_Pair_Pair,9,0.000143
+FourOfKind_ThreeOfKind_Pair,4,0.000063
+FourOfKind_Pair_Pair_Pair,2,0.000032
+ThreeOfKind_ThreeOfKind_ThreeOfKind,1,0.000016

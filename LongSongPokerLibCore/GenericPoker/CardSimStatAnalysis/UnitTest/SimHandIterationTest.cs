@@ -38,8 +38,8 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string defaultBase = Path.Combine(projectDirectory, "..", "..", "..");
             string expectedPath = Directory.Exists(Path.Combine(defaultBase, "LongSongPokerLibCore"))
-                ? Path.Combine(defaultBase, "LongSongPokerLibCore", $"stats_result_{cardsPerHand}cards.csv")
-                : Path.Combine(defaultBase, $"stats_result_{cardsPerHand}cards.csv");
+                ? Path.Combine(defaultBase, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", $"stats_result_{cardsPerHand}cards.csv")
+                : Path.Combine(defaultBase, "GenericPoker", "CardSimStatAnalysis", "Data", $"stats_result_{cardsPerHand}cards.csv");
 
             Assert.That(File.Exists(expectedPath), Is.True, $"File {expectedPath} does not exist");
 
