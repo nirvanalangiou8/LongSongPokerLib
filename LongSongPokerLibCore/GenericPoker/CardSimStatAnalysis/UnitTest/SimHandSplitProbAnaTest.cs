@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using LongSongPokerLibCore.GenericPoker;
+using GenericPoker.CardSimStatAnalysis;
 using NUnit.Framework;
 
 namespace GenericPoker.CardSimStatAnalysis.UnitTest

@@ -5,11 +5,11 @@ using System.Linq;
 using GenericPoker;
 using GenericPoker.EightCard;
 
-namespace LongSongPokerLibCore.GenericPoker
+namespace GenericPoker.CardSimStatAnalysis
 {
     public class InitEightCardHandSplitProbAna
     {
-        public static (Dictionary<EightCardOverAllHandRank, double> FrontStats, Dictionary<EightCardOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null)
+        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null)
         {
             return Analyze(inputPath, outputPath);
         }
@@ -96,7 +96,7 @@ namespace LongSongPokerLibCore.GenericPoker
             return Path.Combine(sourceDir, "front_back_stats.csv");
         }
 
-        public static (Dictionary<EightCardOverAllHandRank, double> FrontStats, Dictionary<EightCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null)
+        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null)
         {
             string resolvedInputPath = ResolveInputPath(inputPath);
             string resolvedOutputPath = ResolveOutputPath(outputPath);
@@ -104,11 +104,11 @@ namespace LongSongPokerLibCore.GenericPoker
             if (!File.Exists(resolvedInputPath))
             {
                 Console.WriteLine($"Input file not found: {resolvedInputPath}");
-                return (new Dictionary<EightCardOverAllHandRank, double>(), new Dictionary<EightCardOverAllHandRank, double>());
+                return (new Dictionary<SimCardOverAllHandRank, double>(), new Dictionary<SimCardOverAllHandRank, double>());
             }
 
-            var frontHandStats = new Dictionary<EightCardOverAllHandRank, double>();
-            var backHandStats = new Dictionary<EightCardOverAllHandRank, double>();
+            var frontHandStats = new Dictionary<SimCardOverAllHandRank, double>();
+            var backHandStats = new Dictionary<SimCardOverAllHandRank, double>();
             long totalInputCount = 0;
 
             var lines = File.ReadAllLines(resolvedInputPath);
@@ -127,11 +127,15 @@ namespace LongSongPokerLibCore.GenericPoker
 
                 if (handName == "Nothing")
                 {
-                    backHandStats[EightCardOverAllHandRank.Nothing] = backHandStats.GetValueOrDefault(EightCardOverAllHandRank.Nothing) + count;
-                    frontHandStats[EightCardOverAllHandRank.Nothing] = frontHandStats.GetValueOrDefault(EightCardOverAllHandRank.Nothing) + count;
+                    backHandStats[SimCardOverAllHandRank.Nothing] = backHandStats.GetValueOrDefault(SimCardOverAllHandRank.Nothing) + count;
+                    frontHandStats[SimCardOverAllHandRank.Nothing] = frontHandStats.GetValueOrDefault(SimCardOverAllHandRank.Nothing) + count;
                     continue;
                 }
-               
+
+                if (handName == "ThreeCardsFlushStraight_ThreeOfKind*2")
+                {
+                    Console.WriteLine($"Invalid hand name: {handName}");
+                }
                 var components = ParseHandName(handName);
 
                 var solutions = SplitHand(components);
@@ -148,8 +152,8 @@ namespace LongSongPokerLibCore.GenericPoker
                 {
                     // If no valid split found (should not happen with legal hands), fallback to None
                     // This is for sanity check
-                    frontHandStats[EightCardOverAllHandRank.None] = frontHandStats.GetValueOrDefault(EightCardOverAllHandRank.None) + count;
-                    backHandStats[EightCardOverAllHandRank.None] = backHandStats.GetValueOrDefault(EightCardOverAllHandRank.None) + count;
+                    frontHandStats[SimCardOverAllHandRank.None] = frontHandStats.GetValueOrDefault(SimCardOverAllHandRank.None) + count;
+                    backHandStats[SimCardOverAllHandRank.None] = backHandStats.GetValueOrDefault(SimCardOverAllHandRank.None) + count;
                 }
             }
 
@@ -181,9 +185,9 @@ namespace LongSongPokerLibCore.GenericPoker
             return (frontHandStats, backHandStats);
         }
 
-        static List<EightCardsCompType> ParseHandName(string handName)
+        static List<SimCardsCompType> ParseHandName(string handName)
         {
-            var comps = new List<EightCardsCompType>();
+            var comps = new List<SimCardsCompType>();
             var parts = handName.Split('_');
             foreach (var part in parts)
             {
@@ -196,7 +200,7 @@ namespace LongSongPokerLibCore.GenericPoker
                     count = int.Parse(subParts[1]);
                 }
 
-                if (Enum.TryParse<EightCardsCompType>(typeStr, out var compType))
+                if (Enum.TryParse<SimCardsCompType>(typeStr, out var compType))
                 {
                     for (int i = 0; i < count; i++)
                         comps.Add(compType);
@@ -206,29 +210,29 @@ namespace LongSongPokerLibCore.GenericPoker
             return comps.OrderByDescending(c => GetCompPower(c)).ToList();
         }
 
-        static int GetCompPower(EightCardsCompType comp)
+        static int GetCompPower(SimCardsCompType comp)
         {
             // Simple power mapping for sorting components
             // Higher rank components should be used in back hand usually.
-            if (comp == EightCardsCompType.Pair) return 1;
-            if (comp == EightCardsCompType.ThreeOfKind) return 10;
-            if (comp == EightCardsCompType.ThreeCardsFlushStraight) return 15;
-            if (comp == EightCardsCompType.FourCardsFlushStraight) return 25;
-            if (comp == EightCardsCompType.FourOfKind) return 30;
+            if (comp == SimCardsCompType.Pair) return 1;
+            if (comp == SimCardsCompType.ThreeOfKind) return 10;
+            if (comp == SimCardsCompType.ThreeCardsFlushStraight) return 15;
+            if (comp == SimCardsCompType.FourCardsFlushStraight) return 25;
+            if (comp == SimCardsCompType.FourOfKind) return 30;
             // Add more if needed from EightCardsCompType
             return (int)comp; 
         }
 
-        static List<(EightCardOverAllHandRank, EightCardOverAllHandRank)> SplitHand(List<EightCardsCompType> comps)
+        private static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<SimCardsCompType> comps)
         {
-            if (comps == null || comps.Count == 0) return new List<(EightCardOverAllHandRank, EightCardOverAllHandRank)>();
+            if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
             // 4. Input for this function is a list of comp, and you can sort the components 
             // from high comp to low to easier for you to map which valid hand based on combo components.
             comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
 
             // 1. Explore all possible legal split hand solutions based on input hand components.
-            var solutions = new List<(EightCardOverAllHandRank, EightCardOverAllHandRank)>();
+            var solutions = new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
             // 2. Use UtilFunc.GetPermutation to get all possible split component groups.
             // Always select no more half number of components count.
@@ -246,7 +250,7 @@ namespace LongSongPokerLibCore.GenericPoker
                     var backRank = MapToRank(backGroup);
 
                     // 3. check the return for MapToRank, if they are None, then it's invalid, skip this solution.
-                    if (frontRank == EightCardOverAllHandRank.None || backRank == EightCardOverAllHandRank.None) continue;
+                    if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
 
                     // 5. in the inner loop always check if front > back, if it is, then swap the front and back as valid solution.
                     if ((int)frontRank > (int)backRank)
@@ -270,35 +274,36 @@ namespace LongSongPokerLibCore.GenericPoker
             return solutions.Distinct().ToList();
         }
 
-        static EightCardOverAllHandRank MapToRank(List<EightCardsCompType> comps)
+        static SimCardOverAllHandRank MapToRank(List<SimCardsCompType>? comps)
         {
-            if (comps == null || comps.Count == 0) return EightCardOverAllHandRank.Nothing;
+            if (comps == null || comps.Count == 0) return SimCardOverAllHandRank.Nothing;
             
             // Sort high to low
             comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
 
             if (comps.Count == 1)
             {
-                if (Enum.TryParse<EightCardOverAllHandRank>(comps[0].ToString(), out var result))
+                if (Enum.TryParse<SimCardOverAllHandRank>(comps[0].ToString(), out var result))
                 {
                     return result;
                 }
             }
+            
             
             if (comps.Count == 2)
             {
                 var c1 = comps[0];
                 var c2 = comps[1];
 
-                if (c1 == EightCardsCompType.ThreeOfKind && c2 == EightCardsCompType.Pair) return EightCardOverAllHandRank.FullHouse;
-                if (c1 == EightCardsCompType.ThreeCardsFlushStraight && c2 == EightCardsCompType.Pair) return EightCardOverAllHandRank.Mansion;
-                if (c1 == EightCardsCompType.Pair && c2 == EightCardsCompType.Pair) return EightCardOverAllHandRank.TwoPairs;
+                if (c1 == SimCardsCompType.ThreeOfKind && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.FullHouse;
+                if (c1 == SimCardsCompType.ThreeCardsFlushStraight && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.Mansion;
+                if (c1 == SimCardsCompType.Pair && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.TwoPairs;
             }
 
-            return EightCardOverAllHandRank.None;
+            return SimCardOverAllHandRank.None;
         }
 
-        public static void SaveStats(string path, Dictionary<EightCardOverAllHandRank, double> front, Dictionary<EightCardOverAllHandRank, double> back)
+        public static void SaveStats(string path, Dictionary<SimCardOverAllHandRank, double> front, Dictionary<SimCardOverAllHandRank, double> back)
         {
             string? dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))

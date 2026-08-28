@@ -55,6 +55,35 @@ namespace GenericPoker.CardSimStatAnalysis
         TenOfKind,
         None,
     }
+    
+    public enum SimCardOverAllHandRank
+    {
+        None,
+        Nothing,
+        Pair,
+        TwoPairs,
+        ThreeOfKind,
+        ThreeCardsFlushStraight,
+        FiveCardsStraight,
+        FiveCardsFlush,
+        FullHouse,
+        Mansion,
+        SixCardsStraight,
+        SixCardsFlush,
+        SevenCardsStraight,
+        FourCardsFlushStraight,
+        FourOfKind,
+        FiveCardsFlushStraight,
+        EightCardsStraight,
+        SevenCardsFlush,
+        NineCardsStraight,
+        SixCardsFlushStraight,
+        EightCardsFlush,
+        SevenCardsFlushStraight,
+        EightCardsFlushStraight,
+        NineCardsFlush,
+        NineCardsFlushStraight
+    }
 
     public enum SimCardsBattleHandRank
     {

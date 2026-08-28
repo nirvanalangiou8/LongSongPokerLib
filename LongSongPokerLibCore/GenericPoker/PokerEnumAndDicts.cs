@@ -87,6 +87,9 @@ namespace GenericPoker
 		SixOfKind,
 		SevenOfKind,
 		EightOfKind,
+		NineCardsStraight,
+		NineCardsFlush,
+		NineCardsStraightFlush,
 		None,
 	}
 	
