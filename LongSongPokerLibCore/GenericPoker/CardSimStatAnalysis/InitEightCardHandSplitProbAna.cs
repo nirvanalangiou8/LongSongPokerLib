@@ -71,12 +71,20 @@ namespace GenericPoker.CardSimStatAnalysis
             return inputPath ?? defaultCandidate;
         }
 
-        public static string ResolveOutputPath(string? outputPath)
+        public static string ResolveOutputPath(string? outputPath, string? inputPath = null)
         {
             if (!string.IsNullOrEmpty(outputPath))
             {
                 if (Path.IsPathRooted(outputPath))
-                    return outputPath;
+                    return Path.GetFullPath(outputPath);
+
+                string? inputToResolve = !string.IsNullOrEmpty(inputPath) ? inputPath : null;
+                string resolvedInput = ResolveInputPath(inputToResolve);
+                string? inputDir = Path.GetDirectoryName(resolvedInput);
+                if (!string.IsNullOrEmpty(inputDir))
+                {
+                    return Path.GetFullPath(Path.Combine(inputDir, outputPath));
+                }
 
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
@@ -99,7 +107,7 @@ namespace GenericPoker.CardSimStatAnalysis
         public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null)
         {
             string resolvedInputPath = ResolveInputPath(inputPath);
-            string resolvedOutputPath = ResolveOutputPath(outputPath);
+            string resolvedOutputPath = ResolveOutputPath(outputPath, resolvedInputPath);
 
             if (!File.Exists(resolvedInputPath))
             {

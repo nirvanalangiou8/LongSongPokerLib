@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GenericPoker;
 using GenericPoker.EightCard;
-using LongSongPokerLibCore.GenericPoker;
+//using LongSongPokerLibCore.GenericPoker;
 using GenericPoker.CardSimStatAnalysis;
 
 namespace LongSongPokerLibCore
@@ -36,8 +36,10 @@ namespace LongSongPokerLibCore
                     }
                     else
                     {
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib_Test\\LongSongPokerLibCore\\stats_result.csv");
-                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv");
+                        
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "test_out_8cards.csv");
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "test_out_9cards.csv");
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv");
                         
                     }
                     break;
