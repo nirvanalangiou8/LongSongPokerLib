@@ -193,9 +193,9 @@ namespace GenericPoker.CardSimStatAnalysis
             return (frontHandStats, backHandStats);
         }
 
-        static List<SimCardsCompType> ParseHandName(string handName)
+        public static List<PokerComponents> ParseHandName(string handName)
         {
-            var comps = new List<SimCardsCompType>();
+            var comps = new List<PokerComponents>();
             var parts = handName.Split('_');
             foreach (var part in parts)
             {
@@ -211,33 +211,20 @@ namespace GenericPoker.CardSimStatAnalysis
                 if (Enum.TryParse<SimCardsCompType>(typeStr, out var compType))
                 {
                     for (int i = 0; i < count; i++)
-                        comps.Add(compType);
+                        comps.Add(new PokerComponents(compType));
                 }
             }
-            // Sort by rank descending to help balanced strategy
-            return comps.OrderByDescending(c => GetCompPower(c)).ToList();
+            // Sort by power descending to help balanced strategy
+            return comps.OrderByDescending(c => c.Power).ToList();
         }
 
-        static int GetCompPower(SimCardsCompType comp)
-        {
-            // Simple power mapping for sorting components
-            // Higher rank components should be used in back hand usually.
-            if (comp == SimCardsCompType.Pair) return 1;
-            if (comp == SimCardsCompType.ThreeOfKind) return 10;
-            if (comp == SimCardsCompType.ThreeCardsFlushStraight) return 15;
-            if (comp == SimCardsCompType.FourCardsFlushStraight) return 25;
-            if (comp == SimCardsCompType.FourOfKind) return 30;
-            // Add more if needed from EightCardsCompType
-            return (int)comp; 
-        }
-
-        private static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<SimCardsCompType> comps)
+        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<PokerComponents> comps)
         {
             if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
             // 4. Input for this function is a list of comp, and you can sort the components 
             // from high comp to low to easier for you to map which valid hand based on combo components.
-            comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
+            comps.Sort((a, b) => b.Power.CompareTo(a.Power));
 
             // 1. Explore all possible legal split hand solutions based on input hand components.
             var solutions = new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
@@ -254,10 +241,10 @@ namespace GenericPoker.CardSimStatAnalysis
                     var frontGroup = group.Selected;
                     var backGroup = group.Remaining;
 
-                    var frontRank = MapToRank(frontGroup);
-                    var backRank = MapToRank(backGroup);
+                    var frontRank = AssemblyComponent.AssembleHandRank(frontGroup);
+                    var backRank = AssemblyComponent.AssembleHandRank(backGroup);
 
-                    // 3. check the return for MapToRank, if they are None, then it's invalid, skip this solution.
+                    // 3. check the return for AssembleHandRank, if they are None, then it's invalid, skip this solution.
                     if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
 
                     // 5. in the inner loop always check if front > back, if it is, then swap the front and back as valid solution.
@@ -282,33 +269,10 @@ namespace GenericPoker.CardSimStatAnalysis
             return solutions.Distinct().ToList();
         }
 
-        static SimCardOverAllHandRank MapToRank(List<SimCardsCompType>? comps)
+        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<SimCardsCompType> compTypes)
         {
-            if (comps == null || comps.Count == 0) return SimCardOverAllHandRank.Nothing;
-            
-            // Sort high to low
-            comps.Sort((a, b) => GetCompPower(b).CompareTo(GetCompPower(a)));
-
-            if (comps.Count == 1)
-            {
-                if (Enum.TryParse<SimCardOverAllHandRank>(comps[0].ToString(), out var result))
-                {
-                    return result;
-                }
-            }
-            
-            
-            if (comps.Count == 2)
-            {
-                var c1 = comps[0];
-                var c2 = comps[1];
-
-                if (c1 == SimCardsCompType.ThreeOfKind && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.FullHouse;
-                if (c1 == SimCardsCompType.ThreeCardsFlushStraight && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.Mansion;
-                if (c1 == SimCardsCompType.Pair && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.TwoPairs;
-            }
-
-            return SimCardOverAllHandRank.None;
+            if (compTypes == null) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
+            return SplitHand(compTypes.Select(t => new PokerComponents(t)).ToList());
         }
 
         public static void SaveStats(string path, Dictionary<SimCardOverAllHandRank, double> front, Dictionary<SimCardOverAllHandRank, double> back)
