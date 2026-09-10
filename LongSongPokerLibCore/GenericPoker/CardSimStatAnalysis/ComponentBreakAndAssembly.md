@@ -79,38 +79,15 @@ The `PokerComponents` class encapsulates individual hand components with metadat
 
 ## 3. Atomic Breakdown Rules (`BreakDown`)
 
-### 3.1 Flushes
-- **9-Card Flush**:
-  - `[5-Card Flush, 4-Card Flush]`
-  - `[6-Card Flush, 3-Card Flush]`
-  - `[9-Card Flush]`
-- **8-Card Flush**:
-  - `[5-Card Flush, 3-Card Flush]`
-  - `[4-Card Flush, 4-Card Flush]`
-  - `[8-Card Flush]`
-- **7-Card Flush**:
-  - `[4-Card Flush, 3-Card Flush]`
-  - `[7-Card Flush]`
-- **6-Card Flush**:
-  - `[3-Card Flush, 3-Card Flush]`
-  - `[6-Card Flush]`
+The `PokerComponents.BreakDown()` method utilizes **mathematical integer partition generation** filtered by minimum card constraints (`_minFlushCards`, `_minFlushStraightCards`, `_minStraightCards`, `_minKindCards`):
 
-### 3.2 Straights & Flush Straights
-- **9-Card Straight**: `[5-Card Straight, 4-Card Straight]`, `[6-Card Straight, 3-Card Straight]`, `[9-Card Straight]`.
-- **8-Card Straight**: `[5-Card Straight, 3-Card Straight]`, `[4-Card Straight, 4-Card Straight]`, `[8-Card Straight]`.
-- **Flush Straights**: Decomposed analogously into valid atomic flush-straight segments (e.g., 8-card into `[5-Card FlushStraight, 3-Card FlushStraight]`, `[4-Card FlushStraight, 4-Card FlushStraight]`).
-
-### 3.3 Sets and Multiples
-- **Four-of-a-Kind (`FourOfKind`)**:
-  - `[FourOfKind]` (kept intact for four-of-a-kind hand)
-  - `[Pair, Pair]` (split into two pairs to support two-pair or front/back distributions)
-- **Three-of-a-Kind (`ThreeOfKind`)**:
-  - `[ThreeOfKind]`
-  - `[Pair]` (used when breaking down into a smaller pair plus single kicker)
-- **Six-of-a-Kind (`SixOfKind`)**:
-  - `[SixOfKind]`, `[ThreeOfKind, ThreeOfKind]`, `[FourOfKind, Pair]`, `[Pair, Pair, Pair]`
-- **Eight-of-a-Kind (`EightOfKind`)**:
-  - `[EightOfKind]`, `[FourOfKind, FourOfKind]`, `[FourOfKind, Pair, Pair]`, `[Pair, Pair, Pair, Pair]`
+1. **Integer Partitions**: For a component of $N$ cards, all integer partitions $N = p_1 + p_2 + \dots + p_k$ ($p_1 \ge p_2 \ge \dots \ge p_k \ge 1$) are mathematically generated.
+2. **Constraint Filtering**: Each part $p_i$ is tested against the corresponding component minimum threshold:
+   - **Flush Straights**: Filtered by `_minFlushStraightCards` (default: 3). E.g., for an 8-card flush straight, $(8) \to [8]$, $(7,1) \to [7]$ (1 is ineligible), $(6,2) \to [6]$ (2 is ineligible), $(5,3) \to [5,3]$, $(4,4) \to [4,4]$, $(4,3,1) \to [4,3]$, $(3,3,2) \to [3,3]$, etc.
+   - **Flushes**: Filtered by `_minFlushCards` (default: 5). E.g., for an 8-card flush, $(8) \to [8]$, $(7,1) \to [7]$, $(6,2) \to [6]$, $(5,3) \to [5]$ (3 is ineligible when min=5), etc.
+   - **Straights**: Filtered by `_minStraightCards` (default: 5).
+   - **Sets / Multiples (Kinds)**: Filtered by `_minKindCards` (default: 2). E.g., `FourOfKind` (4 cards) breaks into `[FourOfKind]`, `[ThreeOfKind]`, `[Pair, Pair]`, `[Pair]`.
+3. **Deduplication**: Partitions resulting in the same set of eligible atomic components are deduplicated while preserving canonical descending order.
 
 ---
 
@@ -173,49 +150,81 @@ public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponent
 
 ## 6. Hand Splitting Pipeline (`InitEightCardHandSplitProbAna.SplitHand`)
 
-The split algorithm partitions a parsed component list into all legal front and back hand pairs:
+The split algorithm breaks down components into atomic subsets, forms candidate combinations across groups via Cartesian product, partitions each candidate set into all legal front and back hand pairs, and removes dominated ("obviously loser") splits:
 
 ```csharp
-public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<PokerComponents> comps)
+public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+    List<PokerComponents> comps,
+    int minFlushStraightCards = -1,
+    int minFlushCards = -1,
+    int minStraightCards = -1,
+    int minKindCards = -1)
 {
     if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
-    // 1. Sort components by power descending
-    comps.Sort((a, b) => b.Power.CompareTo(a.Power));
+    // 1. Break down each component into atomic sub-components based on card constraints.
+    var breakdownSequences = comps
+        .Select(c => c.BreakDown(minFlushStraightCards, minFlushCards, minStraightCards, minKindCards))
+        .ToList();
+
+    // 2. Generate Cartesian Product of all candidate breakdowns across components.
+    var candidateCombinations = PokerComponents.CartesianProduct(breakdownSequences);
 
     var solutions = new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
-    int maxFrontCount = comps.Count / 2;
 
-    // 2. Explore permutations up to half the component count for the front hand
-    for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
+    foreach (var combination in candidateCombinations)
     {
-        var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(comps, selectCount);
-        foreach (var group in possibleGroups)
+        // Flatten the candidate components
+        var atomicComps = combination.SelectMany(c => c).ToList();
+
+        // Sort atomic components by power descending
+        atomicComps.Sort((a, b) => b.Power.CompareTo(a.Power));
+
+        // Explore all possible split component groups (up to half total count for front hand)
+        int maxFrontCount = atomicComps.Count / 2;
+
+        for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
         {
-            var frontRank = AssemblyComponent.AssembleHandRank(group.Selected);
-            var backRank = AssemblyComponent.AssembleHandRank(group.Remaining);
-
-            // 3. Skip invalid ranks
-            if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
-
-            // 4. Ensure Back >= Front; swap if inverted
-            if ((int)frontRank > (int)backRank)
+            var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(atomicComps, selectCount);
+            foreach (var group in possibleGroups)
             {
-                if ((int)frontRank >= (int)backRank)
+                var frontGroup = group.Selected;
+                var backGroup = group.Remaining;
+
+                var frontRank = AssemblyComponent.AssembleHandRank(frontGroup);
+                var backRank = AssemblyComponent.AssembleHandRank(backGroup);
+
+                // If either rank is None, it is an invalid split; skip it.
+                if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
+
+                // Ensure back rank >= front rank (swap if necessary)
+                if ((int)frontRank > (int)backRank)
                 {
-                    solutions.Add((backRank, frontRank));
+                    var swappedFrontRank = backRank;
+                    var swappedBackRank = frontRank;
+
+                    if ((int)swappedBackRank >= (int)swappedFrontRank)
+                    {
+                        solutions.Add((swappedFrontRank, swappedBackRank));
+                    }
                 }
-            }
-            else
-            {
-                solutions.Add((frontRank, backRank));
+                else
+                {
+                    solutions.Add((frontRank, backRank));
+                }
             }
         }
     }
 
-    return solutions.Distinct().ToList();
+    var uniqueSolutions = solutions.Distinct().ToList();
+    return FilterDominatedSolutions(uniqueSolutions);
 }
 ```
+
+### Dominated Solution Filtering (`FilterDominatedSolutions`)
+Eliminates dominated candidate splits. A candidate split $(F_2, B_2)$ is dominated by $(F_1, B_1)$ if $F_1 \ge F_2$ and $B_1 \ge B_2$ with at least one strict inequality.
+- For example, with an 8-card flush straight: `(Nothing, 8FS)` dominates `(Nothing, 7FS)` and `(Nothing, 6FS)`; `(3FS, 5FS)` and `(4FS, 4FS)` dominate `(3FS, 4FS)` and `(3FS, 3FS)`.
+- The filtered result retains only the Pareto-optimal split hand solutions.
 
 ---
 

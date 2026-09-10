@@ -7,7 +7,10 @@ namespace GenericPoker.CardSimStatAnalysis
     public class SimPokerHandCalculator
     {
         private List<SimPokerCard> _allPokerCards;
-        private int _minFlushStraightCards = 3;
+        static public int _minFlushStraightCards = 3;
+        static public int _minFlushCards = 5;
+        static public int _minStraightCards = 5;
+        static public int _minKindCards = 2;
         
         public static readonly int MaxPokerNumber = 20;
         

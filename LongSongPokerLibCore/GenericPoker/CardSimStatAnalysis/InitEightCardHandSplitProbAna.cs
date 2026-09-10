@@ -218,61 +218,122 @@ namespace GenericPoker.CardSimStatAnalysis
             return comps.OrderByDescending(c => c.Power).ToList();
         }
 
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<PokerComponents> comps)
+        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+            List<PokerComponents> comps,
+            int minFlushStraightCards = -1,
+            int minFlushCards = -1,
+            int minStraightCards = -1,
+            int minKindCards = -1)
         {
             if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
-            // 4. Input for this function is a list of comp, and you can sort the components 
-            // from high comp to low to easier for you to map which valid hand based on combo components.
-            comps.Sort((a, b) => b.Power.CompareTo(a.Power));
+            // 1. Break down each component into atomic sub-components based on card constraints.
+            var breakdownSequences = comps
+                .Select(c => c.BreakDown(minFlushStraightCards, minFlushCards, minStraightCards, minKindCards))
+                .ToList();
 
-            // 1. Explore all possible legal split hand solutions based on input hand components.
+            // 2. Generate Cartesian Product of all candidate breakdowns across components.
+            var candidateCombinations = PokerComponents.CartesianProduct(breakdownSequences);
+
             var solutions = new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
-            // 2. Use UtilFunc.GetPermutation to get all possible split component groups.
-            // Always select no more half number of components count.
-            int maxFrontCount = comps.Count / 2;
-
-            for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
+            foreach (var combination in candidateCombinations)
             {
-                var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(comps, selectCount);
-                foreach (var group in possibleGroups)
+                // Flatten the candidate components
+                var atomicComps = combination.SelectMany(c => c).ToList();
+
+                // Sort atomic components by power descending
+                atomicComps.Sort((a, b) => b.Power.CompareTo(a.Power));
+
+                // Explore all possible split component groups (up to half total count for front hand)
+                int maxFrontCount = atomicComps.Count / 2;
+
+                for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
                 {
-                    var frontGroup = group.Selected;
-                    var backGroup = group.Remaining;
-
-                    var frontRank = AssemblyComponent.AssembleHandRank(frontGroup);
-                    var backRank = AssemblyComponent.AssembleHandRank(backGroup);
-
-                    // 3. check the return for AssembleHandRank, if they are None, then it's invalid, skip this solution.
-                    if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
-
-                    // 5. in the inner loop always check if front > back, if it is, then swap the front and back as valid solution.
-                    if ((int)frontRank > (int)backRank)
+                    var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(atomicComps, selectCount);
+                    foreach (var group in possibleGroups)
                     {
-                        // Try swapping
-                        var swappedFrontRank = backRank;
-                        var swappedBackRank = frontRank;
+                        var frontGroup = group.Selected;
+                        var backGroup = group.Remaining;
 
-                        if ((int)swappedBackRank >= (int)swappedFrontRank)
+                        var frontRank = AssemblyComponent.AssembleHandRank(frontGroup);
+                        var backRank = AssemblyComponent.AssembleHandRank(backGroup);
+
+                        // If either rank is None, it is an invalid split; skip it.
+                        if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
+
+                        // Ensure back rank >= front rank (swap if necessary)
+                        if ((int)frontRank > (int)backRank)
                         {
-                            solutions.Add((swappedFrontRank, swappedBackRank));
+                            var swappedFrontRank = backRank;
+                            var swappedBackRank = frontRank;
+
+                            if ((int)swappedBackRank >= (int)swappedFrontRank)
+                            {
+                                solutions.Add((swappedFrontRank, swappedBackRank));
+                            }
                         }
-                    }
-                    else
-                    {
-                        solutions.Add((frontRank, backRank));
+                        else
+                        {
+                            solutions.Add((frontRank, backRank));
+                        }
                     }
                 }
             }
 
-            return solutions.Distinct().ToList();
+            var uniqueSolutions = solutions.Distinct().ToList();
+            return FilterDominatedSolutions(uniqueSolutions);
         }
 
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<SimCardsCompType> compTypes)
+        /// <summary>
+        /// Filters out candidate solutions that are dominated (obviously loser solutions).
+        /// A solution (F2, B2) is dominated by (F1, B1) if F1 >= F2 and B1 >= B2, and at least one inequality is strict.
+        /// </summary>
+        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> FilterDominatedSolutions(
+            IEnumerable<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)> solutions)
+        {
+            if (solutions == null) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
+
+            var list = solutions.Distinct().ToList();
+            var filtered = new List<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)>();
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var s1 = list[i];
+                bool isDominated = false;
+
+                for (int j = 0; j < list.Count; j++)
+                {
+                    if (i == j) continue;
+                    var s2 = list[j];
+
+                    // s2 dominates s1 if s2 is >= s1 in both front and back ranks, and strictly better in at least one rank
+                    if ((int)s2.Front >= (int)s1.Front && (int)s2.Back >= (int)s1.Back &&
+                        ((int)s2.Front > (int)s1.Front || (int)s2.Back > (int)s1.Back))
+                    {
+                        isDominated = true;
+                        break;
+                    }
+                }
+
+                if (!isDominated)
+                {
+                    filtered.Add(s1);
+                }
+            }
+
+            return filtered;
+        }
+
+        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+            List<SimCardsCompType> compTypes,
+            int minFlushStraightCards = -1,
+            int minFlushCards = -1,
+            int minStraightCards = -1,
+            int minKindCards = -1)
         {
             if (compTypes == null) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
-            return SplitHand(compTypes.Select(t => new PokerComponents(t)).ToList());
+            return SplitHand(compTypes.Select(t => new PokerComponents(t)).ToList(), minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
         }
 
         public static void SaveStats(string path, Dictionary<SimCardOverAllHandRank, double> front, Dictionary<SimCardOverAllHandRank, double> back)

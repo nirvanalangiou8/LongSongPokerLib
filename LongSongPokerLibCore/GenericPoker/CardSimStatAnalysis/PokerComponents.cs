@@ -105,203 +105,187 @@ namespace GenericPoker.CardSimStatAnalysis
             };
         }
 
-        /// <summary>
-        /// Breaks this component down into all valid candidate sets of smaller atomic components.
-        /// </summary>
-        public List<List<PokerComponents>> BreakDown()
+        public enum ComponentCategory
         {
-            var result = new List<List<PokerComponents>>();
+            Kind,
+            FlushStraight,
+            Flush,
+            Straight,
+            Other
+        }
 
-            switch (CompType)
+        public static ComponentCategory GetComponentCategory(SimCardsCompType type)
+        {
+            return type switch
             {
-                // Flushes
-                case SimCardsCompType.NineCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.NineCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush), new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush), new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush), new(SimCardsCompType.ThreeCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.EightCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush) });
-                    break;
+                SimCardsCompType.Pair or
+                SimCardsCompType.ThreeOfKind or
+                SimCardsCompType.FourOfKind or
+                SimCardsCompType.FiveOfKind or
+                SimCardsCompType.SixOfKind or
+                SimCardsCompType.SevenOfKind or
+                SimCardsCompType.EightOfKind or
+                SimCardsCompType.NineOfKind or
+                SimCardsCompType.TenOfKind => ComponentCategory.Kind,
 
-                case SimCardsCompType.EightCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.EightCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush), new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush) });
-                    break;
+                SimCardsCompType.ThreeCardsFlushStraight or
+                SimCardsCompType.FourCardsFlushStraight or
+                SimCardsCompType.FiveCardsFlushStraight or
+                SimCardsCompType.SixCardsFlushStraight or
+                SimCardsCompType.SevenCardsFlushStraight or
+                SimCardsCompType.EightCardsFlushStraight or
+                SimCardsCompType.NineCardsFlushStraight or
+                SimCardsCompType.TenCardsFlushStraight => ComponentCategory.FlushStraight,
 
-                case SimCardsCompType.SevenCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush) });
-                    break;
+                SimCardsCompType.ThreeCardsFlush or
+                SimCardsCompType.FourCardsFlush or
+                SimCardsCompType.FiveCardsFlush or
+                SimCardsCompType.SixCardsFlush or
+                SimCardsCompType.SevenCardsFlush or
+                SimCardsCompType.EightCardsFlush or
+                SimCardsCompType.NineCardsFlush or
+                SimCardsCompType.TenCardsFlush => ComponentCategory.Flush,
 
-                case SimCardsCompType.SixCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush), new(SimCardsCompType.ThreeCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush) });
-                    break;
+                SimCardsCompType.ThreeCardsStraight or
+                SimCardsCompType.FourCardStraight or
+                SimCardsCompType.FiveCardsStraight or
+                SimCardsCompType.SixCardsStraight or
+                SimCardsCompType.SevenCardsStraight or
+                SimCardsCompType.EightCardsStraight or
+                SimCardsCompType.NineCardsStraight or
+                SimCardsCompType.TenCardsStraight => ComponentCategory.Straight,
 
-                case SimCardsCompType.FiveCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush) });
-                    break;
+                _ => ComponentCategory.Other
+            };
+        }
 
-                case SimCardsCompType.FourCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlush) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush) });
-                    break;
+        public static SimCardsCompType GetComponentType(ComponentCategory category, int count)
+        {
+            return category switch
+            {
+                ComponentCategory.Kind => count switch
+                {
+                    2 => SimCardsCompType.Pair,
+                    3 => SimCardsCompType.ThreeOfKind,
+                    4 => SimCardsCompType.FourOfKind,
+                    5 => SimCardsCompType.FiveOfKind,
+                    6 => SimCardsCompType.SixOfKind,
+                    7 => SimCardsCompType.SevenOfKind,
+                    8 => SimCardsCompType.EightOfKind,
+                    9 => SimCardsCompType.NineOfKind,
+                    10 => SimCardsCompType.TenOfKind,
+                    _ => SimCardsCompType.Nothing
+                },
+                ComponentCategory.FlushStraight => count switch
+                {
+                    3 => SimCardsCompType.ThreeCardsFlushStraight,
+                    4 => SimCardsCompType.FourCardsFlushStraight,
+                    5 => SimCardsCompType.FiveCardsFlushStraight,
+                    6 => SimCardsCompType.SixCardsFlushStraight,
+                    7 => SimCardsCompType.SevenCardsFlushStraight,
+                    8 => SimCardsCompType.EightCardsFlushStraight,
+                    9 => SimCardsCompType.NineCardsFlushStraight,
+                    10 => SimCardsCompType.TenCardsFlushStraight,
+                    _ => SimCardsCompType.Nothing
+                },
+                ComponentCategory.Flush => count switch
+                {
+                    3 => SimCardsCompType.ThreeCardsFlush,
+                    4 => SimCardsCompType.FourCardsFlush,
+                    5 => SimCardsCompType.FiveCardsFlush,
+                    6 => SimCardsCompType.SixCardsFlush,
+                    7 => SimCardsCompType.SevenCardsFlush,
+                    8 => SimCardsCompType.EightCardsFlush,
+                    9 => SimCardsCompType.NineCardsFlush,
+                    10 => SimCardsCompType.TenCardsFlush,
+                    _ => SimCardsCompType.Nothing
+                },
+                ComponentCategory.Straight => count switch
+                {
+                    3 => SimCardsCompType.ThreeCardsStraight,
+                    4 => SimCardsCompType.FourCardStraight,
+                    5 => SimCardsCompType.FiveCardsStraight,
+                    6 => SimCardsCompType.SixCardsStraight,
+                    7 => SimCardsCompType.SevenCardsStraight,
+                    8 => SimCardsCompType.EightCardsStraight,
+                    9 => SimCardsCompType.NineCardsStraight,
+                    10 => SimCardsCompType.TenCardsStraight,
+                    _ => SimCardsCompType.Nothing
+                },
+                _ => SimCardsCompType.Nothing
+            };
+        }
 
-                case SimCardsCompType.ThreeCardsFlush:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlush) });
-                    break;
+        /// <summary>
+        /// Breaks this component down into all valid candidate sets of smaller atomic components using integer partition mathematics.
+        /// </summary>
+        public List<List<PokerComponents>> BreakDown(
+            int minFlushStraightCards = -1,
+            int minFlushCards = -1,
+            int minStraightCards = -1,
+            int minKindCards = -1)
+        {
+            var category = GetComponentCategory(CompType);
+            int totalCards = CardCount > 0 ? CardCount : GetDefaultCardCount(CompType);
 
-                // Flush Straights
-                case SimCardsCompType.NineCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.NineCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight), new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight), new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.EightCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight) });
-                    break;
+            if (category == ComponentCategory.Other || totalCards <= 0)
+            {
+                return new List<List<PokerComponents>> { new() { new(CompType, totalCards) } };
+            }
 
-                case SimCardsCompType.EightCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.EightCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight), new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight) });
-                    break;
+            int minCards = category switch
+            {
+                ComponentCategory.FlushStraight => minFlushStraightCards > 0 ? minFlushStraightCards : SimPokerHandCalculator._minFlushStraightCards,
+                ComponentCategory.Flush => minFlushCards > 0 ? minFlushCards : SimPokerHandCalculator._minFlushCards,
+                ComponentCategory.Straight => minStraightCards > 0 ? minStraightCards : SimPokerHandCalculator._minStraightCards,
+                ComponentCategory.Kind => minKindCards > 0 ? minKindCards : SimPokerHandCalculator._minKindCards,
+                _ => 1
+            };
 
-                case SimCardsCompType.SevenCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    break;
+            var partitions = new List<List<int>>();
+            GeneratePartitions(totalCards, totalCards, new List<int>(), partitions, minCards);
 
-                case SimCardsCompType.SixCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight), new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    break;
+            var result = new List<List<PokerComponents>>();
+            var seen = new HashSet<string>();
 
-                case SimCardsCompType.FiveCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    break;
+            foreach (var partition in partitions)
+            {
+                var validParts = partition.Where(p => p >= minCards).ToList();
+                if (validParts.Count == 0)
+                {
+                    continue;
+                }
 
-                case SimCardsCompType.FourCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardsFlushStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    break;
+                string key = string.Join(",", validParts);
+                if (seen.Add(key))
+                {
+                    var breakdownOption = validParts.Select(p => new PokerComponents(GetComponentType(category, p), p)).ToList();
+                    result.Add(breakdownOption);
+                }
+            }
 
-                case SimCardsCompType.ThreeCardsFlushStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsFlushStraight) });
-                    break;
-
-                // Straights
-                case SimCardsCompType.NineCardsStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.NineCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight), new(SimCardsCompType.FourCardStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsStraight), new(SimCardsCompType.ThreeCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight), new(SimCardsCompType.ThreeCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.EightCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight) });
-                    break;
-
-                case SimCardsCompType.EightCardsStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.EightCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight), new(SimCardsCompType.ThreeCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardStraight), new(SimCardsCompType.FourCardStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight) });
-                    break;
-
-                case SimCardsCompType.SevenCardsStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SevenCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardStraight), new(SimCardsCompType.ThreeCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight) });
-                    break;
-
-                case SimCardsCompType.SixCardsStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.SixCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsStraight), new(SimCardsCompType.ThreeCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardStraight) });
-                    break;
-
-                case SimCardsCompType.FiveCardsStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FiveCardsStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsStraight) });
-                    break;
-
-                case SimCardsCompType.FourCardStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourCardStraight) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsStraight) });
-                    break;
-
-                case SimCardsCompType.ThreeCardsStraight:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeCardsStraight) });
-                    break;
-
-                // Sets / Multiples
-                case SimCardsCompType.FourOfKind:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.FourOfKind) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.Pair), new(SimCardsCompType.Pair) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeOfKind) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.Pair) });
-                    break;
-
-                case SimCardsCompType.ThreeOfKind:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.ThreeOfKind) });
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.Pair) });
-                    break;
-
-                case SimCardsCompType.Pair:
-                    result.Add(new List<PokerComponents> { new(SimCardsCompType.Pair) });
-                    break;
-
-                default:
-                    result.Add(new List<PokerComponents> { new(CompType, CardCount) });
-                    break;
+            if (result.Count == 0)
+            {
+                result.Add(new List<PokerComponents> { new(CompType, totalCards) });
             }
 
             return result;
+        }
+
+        private static void GeneratePartitions(int remaining, int maxVal, List<int> current, List<List<int>> partitions, int minCards = 1)
+        {
+            if (remaining < minCards)
+            {
+                partitions.Add(new List<int>(current));
+                return;
+            }
+
+            for (int i = Math.Min(remaining, maxVal); i >= minCards; i--)
+            {
+                current.Add(i);
+                GeneratePartitions(remaining - i, i, current, partitions, minCards);
+                current.RemoveAt(current.Count - 1);
+            }
         }
 
         /// <summary>
