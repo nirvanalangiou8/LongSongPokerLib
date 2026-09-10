@@ -26,49 +26,60 @@ namespace GenericPoker.CardSimStatAnalysis
                 if (File.Exists(candidate))
                     return candidate;
 
-                string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
+                // Check multiple ancestor directory depths (e.g. project root, solution root)
+                DirectoryInfo? currentDir = new DirectoryInfo(baseDir);
+                while (currentDir != null)
+                {
+                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, inputPath));
+                    if (File.Exists(candidate))
+                        return candidate;
 
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis", inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
+                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "GenericPoker", "CardSimStatAnalysis", inputPath));
+                    if (File.Exists(candidate))
+                        return candidate;
 
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
+                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", inputPath));
+                    if (File.Exists(candidate))
+                        return candidate;
 
-                string fileName = Path.GetFileName(inputPath);
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
-                if (File.Exists(candidate))
-                    return candidate;
+                    string fileName = Path.GetFileName(inputPath);
+                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
+                    if (File.Exists(candidate))
+                        return candidate;
 
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
-                if (File.Exists(candidate))
-                    return candidate;
+                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
+                    if (File.Exists(candidate))
+                        return candidate;
+
+                    currentDir = currentDir.Parent;
+                }
             }
 
             // Default fallback
             string defaultBaseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string root = Path.GetFullPath(Path.Combine(defaultBaseDir, "..", "..", ".."));
-            string defaultCandidate = Path.GetFullPath(Path.Combine(root, "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
+            DirectoryInfo? fallbackDir = new DirectoryInfo(defaultBaseDir);
+            while (fallbackDir != null)
+            {
+                string defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
+                if (File.Exists(defaultCandidate))
+                    return defaultCandidate;
 
-            defaultCandidate = Path.GetFullPath(Path.Combine(root, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
+                defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
+                if (File.Exists(defaultCandidate))
+                    return defaultCandidate;
 
-            defaultCandidate = Path.GetFullPath(Path.Combine(root, "LongSongPokerLibCore", "stats_result.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
+                defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "LongSongPokerLibCore", "stats_result.csv"));
+                if (File.Exists(defaultCandidate))
+                    return defaultCandidate;
 
-            defaultCandidate = Path.GetFullPath(Path.Combine(root, "stats_result.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
+                defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "stats_result.csv"));
+                if (File.Exists(defaultCandidate))
+                    return defaultCandidate;
 
-            return inputPath ?? defaultCandidate;
+                fallbackDir = fallbackDir.Parent;
+            }
+
+            return inputPath ?? "";
         }
 
         public static string ResolveOutputPath(string? outputPath, string? inputPath = null)
