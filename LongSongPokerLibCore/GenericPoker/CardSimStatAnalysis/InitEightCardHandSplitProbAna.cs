@@ -26,49 +26,40 @@ namespace GenericPoker.CardSimStatAnalysis
                 if (File.Exists(candidate))
                     return candidate;
 
-                string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
-
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis", inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
-
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
-
+                // Check relative to current working directory and directory ancestors
                 string fileName = Path.GetFileName(inputPath);
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
-                if (File.Exists(candidate))
-                    return candidate;
+                string? currentDir = baseDir;
+                for (int i = 0; i < 6 && currentDir != null; i++)
+                {
+                    string p1 = Path.Combine(currentDir, inputPath);
+                    if (File.Exists(p1)) return Path.GetFullPath(p1);
 
-                candidate = Path.GetFullPath(Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
-                if (File.Exists(candidate))
-                    return candidate;
+                    string p2 = Path.Combine(currentDir, "Data", fileName);
+                    if (File.Exists(p2)) return Path.GetFullPath(p2);
+
+                    string p3 = Path.Combine(currentDir, "GenericPoker", "CardSimStatAnalysis", "Data", fileName);
+                    if (File.Exists(p3)) return Path.GetFullPath(p3);
+
+                    string p4 = Path.Combine(currentDir, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName);
+                    if (File.Exists(p4)) return Path.GetFullPath(p4);
+
+                    currentDir = Directory.GetParent(currentDir)?.FullName;
+                }
             }
 
             // Default fallback
             string defaultBaseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string root = Path.GetFullPath(Path.Combine(defaultBaseDir, "..", "..", ".."));
-            string defaultCandidate = Path.GetFullPath(Path.Combine(root, "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
+            string? cur = defaultBaseDir;
+            for (int i = 0; i < 6 && cur != null; i++)
+            {
+                string p = Path.Combine(cur, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv");
+                if (File.Exists(p)) return Path.GetFullPath(p);
+                p = Path.Combine(cur, "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv");
+                if (File.Exists(p)) return Path.GetFullPath(p);
+                cur = Directory.GetParent(cur)?.FullName;
+            }
 
-            defaultCandidate = Path.GetFullPath(Path.Combine(root, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
-
-            defaultCandidate = Path.GetFullPath(Path.Combine(root, "LongSongPokerLibCore", "stats_result.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
-
-            defaultCandidate = Path.GetFullPath(Path.Combine(root, "stats_result.csv"));
-            if (File.Exists(defaultCandidate))
-                return defaultCandidate;
-
-            return inputPath ?? defaultCandidate;
+            return inputPath ?? "stats_result_8cards.csv";
         }
 
         public static string ResolveOutputPath(string? outputPath, string? inputPath = null)
@@ -193,7 +184,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return (frontHandStats, backHandStats);
         }
 
-        static List<SimCardsCompType> ParseHandName(string handName)
+        public static List<SimCardsCompType> ParseHandName(string handName)
         {
             var comps = new List<SimCardsCompType>();
             var parts = handName.Split('_');
@@ -231,7 +222,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return (int)comp; 
         }
 
-        private static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<SimCardsCompType> comps)
+        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(List<SimCardsCompType> comps)
         {
             if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
