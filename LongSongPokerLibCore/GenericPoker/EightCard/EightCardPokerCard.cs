@@ -96,8 +96,8 @@ namespace GenericPoker.EightCard
 		public static EightCardPokerCard CreateInstance(string pokerCardStr, int objectID = 0, int deckID = 1)
 		{
 			// TODO , will enable below remarks later.
-			return null;
-			/*
+			
+			
 			var (numStr, suitSymbol) = SplitCard(pokerCardStr);
 			
 			var data = numStr == "A" ? new AceCard() : new EightCardPokerCard();
@@ -108,7 +108,7 @@ namespace GenericPoker.EightCard
 			var id = ((int)suit - 1) * PokerConst.MaxTotalCountInSameSuit + number;
 			data.Init(id, number, suit, objectID, deckID);
 			data._computePokerRangeGroup();
-			return data; */
+			return data; 
 		}
 		
 		public static EightCardPokerCard CreateInstance(EightCardPokerCard another)

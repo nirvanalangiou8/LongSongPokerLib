@@ -75,34 +75,7 @@ namespace GenericPoker.CardSimStatAnalysis
 
         public static int GetCompPower(SimCardsCompType comp)
         {
-            return comp switch
-            {
-                SimCardsCompType.Pair => 1,
-                SimCardsCompType.ThreeCardsStraight => 2,
-                SimCardsCompType.ThreeCardsFlush => 3,
-                SimCardsCompType.FourCardStraight => 4,
-                SimCardsCompType.FourCardsFlush => 5,
-                SimCardsCompType.ThreeOfKind => 10,
-                SimCardsCompType.ThreeCardsFlushStraight => 15,
-                SimCardsCompType.FiveCardsStraight => 18,
-                SimCardsCompType.FiveCardsFlush => 20,
-                SimCardsCompType.FourCardsFlushStraight => 25,
-                SimCardsCompType.FourOfKind => 30,
-                SimCardsCompType.SixCardsStraight => 32,
-                SimCardsCompType.SixCardsFlush => 34,
-                SimCardsCompType.FiveCardsFlushStraight => 35,
-                SimCardsCompType.SevenCardsStraight => 36,
-                SimCardsCompType.SevenCardsFlush => 38,
-                SimCardsCompType.SixCardsFlushStraight => 40,
-                SimCardsCompType.EightCardsStraight => 42,
-                SimCardsCompType.EightCardsFlush => 44,
-                SimCardsCompType.SevenCardsFlushStraight => 46,
-                SimCardsCompType.NineCardsStraight => 48,
-                SimCardsCompType.NineCardsFlush => 50,
-                SimCardsCompType.EightCardsFlushStraight => 52,
-                SimCardsCompType.NineCardsFlushStraight => 55,
-                _ => (int)comp
-            };
+            return (int)comp;
         }
 
         public enum ComponentCategory
