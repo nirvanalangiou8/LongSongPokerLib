@@ -169,7 +169,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("SevenCardsFlushStraight", "[Nothing,SevenCardsFlushStraight],[ThreeCardsFlushStraight,FourCardsFlushStraight]")]
         [TestCase("ThreeOfKind*3", "[ThreeOfKind,FullHouse]")]
         [TestCase("FourOfKind_FourCardsFlushStraight", "[FourCardsFlushStraight,FourOfKind]")]
-        [TestCase("ThreeCardsFlushStraight*3", "")]
+        [TestCase("ThreeCardsFlushStraight*3", "[ThreeCardsFlushStraight,ThreeCardsFlushStraight]")]
         [TestCase("FourOfKind*2", "[FourOfKind,FourOfKind]")]
         [TestCase("NineCardsFlush", "[Nothing,NineCardsFlush]")]
         [TestCase("SevenCardsFlushStraight_Pair", "[Pair,SevenCardsFlushStraight],[Mansion,FourCardsFlushStraight]")]

@@ -39,6 +39,7 @@ namespace GenericPoker.CardSimStatAnalysis
                 if (c1 == SimCardsCompType.ThreeOfKind && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.FullHouse;
                 if (c1 == SimCardsCompType.ThreeCardsFlushStraight && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.Mansion;
                 if (c1 == SimCardsCompType.Pair && c2 == SimCardsCompType.Pair) return SimCardOverAllHandRank.TwoPairs;
+                if (c1 == SimCardsCompType.ThreeCardsFlushStraight && c2 == SimCardsCompType.ThreeCardsFlushStraight) return SimCardOverAllHandRank.ThreeCardsFlushStraight;
 
                 return SimCardOverAllHandRank.None;
             }
