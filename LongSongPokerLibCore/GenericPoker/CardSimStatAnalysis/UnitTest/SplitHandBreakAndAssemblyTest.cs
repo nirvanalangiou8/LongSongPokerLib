@@ -9,7 +9,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
     [TestFixture]
     public class SplitHandBreakAndAssemblyTest
     {
-        private static string SplitHandToString(string handName)
+        private static string SplitHandToString(string handName, ISimCardRule? rule = null)
         {
             List<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)> solutions;
             if (handName == "Nothing")
@@ -21,8 +21,8 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             }
             else
             {
-                var components = InitEightCardHandSplitProbAna.ParseHandName(handName);
-                solutions = InitEightCardHandSplitProbAna.SplitHand(components);
+                var components = InitEightCardHandSplitProbAna.ParseHandName(handName, rule);
+                solutions = InitEightCardHandSplitProbAna.SplitHand(components, rule);
             }
 
             return string.Join(",", solutions.Select(s => $"[{s.Front},{s.Back}]"));
@@ -86,7 +86,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("EightCardsFlushStraight", "[Nothing,EightCardsFlushStraight],[ThreeCardsFlushStraight,FiveCardsFlushStraight],[FourCardsFlushStraight,FourCardsFlushStraight]")]
         public void Test8CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName);
+            string actualSolutions = SplitHandToString(handName, new EightCardSimRule());
             Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 8-card hand: {handName}");
         }
 
@@ -181,7 +181,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("NineCardsFlushStraight", "[Nothing,NineCardsFlushStraight],[ThreeCardsFlushStraight,SixCardsFlushStraight],[FourCardsFlushStraight,FiveCardsFlushStraight]")]
         public void Test9CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName);
+            string actualSolutions = SplitHandToString(handName, new NineCardSimRule());
             Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 9-card hand: {handName}");
         }
 

@@ -8,7 +8,8 @@ namespace GenericPoker.CardSimStatAnalysis
     {
         public SimCardsCompType CompType { get; set; }
         public int CardCount { get; set; }
-        public int Power => GetCompPower(CompType);
+        public int Power => (int)CompType;
+        public ISimCardRule? Rule { get; set; }
 
         public PokerComponents()
         {
@@ -16,16 +17,18 @@ namespace GenericPoker.CardSimStatAnalysis
             CardCount = 0;
         }
 
-        public PokerComponents(SimCardsCompType compType)
+        public PokerComponents(SimCardsCompType compType, ISimCardRule? rule = null)
         {
             CompType = compType;
             CardCount = GetDefaultCardCount(compType);
+            Rule = rule;
         }
 
-        public PokerComponents(SimCardsCompType compType, int cardCount)
+        public PokerComponents(SimCardsCompType compType, int cardCount, ISimCardRule? rule = null)
         {
             CompType = compType;
             CardCount = cardCount;
+            Rule = rule;
         }
 
         public static int GetDefaultCardCount(SimCardsCompType comp)
@@ -198,20 +201,34 @@ namespace GenericPoker.CardSimStatAnalysis
             int minStraightCards = -1,
             int minKindCards = -1)
         {
+            return BreakDown(null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
+        }
+
+        /// <summary>
+        /// Breaks this component down into all valid candidate sets of smaller atomic components using integer partition mathematics.
+        /// </summary>
+        public List<List<PokerComponents>> BreakDown(
+            ISimCardRule? rule,
+            int minFlushStraightCards = -1,
+            int minFlushCards = -1,
+            int minStraightCards = -1,
+            int minKindCards = -1)
+        {
             var category = GetComponentCategory(CompType);
             int totalCards = CardCount > 0 ? CardCount : GetDefaultCardCount(CompType);
+            var effectiveRule = rule ?? Rule ?? EightCardSimRule.Default;
 
             if (category == ComponentCategory.Other || totalCards <= 0)
             {
-                return new List<List<PokerComponents>> { new() { new(CompType, totalCards) } };
+                return new List<List<PokerComponents>> { new() { new(CompType, totalCards, effectiveRule) } };
             }
 
             int minCards = category switch
             {
-                ComponentCategory.FlushStraight => minFlushStraightCards > 0 ? minFlushStraightCards : SimPokerHandCalculator._minFlushStraightCards,
-                ComponentCategory.Flush => minFlushCards > 0 ? minFlushCards : SimPokerHandCalculator._minFlushCards,
-                ComponentCategory.Straight => minStraightCards > 0 ? minStraightCards : SimPokerHandCalculator._minStraightCards,
-                ComponentCategory.Kind => minKindCards > 0 ? minKindCards : SimPokerHandCalculator._minKindCards,
+                ComponentCategory.FlushStraight => minFlushStraightCards > 0 ? minFlushStraightCards : effectiveRule.MinFlushStraightCount,
+                ComponentCategory.Flush => minFlushCards > 0 ? minFlushCards : effectiveRule.MinFlushCount,
+                ComponentCategory.Straight => minStraightCards > 0 ? minStraightCards : effectiveRule.MinStraightCount,
+                ComponentCategory.Kind => minKindCards > 0 ? minKindCards : effectiveRule.MinKindCount,
                 _ => 1
             };
 
@@ -232,14 +249,14 @@ namespace GenericPoker.CardSimStatAnalysis
                 string key = string.Join(",", validParts);
                 if (seen.Add(key))
                 {
-                    var breakdownOption = validParts.Select(p => new PokerComponents(GetComponentType(category, p), p)).ToList();
+                    var breakdownOption = validParts.Select(p => new PokerComponents(GetComponentType(category, p), p, effectiveRule)).ToList();
                     result.Add(breakdownOption);
                 }
             }
 
             if (result.Count == 0)
             {
-                result.Add(new List<PokerComponents> { new(CompType, totalCards) });
+                result.Add(new List<PokerComponents> { new(CompType, totalCards, effectiveRule) });
             }
 
             return result;

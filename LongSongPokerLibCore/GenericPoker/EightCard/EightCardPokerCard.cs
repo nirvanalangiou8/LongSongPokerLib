@@ -66,13 +66,13 @@ namespace GenericPoker.EightCard
 		public static EightCardPokerCard CreateInstance(int id, int number, PokerSuit pokerSuit, int objectID = 0, int deckID = 1)
 		{
 			// TODO , will enable below remarks later.
-			return null;
-			/*
+			//return null;
+			
 			var data = number == PokerConst.AceBigNumber ? 
 				new AceCard() : new EightCardPokerCard();
 		
 			data.Init(id, number, pokerSuit, objectID, deckID);
-			return data;*/
+			return data;
 		}
 		
 		// The input string would be like 10♣️, or A♣️, since we don't know if first number has one or two chars, so

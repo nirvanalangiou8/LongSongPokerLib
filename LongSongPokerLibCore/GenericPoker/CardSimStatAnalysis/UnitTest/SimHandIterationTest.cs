@@ -31,19 +31,25 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [Test, TestCaseSource(nameof(SimHandIterationTestData))]
         public void TestSimCardRunStat(int cardsPerHand, int totalIterations, string expectedResult)
         {
-            XRandom.Init(12345678uL);
-            SimRunAndCalcComponentStat.SimCardRunStat(totalIterations, cardsPerHand, useParallel: false);
-
-            // Check that the file was written to disk
             string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string defaultBase = Path.Combine(projectDirectory, "..", "..", "..");
-            string expectedPath = Directory.Exists(Path.Combine(defaultBase, "LongSongPokerLibCore"))
-                ? Path.Combine(defaultBase, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", $"stats_result_{cardsPerHand}cards.csv")
-                : Path.Combine(defaultBase, "GenericPoker", "CardSimStatAnalysis", "Data", $"stats_result_{cardsPerHand}cards.csv");
+            string outputPath = Path.GetFullPath(Directory.Exists(Path.Combine(defaultBase, "LongSongPokerLibCore"))
+                ? Path.Combine(defaultBase, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "UnitTest", "cache", $"unittest_out_iter_result_{cardsPerHand}cards.csv")
+                : Path.Combine(defaultBase, "GenericPoker", "CardSimStatAnalysis", "UnitTest", "cache", $"unittest_out_iter_result_{cardsPerHand}cards.csv"));
 
-            Assert.That(File.Exists(expectedPath), Is.True, $"File {expectedPath} does not exist");
+            string? dir = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
 
-            string csvResult = File.ReadAllText(expectedPath);
+            XRandom.Init(12345678uL);
+            SimRunAndCalcComponentStat.SimCardRunStat(outputPath, totalIterations, cardsPerHand, useParallel: false);
+
+            // Check that the file was written to disk
+            Assert.That(File.Exists(outputPath), Is.True, $"File {outputPath} does not exist");
+
+            string csvResult = File.ReadAllText(outputPath);
 
             // Normalize newlines for cross-platform comparison
             string normalizedActual = csvResult.Replace("\r\n", "\n").TrimEnd();

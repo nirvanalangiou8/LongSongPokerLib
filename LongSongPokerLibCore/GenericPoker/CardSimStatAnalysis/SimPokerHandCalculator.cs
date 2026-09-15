@@ -7,10 +7,18 @@ namespace GenericPoker.CardSimStatAnalysis
     public class SimPokerHandCalculator
     {
         private List<SimPokerCard> _allPokerCards;
-        static public int _minFlushStraightCards = 3;
-        static public int _minFlushCards = 5;
-        static public int _minStraightCards = 5;
-        static public int _minKindCards = 2;
+        private ISimCardRule _rule;
+
+        public ISimCardRule Rule
+        {
+            get => _rule;
+            set => _rule = value;
+        }
+
+        public SimPokerHandCalculator(ISimCardRule? rule = null)
+        {
+            _rule = rule ?? EightCardSimRule.Default;
+        }
         
         public static readonly int MaxPokerNumber = 20;
         
@@ -152,13 +160,13 @@ namespace GenericPoker.CardSimStatAnalysis
             var hasRank = false;
 			
             var kindGroupList = GetNumberGroups(1, remainingCards);
-            var flushGroups = _evaluateFlushGroups(_minFlushStraightCards, remainingCards);
+            var flushGroups = _evaluateFlushGroups(_rule.MinFlushStraightCount, remainingCards);
 			
             //1. Sort the number in each suit, try to find suit first and find straight by the way to see if we have flush Straight.
             hasRank = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, currentHandCandidates, results, hasRank);
 			
             // 2. Sort majorly for straight
-            var allStraightClusters = GetAllStraightCluster(_minFlushStraightCards, kindGroupList);
+            var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
             hasRank = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates, results, hasRank);
 			
             // 3. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
@@ -208,10 +216,9 @@ namespace GenericPoker.CardSimStatAnalysis
                         var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                         RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
                         currentHandCandidates.Components.RemoveAt(currentHandCandidates.Components.Count - 1);
-                        
+                        hasRank = true;
                     }
                 }
-                hasRank = true;
             }
             return hasRank;
         }
@@ -386,7 +393,7 @@ namespace GenericPoker.CardSimStatAnalysis
         {
 			foreach (var flushGroup in flushGroups)
 			{
-				for (var desiredCount = flushGroup.Count; desiredCount >= _minFlushStraightCards; desiredCount--)
+				for (var desiredCount = flushGroup.Count; desiredCount >= _rule.MinFlushStraightCount; desiredCount--)
 				{
 					var flushStraightPermutes = new List<List<SimPokerCard>>();
 					var flushOnlyPermutes = new List<List<SimPokerCard>>();
@@ -464,7 +471,7 @@ namespace GenericPoker.CardSimStatAnalysis
                 //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
                 // Ex: we have 5 cards straights, 8,7,6,5,4, we still need to visit all sub straights, such as 3-card straight and 4 cards straight and also
                 // full set of 5 cards straights.
-                for (var targetSCount = straightCluster.Count; targetSCount >= _minFlushStraightCards; targetSCount--)
+                for (var targetSCount = straightCluster.Count; targetSCount >= _rule.MinFlushStraightCount; targetSCount--)
                 {
                     for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
                     {
@@ -481,12 +488,11 @@ namespace GenericPoker.CardSimStatAnalysis
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
                             
                             currentHandCandidates.Components.RemoveAt(currentHandCandidates.Components.Count - 1);
-                            
+                            hasRank = true;
                         }
                     }
                 }
-                // TODO , need to comment out below as it's a big bug.
-                hasRank = true;
+                
             }
             
             return hasRank;

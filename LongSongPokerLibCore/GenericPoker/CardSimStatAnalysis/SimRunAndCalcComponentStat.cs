@@ -44,8 +44,19 @@ namespace GenericPoker.CardSimStatAnalysis
 
     public static class SimRunAndCalcComponentStat
     {
-        public static void SimCardRunStat(int totalIterations = 10000, int cardsPerHand = 8, bool useParallel = false)
+        public static void SimCardRunStat(string outputPath, int totalIterations = 10000, int cardsPerHand = 8, bool useParallel = false)
         {
+            if (string.IsNullOrWhiteSpace(outputPath))
+            {
+                throw new ArgumentException("Output path must not be null or whitespace.", nameof(outputPath));
+            }
+
+            string? dir = System.IO.Path.GetDirectoryName(outputPath);
+            if (string.IsNullOrEmpty(dir) || !System.IO.Directory.Exists(dir))
+            {
+                throw new System.IO.DirectoryNotFoundException($"Directory '{dir}' does not exist for output path '{outputPath}'.");
+            }
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
             int workerCount = 10;
             //bool useParallel = false;
@@ -150,25 +161,7 @@ namespace GenericPoker.CardSimStatAnalysis
             var sortedStats = finalStats.OrderByDescending(x => x.Value).ToList();
             long totalHands = sortedStats.Sum(x => x.Value);
             
-            string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string baseDir = System.IO.Path.Combine(projectDirectory, "..", "..", "..");
-            string dataDir;
-            if (System.IO.Directory.Exists(System.IO.Path.Combine(baseDir, "GenericPoker", "CardSimStatAnalysis", "Data")))
-            {
-                dataDir = System.IO.Path.Combine(baseDir, "GenericPoker", "CardSimStatAnalysis", "Data");
-            }
-            else if (System.IO.Directory.Exists(System.IO.Path.Combine(baseDir, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data")))
-            {
-                dataDir = System.IO.Path.Combine(baseDir, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data");
-            }
-            else
-            {
-                dataDir = System.IO.Path.Combine(baseDir, "GenericPoker", "CardSimStatAnalysis", "Data");
-                System.IO.Directory.CreateDirectory(dataDir);
-            }
-            string targetPath = System.IO.Path.Combine(dataDir, $"stats_result_{cardsPerHand}cards.csv");
-            
-            using (var writer = new System.IO.StreamWriter(targetPath))
+            using (var writer = new System.IO.StreamWriter(outputPath))
             {
                 writer.WriteLine($"# Total Iterations: {totalIterations}");
                 writer.WriteLine($"# Cards per Hand: {cardsPerHand}");
@@ -182,7 +175,12 @@ namespace GenericPoker.CardSimStatAnalysis
                 }
             }
             
-            Console.WriteLine($"Results saved to {targetPath}");
+            Console.WriteLine($"Results saved to {outputPath}");
+        }
+
+        public static void SimCardRunStat(int totalIterations, int cardsPerHand, bool useParallel, string outputPath)
+        {
+            SimCardRunStat(outputPath, totalIterations, cardsPerHand, useParallel);
         }
     }
 }

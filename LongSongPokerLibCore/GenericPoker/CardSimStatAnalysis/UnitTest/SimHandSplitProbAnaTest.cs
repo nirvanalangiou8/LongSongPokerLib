@@ -19,7 +19,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                InitEightCardHandSplitProbAna.Run(SourceData8CardsPath, tempOutputPath);
+                InitEightCardHandSplitProbAna.Run(SourceData8CardsPath, tempOutputPath, new EightCardSimRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
 
@@ -52,7 +52,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                InitEightCardHandSplitProbAna.Run(SourceData9CardsPath, tempOutputPath);
+                InitEightCardHandSplitProbAna.Run(SourceData9CardsPath, tempOutputPath, new NineCardSimRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
 

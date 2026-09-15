@@ -26,7 +26,9 @@ namespace GenericPoker.EightCard
 		// the purpose of this variable.
 		public static readonly int MaxPokerNumber = 20;
 		private int _minFlushStraightCards = 3;
-
+		private int _minStraightCards = 5;
+		private int _minFlushCards = 5;
+		
 		public int MinFlushStraightCards
 		{
 			get { return _minFlushStraightCards; }
@@ -256,7 +258,7 @@ namespace GenericPoker.EightCard
 
 			// if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
 			// so that to let 3,2,1 straight become available.
-			if (kindGroupList[0][0] is AcePokerCard)
+			if (kindGroupList[0][0] is AceCard)
 			{
 				var newKindGroup = new List<EightCardPokerCard>();
 				foreach (var ace in kindGroupList[0])
@@ -348,7 +350,7 @@ namespace GenericPoker.EightCard
 			} 
 			// if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
 			// so that to let 3,2,1 straight become available.
-			if (kindGroupList[0][0] is AcePokerCard)
+			if (kindGroupList[0][0] is AceCard)
 			{
 				var newKindGroup = new List<EightCardPokerCard>();
 				foreach (var ace in kindGroupList[0])
@@ -643,7 +645,7 @@ namespace GenericPoker.EightCard
                 //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
                 // Ex: we have 5 cards straights, 8,7,6,5,4, we still need to visit all sub straights, such as 3-card straight and 4 cards straight and also
                 // full set of 5 cards straights.
-                for (var targetSCount = straightCluster.Count; targetSCount >= _minFlushStraightCards; targetSCount--)
+                for (var targetSCount = straightCluster.Count; targetSCount >= _minStraightCards; targetSCount--)
                 {
                     for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
                     {
@@ -659,10 +661,11 @@ namespace GenericPoker.EightCard
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
                             currentHandCandidates.RemoveLastComp();
+                            hasRank = true;
                         }
                     }
                 }
-                hasRank = true;
+                //hasRank = true;
             }
             
             return hasRank;

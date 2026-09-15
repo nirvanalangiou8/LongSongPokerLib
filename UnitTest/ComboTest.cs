@@ -197,6 +197,7 @@ namespace EightCardsProbTest
             Assert.That(objectStrs, Is.EqualTo(expected));
         }
         
+        
         [Test, TestCaseSource(nameof(TestCasesFourCardsStraight))]
         public void TestFourCardsStraight(string inputCardStr, List<string>  expected)
         {

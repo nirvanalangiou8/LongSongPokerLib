@@ -15,7 +15,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "analyze"; 
+            var runOption = "run_stat"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -25,21 +25,32 @@ namespace LongSongPokerLibCore
             switch (runOption)
             {
                 case "analyze":
-                    // Usage: Program.exe analyze [sourceDataPath] [outputPath]
+                    // Usage: Program.exe analyze [sourceDataPath] [outputPath] [cardCount: 8 or 9]
+                    ISimCardRule selectedRule = EightCardSimRule.Default;
+                    if (args.Length >= 4 && int.TryParse(args[3], out int cardCount))
+                    {
+                        selectedRule = cardCount == 9 ? NineCardSimRule.Default : EightCardSimRule.Default;
+                    }
+                    else if (args.Length >= 2 && (args[1].Contains("9cards") || args[1].Contains("9_cards") || args[1].Contains("9card")))
+                    {
+                        selectedRule = NineCardSimRule.Default;
+                    }
+
                     if (args.Length >= 3)
                     {
-                        InitEightCardHandSplitProbAna.Run(args[1], args[2]);
+                        InitEightCardHandSplitProbAna.Run(args[1], args[2], selectedRule);
                     }
                     else if (args.Length >= 2)
                     {
-                        InitEightCardHandSplitProbAna.Run(args[1]);
+                        InitEightCardHandSplitProbAna.Run(args[1], rule: selectedRule);
                     }
                     else
                     {
-                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\debug.csv", "debug_out.csv");
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "test_out_8cards.csv");
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "test_out_9cards.csv");
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv");
+                        // Explicitly run with 8-card or 9-card rule
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\debug.csv", "debug_out.csv", new EightCardSimRule());
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "test_out_8cards.csv", EightCardSimRule.Default);
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "test_out_9cards.csv", NineCardSimRule.Default);
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv", rule: EightCardSimRule.Default);
                         
                     }
                     break;
@@ -69,10 +80,10 @@ namespace LongSongPokerLibCore
                 case "run_stat":
                     XRandom.Init(12345678uL);
                     
-                    //SimRunAndCalcComponentStat.SimCardRunStat(500000000, 8, useParallel: true);
-                    //SimRunAndCalcComponentStat.SimCardRunStat(100000, 8, useParallel: true);
-                    //SimRunAndCalcComponentStat.SimCardRunStat(500000000, 9, useParallel: true);
-                    SimRunAndCalcComponentStat.SimCardRunStat(100000, 9, useParallel: true);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_8cards.csv", 500000000, 8, useParallel: true);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_8cards.csv", 100000, 8, useParallel: true);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_9cards.csv", 500000000, 9, useParallel: true);
+                    SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_9cards.csv", 200000, 9, useParallel: true);
                     //SimRunAndCalcComponentStat.SimCardRunStat(10000, 10);
                     break;
 
