@@ -9,10 +9,11 @@ This document explains the architecture and mechanics of breaking composite poke
 In multi-card games (e.g., 8-card or 9-card poker), hands are evaluated and split into front and back hands (where the back hand must be at least as strong as the front hand: `BackHand >= FrontHand`).
 
 To systematically evaluate all valid front/back hand arrangements:
-1. **Component Decomposition (`PokerComponents.BreakDown`)**: Large/oversized structures (such as a 9-card flush, an 8-card straight, or four-of-a-kind) are broken down into valid atomic building blocks.
-2. **Multi-Group Cartesian Product (`PokerComponents.CartesianProduct`)**: When a hand has multiple component groups (e.g., a flush group and a pair group), candidate decompositions from each group are combined across groups to yield all complete atomic hand representations.
-3. **Hand Assembly (`AssemblyComponent.AssembleHandRank`)**: Candidate subsets of atomic components are mapped and assembled into composite overall hand ranks (`SimCardOverAllHandRank`), such as `FullHouse`, `TwoPairs`, `Mansion`, or individual component ranks.
-4. **Permutation & Splitting (`InitEightCardHandSplitProbAna.SplitHand`)**: Combinations of components are distributed into front and back hands, assembled into ranks, validated (`BackHand >= FrontHand`), and deduplicated.
+1. **Rule Configuration (`ISimCardRule`)**: Rules encapsulate game-specific thresholds (minimum flush, straight, flush-straight, and kind counts) and rank assembly logic (`AssembleHandRank`), allowing 8-card, 9-card, or future poker variants to customize splitting and assembly behavior.
+2. **Component Decomposition (`PokerComponents.BreakDown`)**: Large/oversized structures (such as a 9-card flush, an 8-card straight, or four-of-a-kind) are broken down into valid atomic building blocks according to the active `ISimCardRule`.
+3. **Multi-Group Cartesian Product (`PokerComponents.CartesianProduct`)**: When a hand has multiple component groups (e.g., a flush group and a pair group), candidate decompositions from each group are combined across groups to yield all complete atomic hand representations.
+4. **Hand Assembly (`ISimCardRule.AssembleHandRank` / `AssemblyComponent.AssembleHandRank`)**: Candidate subsets of atomic components are mapped and assembled into composite overall hand ranks (`SimCardOverAllHandRank`), such as `FullHouse`, `TwoPairs`, `Mansion`, or individual component ranks according to game-specific rules.
+5. **Permutation & Splitting (`InitEightCardHandSplitProbAna.SplitHand`)**: Combinations of components are distributed into front and back hands, assembled into ranks, validated (`BackHand >= FrontHand`), and deduplicated.
 
 ```
 +-------------------------------------------------------------+
@@ -22,7 +23,7 @@ To systematically evaluate all valid front/back hand arrangements:
                                |
                                v
 +-------------------------------------------------------------+
-|             PokerComponents.BreakDown()                     |
+|             PokerComponents.BreakDown(rule)                 |
 |  - 9-Card Flush  -> [5-Card Flush + 4-Card Flush], etc.     |
 |  - FourOfKind    -> [FourOfKind], [Pair + Pair]             |
 +-------------------------------------------------------------+
@@ -41,7 +42,7 @@ To systematically evaluate all valid front/back hand arrangements:
                                |
                                v
 +-------------------------------------------------------------+
-|            AssemblyComponent.AssembleHandRank()             |
+|           rule.AssembleHandRank() (via ISimCardRule)        |
 |   Front Rank: Pair                                          |
 |   Back Rank:  FullHouse (ThreeOfKind + Pair)                |
 |   Legality:   Back >= Front (Valid)                         |
@@ -52,11 +53,12 @@ To systematically evaluate all valid front/back hand arrangements:
 
 ## 2. Component Power & Metadata (`PokerComponents`)
 
-The `PokerComponents` class encapsulates individual hand components with metadata and power rankings:
+The `PokerComponents` class encapsulates individual hand components with metadata, optional rule references, and power rankings:
 
 - `CompType`: The type of component (`SimCardsCompType`).
 - `CardCount`: Number of cards making up the component (e.g., 2 for `Pair`, 3 for `ThreeOfKind`, 5 for `FiveCardsFlush`).
 - `Power`: An integer value reflecting relative component strength, used for balanced sorting and ranking comparisons.
+- `Rule`: An optional `ISimCardRule` associated with the component, used for rule-guided breakdowns and rank evaluations.
 
 ### Component Power Table (Sample)
 
@@ -79,14 +81,14 @@ The `PokerComponents` class encapsulates individual hand components with metadat
 
 ## 3. Atomic Breakdown Rules (`BreakDown`)
 
-The `PokerComponents.BreakDown()` method utilizes **mathematical integer partition generation** filtered by minimum card constraints (`_minFlushCards`, `_minFlushStraightCards`, `_minStraightCards`, `_minKindCards`):
+The `PokerComponents.BreakDown()` method utilizes **mathematical integer partition generation** filtered by minimum card constraints encapsulated in `ISimCardRule` (`rule.MinFlushCount`, `rule.MinFlushStraightCount`, `rule.MinStraightCount`, `rule.MinKindCount`):
 
 1. **Integer Partitions**: For a component of $N$ cards, all integer partitions $N = p_1 + p_2 + \dots + p_k$ ($p_1 \ge p_2 \ge \dots \ge p_k \ge 1$) are mathematically generated.
-2. **Constraint Filtering**: Each part $p_i$ is tested against the corresponding component minimum threshold:
-   - **Flush Straights**: Filtered by `_minFlushStraightCards` (default: 3). E.g., for an 8-card flush straight, $(8) \to [8]$, $(7,1) \to [7]$ (1 is ineligible), $(6,2) \to [6]$ (2 is ineligible), $(5,3) \to [5,3]$, $(4,4) \to [4,4]$, $(4,3,1) \to [4,3]$, $(3,3,2) \to [3,3]$, etc.
-   - **Flushes**: Filtered by `_minFlushCards` (default: 5). E.g., for an 8-card flush, $(8) \to [8]$, $(7,1) \to [7]$, $(6,2) \to [6]$, $(5,3) \to [5]$ (3 is ineligible when min=5), etc.
-   - **Straights**: Filtered by `_minStraightCards` (default: 5).
-   - **Sets / Multiples (Kinds)**: Filtered by `_minKindCards` (default: 2). E.g., `FourOfKind` (4 cards) breaks into `[FourOfKind]`, `[ThreeOfKind]`, `[Pair, Pair]`, `[Pair]`.
+2. **Constraint Filtering**: Each part $p_i$ is tested against the corresponding component minimum threshold from the effective `ISimCardRule`:
+   - **Flush Straights**: Filtered by `rule.MinFlushStraightCount` (default: 3). E.g., for an 8-card flush straight, $(8) \to [8]$, $(7,1) \to [7]$ (1 is ineligible), $(6,2) \to [6]$ (2 is ineligible), $(5,3) \to [5,3]$, $(4,4) \to [4,4]$, $(4,3,1) \to [4,3]$, $(3,3,2) \to [3,3]$, etc.
+   - **Flushes**: Filtered by `rule.MinFlushCount` (default: 5). E.g., for an 8-card flush, $(8) \to [8]$, $(7,1) \to [7]$, $(6,2) \to [6]$, $(5,3) \to [5]$ (3 is ineligible when min=5), etc.
+   - **Straights**: Filtered by `rule.MinStraightCount` (default: 5).
+   - **Sets / Multiples (Kinds)**: Filtered by `rule.MinKindCount` (default: 2). E.g., `FourOfKind` (4 cards) breaks into `[FourOfKind]`, `[ThreeOfKind]`, `[Pair, Pair]`, `[Pair]`.
 3. **Deduplication**: Partitions resulting in the same set of eligible atomic components are deduplicated while preserving canonical descending order.
 
 ---
@@ -124,12 +126,42 @@ Flattening each combination produces a complete candidate component list for the
 
 ---
 
-## 5. Hand Rank Assembly (`AssemblyComponent.AssembleHandRank`)
+## 5. Rule Hierarchy & Hand Rank Assembly (`ISimCardRule`)
 
-`AssemblyComponent.AssembleHandRank` evaluates a list of atomic components and maps them to an overall hand rank (`SimCardOverAllHandRank`):
+Rank assembly logic and threshold configuration are decoupled into a polymorphic rule hierarchy (`ISimCardRule`), enabling game-specific customization for 8-card, 9-card, or future variations.
+
+```
+                  +-------------------+
+                  |   ISimCardRule    |
+                  +-------------------+
+                  | + MinStraight     |
+                  | + MinFlush        |
+                  | + MinFlushStraight|
+                  | + MinKind         |
+                  | + AssembleHandRank|
+                  +-------------------+
+                            ^
+                            |
+                  +-------------------+
+                  |  BaseSimCardRule  |
+                  +-------------------+
+                     ^             ^
+                     |             |
+        +--------------------+     +--------------------+
+        |  EightCardSimRule  |     |  NineCardSimRule   |
+        +--------------------+     +--------------------+
+```
+
+### Rule Interfaces and Implementations:
+- **`ISimCardRule`**: Interface exposing minimum card counts and `AssembleHandRank` overloads.
+- **`BaseSimCardRule`**: Default base implementation providing common hand assembly rules (e.g. matching `ThreeOfKind + Pair` into `FullHouse`, `ThreeCardsFlushStraight + Pair` into `Mansion`, `Pair + Pair` into `TwoPairs`).
+- **`EightCardSimRule` / `NineCardSimRule`**: Concrete game-specific rule classes inheriting from `BaseSimCardRule`. Allows per-game customization or override of hand assembly strategies and card minimum thresholds.
+
+### Assembly Mapping via `AssemblyComponent`:
+`AssemblyComponent.AssembleHandRank` delegates to the injected or default `ISimCardRule`:
 
 ```csharp
-public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components)
+public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components, ISimCardRule? rule = null)
 ```
 
 ### Assembly Mapping Rules:
@@ -150,11 +182,12 @@ public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponent
 
 ## 6. Hand Splitting Pipeline (`InitEightCardHandSplitProbAna.SplitHand`)
 
-The split algorithm breaks down components into atomic subsets, forms candidate combinations across groups via Cartesian product, partitions each candidate set into all legal front and back hand pairs, and removes dominated ("obviously loser") splits:
+The split algorithm breaks down components into atomic subsets according to the provided `ISimCardRule`, forms candidate combinations across groups via Cartesian product, partitions each candidate set into all legal front and back hand pairs, and removes dominated ("obviously loser") splits:
 
 ```csharp
 public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
     List<PokerComponents> comps,
+    ISimCardRule? rule = null,
     int minFlushStraightCards = -1,
     int minFlushCards = -1,
     int minStraightCards = -1,
@@ -162,9 +195,11 @@ public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
 {
     if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
+    var effectiveRule = rule ?? comps.FirstOrDefault(c => c.Rule != null)?.Rule ?? EightCardSimRule.Default;
+
     // 1. Break down each component into atomic sub-components based on card constraints.
     var breakdownSequences = comps
-        .Select(c => c.BreakDown(minFlushStraightCards, minFlushCards, minStraightCards, minKindCards))
+        .Select(c => c.BreakDown(effectiveRule, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards))
         .ToList();
 
     // 2. Generate Cartesian Product of all candidate breakdowns across components.
@@ -191,8 +226,8 @@ public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
                 var frontGroup = group.Selected;
                 var backGroup = group.Remaining;
 
-                var frontRank = AssemblyComponent.AssembleHandRank(frontGroup);
-                var backRank = AssemblyComponent.AssembleHandRank(backGroup);
+                var frontRank = effectiveRule.AssembleHandRank(frontGroup);
+                var backRank = effectiveRule.AssembleHandRank(backGroup);
 
                 // If either rank is None, it is an invalid split; skip it.
                 if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
@@ -243,7 +278,7 @@ Input: `[ThreeOfKind, Pair]`
 
 ### Example 2: Decomposing a 9-Card Flush
 ```csharp
-var nineFlush = new PokerComponents(SimCardsCompType.NineCardsFlush);
+var nineFlush = new PokerComponents(SimCardsCompType.NineCardsFlush, NineCardSimRule.Default);
 var breakdowns = nineFlush.BreakDown();
 ```
 Output candidate decompositions:
@@ -261,12 +296,14 @@ When distributed into front and back hands, the `[FiveCardsFlush, FourCardsFlush
 ## 8. Verification & Tests
 
 The implementation is verified by test suites in:
-- `UnitTest/PokerComponentBreakingAndAssemblyTest.cs`:
+- `UnitTest/SimCardRuleTest.cs`:
+  - Validates `ISimCardRule` defaults, minimum threshold properties, custom rule overrides, and hand assembly logic.
+- `UnitTest/SplitHandBreakAndAssemblyTest.cs`:
   - `TestFlushBreakdown`: Tests 9-card flush decomposition into 5-card + 4-card flushes.
   - `TestMultiplesBreakdown`: Tests four-of-a-kind decomposition into pair + pair.
   - `TestCartesianProductOfBreakdowns`: Tests multi-group cross-product decomposition.
   - `TestAssembleHandRank`: Tests single and composite hand assembly (`FullHouse`, `Mansion`, `TwoPairs`).
-  - `TestSplitHandIntegration`: Tests complete end-to-end split generation.
+  - `TestSplitHandIntegration`: Tests complete end-to-end split generation with rule injection.
 - `UnitTest/SimHandSplitProbAnaTest.cs`:
   - `TestEightCardHandSplitProbAna`: Validates 8-card probability analysis and split outputs against historical baseline.
   - `TestNineCardHandSplitProbAna`: Validates 9-card probability analysis and split outputs against historical baseline.
