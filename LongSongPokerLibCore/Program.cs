@@ -16,7 +16,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "game"; 
+            var runOption = "analyze"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -48,10 +48,8 @@ namespace LongSongPokerLibCore
                     else
                     {
                         // Explicitly run with 8-card or 9-card rule
-                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\debug.csv", "debug_out.csv", new EightCardRule());
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "test_out_8cards.csv", EightCardRule.Default);
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "test_out_9cards.csv", NineCardRule.Default);
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv", rule: EightCardRule.Default);
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "twohands_prob_8cards.csv", new EightCardRule());
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "twohands_prob_9cards.csv", new NineCardRule());
                         
                     }
                     break;
@@ -91,7 +89,7 @@ namespace LongSongPokerLibCore
                 case "debug":
                     DebugSimHandType();
                     break;
-
+                
                 default:
                     Console.WriteLine("Unknown runOption. Available options: analyze, hand, game, split, test, debug");
                     break;
