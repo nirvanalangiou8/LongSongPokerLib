@@ -1,24 +1,22 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using GenericPoker;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
-    public class SimConsolePlayer : ConsolePlayer<SimPokerCard>
+    public class SimConsolePlayer : ConsolePlayer
     {
-        //private SimPokerHandCalculator _pokerHandCalculator;
         private SimStatEstimator _pokerHandCalculator;
 
         public SimConsolePlayer(string playerName) : base(playerName)
         {
-            //_pokerHandCalculator = new SimPokerHandCalculator();
             _pokerHandCalculator = new SimStatEstimator();
         }
 
         public List<SimPokerHandStructure> ProcessSimHands()
         {
-            _pokerHandCalculator.SetupCards(_pokerCards);
-           
+            var simCards = _pokerCards.Select(c => c as SimPokerCard ?? SimPokerCard.CreateInstance(c.CardStr)).ToList();
+            _pokerHandCalculator.SetupCards(simCards);
             return _pokerHandCalculator.TestSimCards();
         }
 
@@ -28,7 +26,7 @@ namespace GenericPoker.CardSimStatAnalysis
         }
     }
 
-    public class SimCardPlayerFactory : EightCard.IPlayerFactory<SimConsolePlayer>
+    public class SimCardPlayerFactory : IPlayerFactory<SimConsolePlayer>
     {
         public SimConsolePlayer Create(string name)
         {

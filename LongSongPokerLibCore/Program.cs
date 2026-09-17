@@ -1,9 +1,10 @@
-﻿using System.Collections.Concurrent;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GenericPoker;
 using GenericPoker.EightCard;
-//using LongSongPokerLibCore.GenericPoker;
 using GenericPoker.CardSimStatAnalysis;
 
 namespace LongSongPokerLibCore
@@ -15,7 +16,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "run_stat"; 
+            var runOption = "game"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -26,14 +27,14 @@ namespace LongSongPokerLibCore
             {
                 case "analyze":
                     // Usage: Program.exe analyze [sourceDataPath] [outputPath] [cardCount: 8 or 9]
-                    ISimCardRule selectedRule = EightCardSimRule.Default;
+                    ICardRule selectedRule = EightCardRule.Default;
                     if (args.Length >= 4 && int.TryParse(args[3], out int cardCount))
                     {
-                        selectedRule = cardCount == 9 ? NineCardSimRule.Default : EightCardSimRule.Default;
+                        selectedRule = cardCount == 9 ? NineCardRule.Default : EightCardRule.Default;
                     }
                     else if (args.Length >= 2 && (args[1].Contains("9cards") || args[1].Contains("9_cards") || args[1].Contains("9card")))
                     {
-                        selectedRule = NineCardSimRule.Default;
+                        selectedRule = NineCardRule.Default;
                     }
 
                     if (args.Length >= 3)
@@ -47,10 +48,10 @@ namespace LongSongPokerLibCore
                     else
                     {
                         // Explicitly run with 8-card or 9-card rule
-                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\debug.csv", "debug_out.csv", new EightCardSimRule());
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "test_out_8cards.csv", EightCardSimRule.Default);
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "test_out_9cards.csv", NineCardSimRule.Default);
-                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv", rule: EightCardSimRule.Default);
+                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\debug.csv", "debug_out.csv", new EightCardRule());
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "test_out_8cards.csv", EightCardRule.Default);
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "test_out_9cards.csv", NineCardRule.Default);
+                        //InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards_for_unittest.csv", rule: EightCardRule.Default);
                         
                     }
                     break;
@@ -111,42 +112,17 @@ namespace LongSongPokerLibCore
             Console.WriteLine("=== Continuous 8-Card Game ===\n");
             Console.WriteLine("(每局結束後按任意鍵繼續，按 Q 或 Esc 離開)\n");
 
-            // 1. 建立一副 52 張的標準牌 (4 花色 x 13 點數) 的字串表示。
-            string[] numberStrs = { "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" };
-            string[] suitSymbols = { "♣️", "🔶", "❤️", "♠️" };
+            var gameManager = new ConsolePlayManager(EightCardRule.Default, cardsPerPlayer: 8);
+            var player = new ConsolePlayer("Player1", EightCardRule.Default);
+            gameManager.AddPlayer(player);
 
-            var fullDeck = new System.Collections.Generic.List<string>();
-            foreach (var suit in suitSymbols)
-                foreach (var num in numberStrs)
-                    fullDeck.Add(num + suit);
-
-            // 牌堆 (尚未發出的牌) 與棄牌堆 (已用過的牌)。
-            var deck = new System.Collections.Generic.List<string>(fullDeck);
-            var discard = new System.Collections.Generic.List<string>();
-            XRandom.Instance.Shuffle(deck);
-
-            int round = 0;
             while (true)
             {
-                round++;
+                gameManager.StartNewRound();
 
-                // 若牌堆剩餘不足 8 張，將棄牌全部洗回牌堆。
-                if (deck.Count < 8)
-                {
-                    Console.WriteLine("牌堆不足 8 張，將棄牌重新洗牌補回牌堆... (reshuffle)\n");
-                    deck.AddRange(discard);
-                    discard.Clear();
-                    XRandom.Instance.Shuffle(deck);
-                }
-
-                // 從牌堆頂端發出 8 張，其餘留在牌堆。
-                var dealtCards = deck.GetRange(0, 8);
-                deck.RemoveRange(0, 8);
-                discard.AddRange(dealtCards);
-
-                Console.WriteLine($"------ 第 {round} 局 (Round {round}) ------");
-                PlayOneHand(string.Join(",", dealtCards));
-                Console.WriteLine($"(牌堆剩餘 {deck.Count} 張，棄牌堆 {discard.Count} 張)");
+                Console.WriteLine($"------ 第 {gameManager.CurrentRound} 局 (Round {gameManager.CurrentRound}) ------");
+                PlayOneHand(string.Join(",", player.Cards.Select(c => c.CardStr)));
+                Console.WriteLine($"(牌堆剩餘 {gameManager.Dealer.RemainingCards.Count} 張，棄牌堆 {gameManager.Dealer.DiscardCards.Count} 張)");
                 Console.WriteLine("\n按任意鍵繼續下一局 (Hit any key to continue, Q/Esc to quit)...");
 
                 var key = Console.ReadKey(true);
@@ -174,51 +150,8 @@ namespace LongSongPokerLibCore
 
             try
             {
-                // 1. 解析 8 張牌。
-                var cards = inputCardStr.Split(',')
-                    .Select(s => EightCardPokerCard.CreateInstance(s.Trim()))
-                    .ToList();
-
-                if (cards.Count != 8)
-                {
-                    Console.WriteLine("輸入牌張數不是 8，略過。");
-                    return;
-                }
-
-                EightCardSubBattleHand bestFrontHand = null, bestBackHand = null;
-                double bestFront = 0, bestBack = 0, bestTotal = double.NegativeInfinity;
-
-                // 2. 窮舉所有 C(8,3) 的拆法：選 3 張當前墩，其餘 5 張當後墩。
-                foreach (var frontIdx in Combinations(cards.Count, 3))
-                {
-                    var frontCards = frontIdx.Select(i => cards[i]).ToList();
-                    var backCards = Enumerable.Range(0, cards.Count)
-                        .Where(i => !frontIdx.Contains(i))
-                        .Select(i => cards[i])
-                        .ToList();
-
-                    // 各墩各自評估出最強牌型 (含散牌)。
-                    var frontHand = EvaluateBestSingleHand(frontCards, BattleHandEnum.FirstHand);
-                    var backHand = EvaluateBestSingleHand(backCards, BattleHandEnum.SecondHand);
-
-                    // 規則限制：後墩不得弱於前墩 (否則為相公/犯規)。
-                    if (backHand.CompareTo(frontHand) < 0) continue;
-
-                    double front = WinRateStrategy.GetSubHandWinRate(frontHand);
-                    double back = WinRateStrategy.GetSubHandWinRate(backHand);
-                    double total = front + back;
-
-                    if (total > bestTotal)
-                    {
-                        bestTotal = total;
-                        bestFront = front;
-                        bestBack = back;
-                        bestFrontHand = frontHand;
-                        bestBackHand = backHand;
-                    }
-                }
-
-                if (bestFrontHand == null || bestBackHand == null)
+                var result = ConsolePlayer.EvaluateBestSplitHand(inputCardStr);
+                if (result == null)
                 {
                     Console.WriteLine("無法排出有效的前/後墩。");
                     return;
@@ -228,16 +161,16 @@ namespace LongSongPokerLibCore
                 Console.WriteLine("最佳排列 (窮舉所有拆法，取 前墩+後墩勝率總和最大)：\n");
 
                 Console.WriteLine("--- 前墩 (Front Hand) ---");
-                Console.WriteLine($"  牌型 (Rank): {bestFrontHand.BattleHandRank}");
-                Console.WriteLine($"  牌組 (Cards): {bestFrontHand.GetHandString()}");
-                Console.WriteLine($"  勝率 (Win Rate): {bestFront:P4}\n");
+                Console.WriteLine($"  牌型 (Rank): {result.FrontHand.BattleHandRank}");
+                Console.WriteLine($"  牌組 (Cards): {result.FrontHand.GetHandString()}");
+                Console.WriteLine($"  勝率 (Win Rate): {result.FrontWinRate:P4}\n");
 
                 Console.WriteLine("--- 後墩 (Back Hand) ---");
-                Console.WriteLine($"  牌型 (Rank): {bestBackHand.BattleHandRank}");
-                Console.WriteLine($"  牌組 (Cards): {bestBackHand.GetHandString()}");
-                Console.WriteLine($"  勝率 (Win Rate): {bestBack:P4}\n");
+                Console.WriteLine($"  牌型 (Rank): {result.BackHand.BattleHandRank}");
+                Console.WriteLine($"  牌組 (Cards): {result.BackHand.GetHandString()}");
+                Console.WriteLine($"  勝率 (Win Rate): {result.BackWinRate:P4}\n");
 
-                Console.WriteLine($"加權總分 (前墩勝率 + 後墩勝率): {bestTotal:F4}");
+                Console.WriteLine($"加權總分 (前墩勝率 + 後墩勝率): {result.TotalScore:F4}");
             }
             catch (Exception ex)
             {
@@ -245,98 +178,6 @@ namespace LongSongPokerLibCore
             }
 
             Console.WriteLine("\n==========================");
-        }
-
-        /// <summary>
-        /// 將一組牌 (3 張或 5 張) 評估成「單一墩」的最強牌型 (EightCardSubBattleHand)，
-        /// 散牌 (kicker) 會依點數由大到小補入。利用 PokerHandCalculator 的拆解結果取得正確牌型，
-        /// 並在所有拆解中挑出最強者；若都不成牌，退回純散牌 (Nothing)。
-        /// </summary>
-        static EightCardSubBattleHand EvaluateBestSingleHand(
-            System.Collections.Generic.List<EightCardPokerCard> cards, BattleHandEnum which)
-        {
-            // 基準：純散牌 (Nothing)，全部當作散牌。
-            var best = BuildSingleHand(which, EightCardsBattleHandRank.Nothing,
-                new System.Collections.Generic.List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>(),
-                cards);
-
-            var calc = new PokerHandCalculator();
-            calc.SetupCards(cards);
-            calc.MinFlushStraightCards = 3;
-
-            var structures = calc.Test8Cards();
-
-            foreach (var st in structures)
-            {
-                var comps = st.Components;
-                if (comps.Count == 0) continue;
-
-                EightCardsBattleHandRank rank;
-                var usedComps = new System.Collections.Generic.List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
-
-                // 嘗試以前兩個 component 組成複合牌型 (例如 葫蘆 = 三條 + 一對，兩對 = 一對 + 一對)。
-                if (comps.Count >= 2 &&
-                    (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
-                         (comps[0].CompRank, comps[1].CompRank), out rank) ||
-                     PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
-                         (comps[1].CompRank, comps[0].CompRank), out rank)))
-                {
-                    usedComps.Add(comps[0]);
-                    usedComps.Add(comps[1]);
-                }
-                else
-                {
-                    rank = PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank);
-                    usedComps.Add(comps[0]);
-                }
-
-                // 該牌型必須對此墩 (前墩/後墩) 合法，否則略過。
-                if (!EightCardSubBattleHand.EightCardsBattleHandPowerDict.ContainsKey((which, rank)))
-                    continue;
-
-                var usedSet = new System.Collections.Generic.HashSet<EightCardPokerCard>(
-                    usedComps.SelectMany(c => c.Cards));
-                var leftovers = cards.Where(c => !usedSet.Contains(c)).ToList();
-
-                var cand = BuildSingleHand(which, rank, usedComps, leftovers);
-                if (cand.CompareTo(best) > 0) best = cand;
-            }
-
-            return best;
-        }
-
-        /// <summary>
-        /// 以指定牌型與 component 建立一個墩，並把散牌依點數由大到小補入 (受該墩容量限制：前墩 3、後墩 5)。
-        /// </summary>
-        static EightCardSubBattleHand BuildSingleHand(BattleHandEnum which, EightCardsBattleHandRank rank,
-            System.Collections.Generic.List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps,
-            System.Collections.Generic.List<EightCardPokerCard> kickers)
-        {
-            var hand = new EightCardSubBattleHand(which, rank, comps.ToArray());
-            var sorted = kickers.OrderByDescending(c => c.PokerCardPower).ToList();
-            hand.AddMinorCards(sorted);
-            return hand;
-        }
-
-        /// <summary>
-        /// 產生「從 n 個元素中取 k 個」的所有索引組合 (字典序)。
-        /// </summary>
-        static System.Collections.Generic.IEnumerable<int[]> Combinations(int n, int k)
-        {
-            var idx = new int[k];
-            for (int i = 0; i < k; i++) idx[i] = i;
-
-            while (true)
-            {
-                yield return (int[])idx.Clone();
-
-                int pos = k - 1;
-                while (pos >= 0 && idx[pos] == n - k + pos) pos--;
-                if (pos < 0) break;
-
-                idx[pos]++;
-                for (int i = pos + 1; i < k; i++) idx[i] = idx[i - 1] + 1;
-            }
         }
 
         public static class PokerEvaluator
@@ -502,7 +343,6 @@ namespace LongSongPokerLibCore
             }
         }
 
-
         static void DebugSimHandType()
         {
             var inputCardStr = "2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,4❤️,4♣️";
@@ -524,14 +364,13 @@ namespace LongSongPokerLibCore
         {
             Console.WriteLine("Hello World!");
             
-            //var inputCardStr = "J♣️,J🔶,3♣️,5♣️,6♣️,A♣️,A❤️,A♠️";
+            //var inputCardStr = "J♣️,J🔶,3♣️,5��️,6♣️,A♣️,A❤️,A♠️";
             //var inputCardStr = "J♣️,J🔶,3♣️,6♣️,6❤️,A♣️,A❤️,A♠️";
             //var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3♣️,2♣️,A♣️";
             var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♣️,2♣️"; // test for four pairs.
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
             
             var handRes = pokerHand.Test8Cards();
-            
             
             pokerHand.MinFlushStraightCards = 3;
             var resHand = pokerHand.Test8CardsTwoHandsDeploy();

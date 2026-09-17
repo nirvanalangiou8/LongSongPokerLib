@@ -1,45 +1,25 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GenericPoker;
 
 namespace GenericPoker.EightCard
 {
-    public interface IPlayerFactory<out TPlayer>
-    {
-        TPlayer Create(string name);
-    }
-    
-
-    
-    public class EightCardConsolePlayer : ConsolePlayer<EightCardPokerCard> 
+    public class EightCardConsolePlayer : ConsolePlayer
     {
         private PokerHandCalculator _pokerHandCalculator;
-        
-        public EightCardConsolePlayer(string playerName) : base(playerName)
-        {
-            _pokerHandCalculator = new PokerHandCalculator();
-        }
 
-        
-        
-/*
-        public EightCardConsolePlayer() : base()
+        public EightCardConsolePlayer(string playerName) : base(playerName, EightCardRule.Default)
         {
             _pokerHandCalculator = new PokerHandCalculator();
         }
-*/
-        
 
         public override List<PokerHandStructure> ProcessHands()
         {
-            var castedList = _pokerCards.Cast<EightCardPokerCard>().ToList();
+            var castedList = _pokerCards.Select(c => c as EightCardPokerCard ?? EightCardPokerCard.CreateInstance(c.CardStr)).ToList();
             _pokerHandCalculator.SetupCards(castedList);
-            // TBR
-            //_pokerHandCalculator.SetupCards(_pokerCards);
             return _pokerHandCalculator.Test8Cards();
         }
-
     }
 
     public class EightCardPlayerFactory : IPlayerFactory<EightCardConsolePlayer>
@@ -49,5 +29,4 @@ namespace GenericPoker.EightCard
             return new EightCardConsolePlayer(name);
         }
     }
-
 }

@@ -59,12 +59,7 @@ namespace GenericPoker.EightCard
 	
 	public class RuleTableStrategy : IBattleHandArrangeStrategy
 	{
-		/*
-		private LookupTable()
-		{
-			
-		}*/
-		
+
 		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps)
 		{

@@ -33,8 +33,8 @@ namespace SevenCardsProbTest
         [Test]
         public void TestSevenCardDealer()
         {
-            var dealer = new ConsoleCardDealer<SevenCardPokerCard>(1, false);
-            var player = new ConsolePlayer<SevenCardPokerCard>("TestPlayer");
+            var dealer = new ConsoleCardDealer(1, false, cardFactory: (id, num, suit, objId, deckId) => SevenCardPokerCard.CreateInstance(id, num, suit, objId, deckId));
+            var player = new ConsolePlayer("TestPlayer");
             dealer.DealCards(player, 7);
             
             Assert.That(player.Cards.Count, Is.EqualTo(7));

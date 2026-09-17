@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using GenericPoker;
+
 namespace GenericPoker.CardSimStatAnalysis
 {
     public class PokerComponents : IComparable<PokerComponents>, IEquatable<PokerComponents>
@@ -9,7 +14,7 @@ namespace GenericPoker.CardSimStatAnalysis
         public SimCardsCompType CompType { get; set; }
         public int CardCount { get; set; }
         public int Power => (int)CompType;
-        public ISimCardRule? Rule { get; set; }
+        public ICardRule? Rule { get; set; }
 
         public PokerComponents()
         {
@@ -17,14 +22,14 @@ namespace GenericPoker.CardSimStatAnalysis
             CardCount = 0;
         }
 
-        public PokerComponents(SimCardsCompType compType, ISimCardRule? rule = null)
+        public PokerComponents(SimCardsCompType compType, ICardRule? rule = null)
         {
             CompType = compType;
             CardCount = GetDefaultCardCount(compType);
             Rule = rule;
         }
 
-        public PokerComponents(SimCardsCompType compType, int cardCount, ISimCardRule? rule = null)
+        public PokerComponents(SimCardsCompType compType, int cardCount, ICardRule? rule = null)
         {
             CompType = compType;
             CardCount = cardCount;
@@ -208,7 +213,7 @@ namespace GenericPoker.CardSimStatAnalysis
         /// Breaks this component down into all valid candidate sets of smaller atomic components using integer partition mathematics.
         /// </summary>
         public List<List<PokerComponents>> BreakDown(
-            ISimCardRule? rule,
+            ICardRule? rule,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
             int minStraightCards = -1,
@@ -216,7 +221,7 @@ namespace GenericPoker.CardSimStatAnalysis
         {
             var category = GetComponentCategory(CompType);
             int totalCards = CardCount > 0 ? CardCount : GetDefaultCardCount(CompType);
-            var effectiveRule = rule ?? Rule ?? EightCardSimRule.Default;
+            var effectiveRule = rule ?? Rule ?? EightCardRule.Default;
 
             if (category == ComponentCategory.Other || totalCards <= 0)
             {

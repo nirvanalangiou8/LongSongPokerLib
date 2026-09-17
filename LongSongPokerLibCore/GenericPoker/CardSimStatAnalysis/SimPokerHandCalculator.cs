@@ -7,17 +7,17 @@ namespace GenericPoker.CardSimStatAnalysis
     public class SimPokerHandCalculator
     {
         private List<SimPokerCard> _allPokerCards;
-        private ISimCardRule _rule;
+        private ICardRule _rule;
 
-        public ISimCardRule Rule
+        public ICardRule Rule
         {
             get => _rule;
             set => _rule = value;
         }
 
-        public SimPokerHandCalculator(ISimCardRule? rule = null)
+        public SimPokerHandCalculator(ICardRule? rule = null)
         {
-            _rule = rule ?? EightCardSimRule.Default;
+            _rule = rule ?? EightCardRule.Default;
         }
         
         public static readonly int MaxPokerNumber = 20;
@@ -77,11 +77,10 @@ namespace GenericPoker.CardSimStatAnalysis
         {
 
             
-           // counter++;
-            //Console.WriteLine($"Test8Cards called {counter} times.");
+     
             
             var allCandidateComps = new List<SimPokerHandStructure>();
-            //RecursiveEvaluateCards(_allPokerCards, new PokerHandStructure(), allCandidateComps);
+        
             RecursiveArrangeHands(_allPokerCards, new SimPokerHandStructure(), allCandidateComps);
             foreach (var res in allCandidateComps)
             {
@@ -91,20 +90,6 @@ namespace GenericPoker.CardSimStatAnalysis
             allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
             var uniqueCandidates = allCandidateComps.Distinct().ToList();
 			
-            
-            // help me print finalcompstr if unuqiueCandidats has something
-            /*
-            if (uniqueCandidates.Count > 0)
-            {
-	            foreach (var candidate in uniqueCandidates)
-	            {
-		            Console.WriteLine("Counter--" + counter + "" + candidate.FinalCompsStr.ToString());
-	            }
-            }
-            else
-            {
-	            Console.WriteLine("Counter--" + counter + "" + "Nothing in unqiueCandidates:");
-            }*/
             
             return uniqueCandidates;
             

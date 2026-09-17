@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using GenericPoker;
+
 namespace GenericPoker.CardSimStatAnalysis
 {
     public static class AssemblyComponent
     {
-        public static ISimCardRule DefaultRule { get; set; } = EightCardSimRule.Default;
+        public static ICardRule DefaultRule { get; set; } = EightCardRule.Default;
 
-        public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components, ISimCardRule? rule = null)
+        public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components, ICardRule? rule = null)
         {
             var effectiveRule = rule ?? DefaultRule;
             return effectiveRule.AssembleHandRank(components);
         }
 
-        public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<SimCardsCompType>? compTypes, ISimCardRule? rule = null)
+        public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<SimCardsCompType>? compTypes, ICardRule? rule = null)
         {
             var effectiveRule = rule ?? DefaultRule;
             return effectiveRule.AssembleHandRank(compTypes);
@@ -25,7 +27,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return DefaultRule.AssembleHandRank((IEnumerable<SimCardsCompType>)compTypes);
         }
 
-        public static SimCardOverAllHandRank AssembleHandRank(ISimCardRule rule, params SimCardsCompType[] compTypes)
+        public static SimCardOverAllHandRank AssembleHandRank(ICardRule rule, params SimCardsCompType[] compTypes)
         {
             return rule.AssembleHandRank((IEnumerable<SimCardsCompType>)compTypes);
         }

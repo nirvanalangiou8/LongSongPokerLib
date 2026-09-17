@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using GenericPoker;
 using GenericPoker.CardSimStatAnalysis;
 using NUnit.Framework;
 
@@ -9,7 +10,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
     [TestFixture]
     public class SplitHandBreakAndAssemblyTest
     {
-        private static string SplitHandToString(string handName, ISimCardRule? rule = null)
+        private static string SplitHandToString(string handName, ICardRule? rule = null)
         {
             List<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)> solutions;
             if (handName == "Nothing")
@@ -86,7 +87,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("EightCardsFlushStraight", "[Nothing,EightCardsFlushStraight],[ThreeCardsFlushStraight,FiveCardsFlushStraight],[FourCardsFlushStraight,FourCardsFlushStraight]")]
         public void Test8CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName, new EightCardSimRule());
+            string actualSolutions = SplitHandToString(handName, new EightCardRule());
             Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 8-card hand: {handName}");
         }
 
@@ -181,7 +182,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("NineCardsFlushStraight", "[Nothing,NineCardsFlushStraight],[ThreeCardsFlushStraight,SixCardsFlushStraight],[FourCardsFlushStraight,FiveCardsFlushStraight]")]
         public void Test9CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName, new NineCardSimRule());
+            string actualSolutions = SplitHandToString(handName, new NineCardRule());
             Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 9-card hand: {handName}");
         }
 

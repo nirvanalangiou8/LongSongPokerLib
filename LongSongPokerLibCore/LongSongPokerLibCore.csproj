@@ -23,4 +23,8 @@
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="GenericPoker\CardSimStatAnalysis\UnitTest\cache\" />
+    </ItemGroup>
+
 </Project>

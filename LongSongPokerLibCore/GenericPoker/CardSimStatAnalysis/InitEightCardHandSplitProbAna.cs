@@ -9,7 +9,7 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class InitEightCardHandSplitProbAna
     {
-        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null, ISimCardRule? rule = null)
+        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
         {
             return Analyze(inputPath, outputPath, rule);
         }
@@ -115,12 +115,12 @@ namespace GenericPoker.CardSimStatAnalysis
             return Path.Combine(sourceDir, "front_back_stats.csv");
         }
 
-        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null, ISimCardRule? rule = null)
+        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
         {
             string resolvedInputPath = ResolveInputPath(inputPath);
             string resolvedOutputPath = ResolveOutputPath(outputPath, resolvedInputPath);
 
-            var effectiveRule = rule ?? ((resolvedInputPath.Contains("9cards") || resolvedInputPath.Contains("9_cards") || resolvedInputPath.Contains("9card")) ? NineCardSimRule.Default : EightCardSimRule.Default);
+            var effectiveRule = rule ?? ((resolvedInputPath.Contains("9cards") || resolvedInputPath.Contains("9_cards") || resolvedInputPath.Contains("9card")) ? NineCardRule.Default : EightCardRule.Default);
 
             if (!File.Exists(resolvedInputPath))
             {
@@ -206,7 +206,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return (frontHandStats, backHandStats);
         }
 
-        public static List<PokerComponents> ParseHandName(string handName, ISimCardRule? rule = null)
+        public static List<PokerComponents> ParseHandName(string handName, ICardRule? rule = null)
         {
             var comps = new List<PokerComponents>();
             var parts = handName.Split('_');
@@ -243,7 +243,7 @@ namespace GenericPoker.CardSimStatAnalysis
 
         public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
             List<PokerComponents> comps,
-            ISimCardRule? rule,
+            ICardRule? rule,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
             int minStraightCards = -1,
@@ -251,7 +251,7 @@ namespace GenericPoker.CardSimStatAnalysis
         {
             if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
 
-            var effectiveRule = rule ?? comps.FirstOrDefault(c => c.Rule != null)?.Rule ?? EightCardSimRule.Default;
+            var effectiveRule = rule ?? comps.FirstOrDefault(c => c.Rule != null)?.Rule ?? EightCardRule.Default;
 
             // 1. Break down each component into atomic sub-components based on card constraints.
             var breakdownSequences = comps
@@ -363,7 +363,7 @@ namespace GenericPoker.CardSimStatAnalysis
 
         public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
             List<SimCardsCompType> compTypes,
-            ISimCardRule? rule,
+            ICardRule? rule,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
             int minStraightCards = -1,

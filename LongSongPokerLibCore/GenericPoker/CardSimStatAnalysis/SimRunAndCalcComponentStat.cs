@@ -7,37 +7,52 @@ using GenericPoker;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
-    public class SimCardGameManager : ConsoleGameManager<SimPokerCard, SimConsolePlayer, SimPokerHandStructure>
+    public class SimCardGameManager : ConsolePlayManager
     {
-        public SimCardGameManager(EightCard.IPlayerFactory<SimConsolePlayer> factory, int cardsPerHand = 8) : base(factory, cardsPerHand) { }
+        public Dictionary<string, int> statDict => StatDict;
+
+        public SimCardGameManager(IPlayerFactory<SimConsolePlayer> factory, int cardsPerHand = 8)
+            : base(EightCardRule.Default, cardsPerHand)
+        {
+            int totalPlayers = Dealer.TotalCards / cardsPerHand;
+            for (var i = 1; i <= totalPlayers; i++)
+            {
+                string playerName = $"Player#{i}";
+                var player = factory.Create(playerName);
+                Players.Add(player);
+            }
+        }
 
         public override void ProcessPlayersHands()
         {
-            foreach (var player in _players)
+            foreach (var player in Players)
             {
-                var ret = player.ProcessSimHands();
-                
-                if (ret.Count == 0)
+                if (player is SimConsolePlayer simPlayer)
                 {
-                    UpdateStat("Nothing");
-                }
-                
-                foreach (var combo in ret)
-                {
-                    UpdateStat(combo.FinalCompsStr);
+                    var ret = simPlayer.ProcessSimHands();
+
+                    if (ret.Count == 0)
+                    {
+                        UpdateStat("Nothing");
+                    }
+
+                    foreach (var combo in ret)
+                    {
+                        UpdateStat(combo.FinalCompsStr);
+                    }
                 }
             }
         }
 
         private void UpdateStat(string key)
         {
-            if (statDict.ContainsKey(key))
+            if (StatDict.ContainsKey(key))
             {
-                statDict[key] += 1;
+                StatDict[key] += 1;
             }
             else
             {
-                statDict[key] = 1;
+                StatDict[key] = 1;
             }
         }
     }
