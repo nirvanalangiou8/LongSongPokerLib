@@ -245,14 +245,3 @@ namespace GenericPoker.EightCard
     }
     
 }
-
-
-
-/*
-     public static bool operator >(EightCardSubBattleHand left, EightCardSubBattleHand right) => left.CompareTo(right) > 0;
-     public static bool operator <(EightCardSubBattleHand left, EightCardSubBattleHand right) => left.CompareTo(right) < 0;
-     public static bool operator >=(EightCardSubBattleHand left, EightCardSubBattleHand right) => left.CompareTo(right) >= 0;
-     public static bool operator <=(EightCardSubBattleHand left, EightCardSubBattleHand right) => left.CompareTo(right) <= 0;
-     public static bool operator ==(EightCardSubBattleHand left, EightCardSubBattleHand right) => left?.Equals(right) ?? right is null;
-     public static bool operator !=(EightCardSubBattleHand left, EightCardSubBattleHand right) => !(left == right);
-     */

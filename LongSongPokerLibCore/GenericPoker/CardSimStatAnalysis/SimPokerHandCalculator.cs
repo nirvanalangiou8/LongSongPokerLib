@@ -142,24 +142,25 @@ namespace GenericPoker.CardSimStatAnalysis
         private void RecursiveArrangeHands(List<SimPokerCard> remainingCards,
             SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results)
         {
-            var hasRank = false;
+            var candidateProcessed = false;
 			
             var kindGroupList = GetNumberGroups(1, remainingCards);
             var flushGroups = _evaluateFlushGroups(_rule.MinFlushStraightCount, remainingCards);
 			
             //1. Sort the number in each suit, try to find suit first and find straight by the way to see if we have flush Straight.
-            hasRank = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, currentHandCandidates, results, hasRank);
+            candidateProcessed = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, currentHandCandidates, results, candidateProcessed);
 			
             // 2. Sort majorly for straight
             var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
-            hasRank = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates, results, hasRank);
+            candidateProcessed = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates, results, candidateProcessed);
 			
             // 3. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
             var allKindGroups = GetKindGroups(2, remainingCards);
-            hasRank = ArrangeKindComps(allKindGroups, remainingCards, currentHandCandidates, results, hasRank);
+            candidateProcessed = ArrangeKindComps(allKindGroups, remainingCards, currentHandCandidates, results, candidateProcessed);
 			
-            // When code comes here, it means there are nothing else worthy to record, so that put all current into Results.
-            if (hasRank == false && currentHandCandidates.Components.Count > 0)
+            // When code comes here, if the candidateProcssed still false (not processed), and if we have some candidates,
+            // so process the current candidates into Results.
+            if (candidateProcessed == false && currentHandCandidates.Components.Count > 0)
             {
                 var newCandidateComps = new SimPokerHandStructure(currentHandCandidates);
                 newCandidateComps.SetRemainingCards(remainingCards);
@@ -371,10 +372,10 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="remainingCards">Available cards.</param>
 		/// <param name="currentHandStructure">Current state of hand composition.</param>
 		/// <param name="results">Output list of complete hand structures.</param>
-		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeFlushOrFlushStraight(List<List<SimPokerCard>> flushGroups, List<SimPokerCard> remainingCards,
-            SimPokerHandStructure currentHandStructure, List<SimPokerHandStructure> results, bool hasRank)
+            SimPokerHandStructure currentHandStructure, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
 			foreach (var flushGroup in flushGroups)
 			{
@@ -403,11 +404,10 @@ namespace GenericPoker.CardSimStatAnalysis
 							var newRemainCards =
 								UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
+							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+							candidateProcessed = true;
 							currentHandStructure.Components.RemoveAt(currentHandStructure.Components.Count - 1);
-							//currentHandStructure.RemoveLastComp();
 							
-							
-							hasRank = true;
 						}
 					} else { // no we don't have straight in suit group which implies @@flush@@
 
@@ -428,13 +428,15 @@ namespace GenericPoker.CardSimStatAnalysis
 							// when do hash set, two J-spade will become single one.
 							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
+							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+							candidateProcessed = true;
 							currentHandStructure.Components.RemoveAt(currentHandStructure.Components.Count - 1);
-							hasRank = true;
+							
 						}
 					}
 				}
 			}
-            return hasRank;
+            return candidateProcessed;
         }
 
         /// <summary>
@@ -445,10 +447,10 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="remainingCards">Available cards.</param>
 		/// <param name="currentHandCandidates">Current state of hand composition.</param>
 		/// <param name="results">Output list of complete hand structures.</param>
-		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeStraightComps(List<List<List<SimPokerCard>>> allStraightClusters, List<SimPokerCard> remainingCards,
-            SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results, bool hasRank)
+            SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
           
             foreach (var straightCluster in allStraightClusters)
@@ -471,16 +473,16 @@ namespace GenericPoker.CardSimStatAnalysis
                             currentHandCandidates.AddComp(newHandCandidateData);
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
-                            
+                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+                            candidateProcessed = true;
                             currentHandCandidates.Components.RemoveAt(currentHandCandidates.Components.Count - 1);
-                            hasRank = true;
                         }
                     }
                 }
                 
             }
             
-            return hasRank;
+            return candidateProcessed;
         }
         
         
@@ -533,14 +535,7 @@ namespace GenericPoker.CardSimStatAnalysis
 			return sortedSubLists.Where(subList => subList.Count >= minCardCountInGroup).ToList();
 
 		}
-
         
-		/*
-        private List<List<List<SimCardPokerCard>>> GetAllStraightCluster(int minCount, List<List<SimCardPokerCard>> kindGroups)
-        {
-            // Simplified straight logic
-            return new List<List<List<SimCardPokerCard>>>();
-        }*/
         
         /// <summary>
         /// Identifies clusters of consecutive card ranks that are long enough to potentially form straights.

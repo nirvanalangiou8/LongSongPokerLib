@@ -5,6 +5,7 @@ using GenericPoker;
 
 namespace GenericPoker.EightCard
 {
+    /*
     public class EightCardConsolePlayer : ConsolePlayer
     {
         private PokerHandCalculator _pokerHandCalculator;
@@ -28,5 +29,5 @@ namespace GenericPoker.EightCard
         {
             return new EightCardConsolePlayer(name);
         }
-    }
+    }*/
 }

@@ -16,7 +16,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "analyze"; 
+            var runOption = "run_stat"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -82,7 +82,8 @@ namespace LongSongPokerLibCore
                     //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_8cards.csv", 500000000, 8, useParallel: true);
                     //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_8cards.csv", 100000, 8, useParallel: true);
                     //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_9cards.csv", 500000000, 9, useParallel: true);
-                    SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_9cards.csv", 200000, 9, useParallel: true);
+                    //SimRunAndCalcComponentStat.SimCardRunStat(@"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data\stats_result_9cards.csv", 200000, 9, useParallel: true);
+                    SimRunAndCalcComponentStat.SimCardRunStat(@args[0], int.Parse(args[1]), 9, useParallel: true);
                     //SimRunAndCalcComponentStat.SimCardRunStat(10000, 10);
                     break;
 

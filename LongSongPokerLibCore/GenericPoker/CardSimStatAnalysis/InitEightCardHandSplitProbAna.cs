@@ -133,9 +133,19 @@ namespace GenericPoker.CardSimStatAnalysis
             long totalInputCount = 0;
 
             var lines = File.ReadAllLines(resolvedInputPath);
+            var headerNotes = new List<string>();
             foreach (var line in lines)
             {
-                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#") || line.StartsWith("Hand Type"))
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                if (line.StartsWith("#"))
+                {
+                    headerNotes.Add(line);
+                    continue;
+                }
+
+                if (line.StartsWith("Hand Type"))
                     continue;
 
                 var parts = line.Split(',');
@@ -180,7 +190,7 @@ namespace GenericPoker.CardSimStatAnalysis
 
             if (!string.IsNullOrEmpty(resolvedOutputPath))
             {
-                SaveStats(resolvedOutputPath, frontHandStats, backHandStats);
+                SaveStats(resolvedOutputPath, frontHandStats, backHandStats, resolvedInputPath, headerNotes);
                 Console.WriteLine($"Analysis completed. Results saved to {resolvedOutputPath}");
             }
 
@@ -373,7 +383,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return SplitHand(compTypes.Select(t => new PokerComponents(t, rule)).ToList(), rule, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
         }
 
-        public static void SaveStats(string path, Dictionary<SimCardOverAllHandRank, double> front, Dictionary<SimCardOverAllHandRank, double> back)
+        public static void SaveStats(string path, Dictionary<SimCardOverAllHandRank, double> front, Dictionary<SimCardOverAllHandRank, double> back, string? inputPath = null, List<string>? headerNotes = null)
         {
             string? dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
@@ -381,25 +391,41 @@ namespace GenericPoker.CardSimStatAnalysis
                 Directory.CreateDirectory(dir);
             }
 
-            double totalFront = front.Values.Sum();
-            double totalBack = back.Values.Sum();
+            var sortedFront = front.OrderByDescending(e => (int)e.Key).ToList();
+            long totalFrontCount = sortedFront.Sum(e => (long)Math.Round(e.Value, MidpointRounding.AwayFromZero));
+
+            var sortedBack = back.OrderByDescending(e => (int)e.Key).ToList();
+            long totalBackCount = sortedBack.Sum(e => (long)Math.Round(e.Value, MidpointRounding.AwayFromZero));
 
             using (var writer = new StreamWriter(path))
             {
-                writer.WriteLine("Hand Position,Rank,Count,Probablities,Win/NoLose probablity");
+                if (headerNotes != null)
+                {
+                    foreach (var note in headerNotes)
+                    {
+                        writer.WriteLine(note);
+                    }
+                }
+                if (!string.IsNullOrEmpty(inputPath))
+                {
+                    writer.WriteLine($"# Source: {inputPath}");
+                }
+
+                writer.WriteLine("Hand Position,Rank,Count,Accumulated Count,Probabilities,Win/NoLose Probabilities");
                 
                 // Front Hand
-                var sortedFront = front.OrderByDescending(e => (int)e.Key).ToList();
-                double cumulativeFront = 0;
+                long cumulativeFrontCount = 0;
                 var frontLines = new List<string>();
                 
                 // Start from bottom (Nothing) to accumulate
                 for (int i = sortedFront.Count - 1; i >= 0; i--)
                 {
                     var entry = sortedFront[i];
-                    double prob = totalFront > 0 ? entry.Value / totalFront : 0;
-                    cumulativeFront += prob;
-                    frontLines.Add($"Front,{entry.Key},{entry.Value:F2},{prob:P8},{cumulativeFront:P8}");
+                    long count = (long)Math.Round(entry.Value, MidpointRounding.AwayFromZero);
+                    cumulativeFrontCount += count;
+                    double prob = totalFrontCount > 0 ? (double)count / totalFrontCount : 0;
+                    double winNoLoseProb = totalFrontCount > 0 ? (double)cumulativeFrontCount / totalFrontCount : 0;
+                    frontLines.Add($"Front,{entry.Key},{count},{cumulativeFrontCount},{prob:P16},{winNoLoseProb:P16}");
                 }
                 
                 // Reverse to have strongest at top
@@ -407,16 +433,17 @@ namespace GenericPoker.CardSimStatAnalysis
                 foreach (var line in frontLines) writer.WriteLine(line);
 
                 // Back Hand
-                var sortedBack = back.OrderByDescending(e => (int)e.Key).ToList();
-                double cumulativeBack = 0;
+                long cumulativeBackCount = 0;
                 var backLines = new List<string>();
 
                 for (int i = sortedBack.Count - 1; i >= 0; i--)
                 {
                     var entry = sortedBack[i];
-                    double prob = totalBack > 0 ? entry.Value / totalBack : 0;
-                    cumulativeBack += prob;
-                    backLines.Add($"Back,{entry.Key},{entry.Value:F2},{prob:P8},{cumulativeBack:P8}");
+                    long count = (long)Math.Round(entry.Value, MidpointRounding.AwayFromZero);
+                    cumulativeBackCount += count;
+                    double prob = totalBackCount > 0 ? (double)count / totalBackCount : 0;
+                    double winNoLoseProb = totalBackCount > 0 ? (double)cumulativeBackCount / totalBackCount : 0;
+                    backLines.Add($"Back,{entry.Key},{count},{cumulativeBackCount},{prob:P16},{winNoLoseProb:P16}");
                 }
 
                 backLines.Reverse();
