@@ -1,0 +1,136 @@
+﻿shader_type canvas_item;
+
+// Animation controls
+uniform bool auto_play = true;
+uniform float duration : hint_range(0.5, 5.0) = 2.0;
+uniform float trigger_time = 0.0;
+
+// Shard parameters
+uniform vec2 grid_size = vec2(6.0, 8.0);
+uniform float shatter_force : hint_range(1.0, 6.0) = 3.5;
+uniform float rotation_speed : hint_range(0.0, 15.0) = 5.0;
+uniform float fade_threshold : hint_range(0.0, 1.0) = 0.15;
+
+vec2 hash2(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+    return fract(sin(p) * 43758.5453123);
+}
+
+vec2 rotate(vec2 p, float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+    return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+float get_progress() {
+    if (!auto_play) return 0.0;
+    float elapsed = (trigger_time > 0.0) ? (TIME - trigger_time) : mod(TIME, duration);
+    return clamp(elapsed / duration, 0.0, 1.0);
+}
+
+// -------------------------------------------------------------
+// VERTEX: Expand outward centered around the card's middle (0,0 in local space)
+// -------------------------------------------------------------
+void vertex() {
+    float p = get_progress();
+    float expansion = 1.0 + p * shatter_force * 2.5;
+    // Scale vertices outward symmetrically
+    VERTEX *= expansion;
+}
+
+// -------------------------------------------------------------
+// FRAGMENT: True multi-directional radial flight
+// -------------------------------------------------------------
+void fragment() {
+    float p = get_progress();
+
+    if (p <= 0.001) {
+        COLOR = texture(TEXTURE, UV);
+    } else if (p >= 0.999 && trigger_time > 0.0) {
+        discard;
+    } else {
+        // 1. Re-center UV coordinates around (0.0, 0.0) at the card center
+        float expansion = 1.0 + p * shatter_force * 2.5;
+        vec2 centered_pos = (UV - vec2(0.5)) * expansion;
+
+        // 2. Identify Voronoi cell using normal un-scaled UV space
+        vec2 base_uv = centered_pos + vec2(0.5);
+        vec2 st = base_uv * grid_size;
+        vec2 i_st = floor(st);
+        vec2 f_st = fract(st);
+
+        vec2 closest_cell = i_st;
+        vec2 closest_point = vec2(0.0);
+        float min_dist = 10.0;
+
+        for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+                vec2 neighbor = vec2(float(x), float(y));
+                vec2 pt = hash2(i_st + neighbor);
+                vec2 diff = neighbor + pt - f_st;
+                float d = length(diff);
+                if (d < min_dist) {
+                    min_dist = d;
+                    closest_point = pt;
+                    closest_cell = i_st + neighbor;
+                }
+            }
+        }
+
+        // 3. Shard origin relative to the card's center (-0.5 to +0.5)
+        vec2 shard_center_norm = (closest_cell + closest_point) / grid_size;
+        vec2 from_center = shard_center_norm - vec2(0.5);
+
+        // Aspect ratio correction (prevents elliptical skewing)
+        vec2 aspect = vec2(1.0, grid_size.y / grid_size.x);
+        vec2 radial_dir = normalize(from_center * aspect) / aspect;
+
+        if (length(from_center) < 0.0001) {
+            radial_dir = vec2(0.0, 1.0);
+        }
+
+        // 4. Trajectory and rotation
+        vec2 rand = hash2(closest_cell);
+        float speed = mix(0.7, 1.4, rand.x);
+        vec2 displacement = radial_dir * p * shatter_force * speed;
+        float angle = (rand.y - 0.5) * rotation_speed * p * 6.28318;
+
+        // 5. Shift coordinate backwards by displacement to sample original texture
+        vec2 local_pt = (base_uv - shard_center_norm) - displacement;
+        vec2 unrotated = rotate(local_pt, -angle);
+        vec2 sample_uv = shard_center_norm + unrotated;
+
+        // 6. Discard pixels out of card texture bounds
+        if (sample_uv.x < 0.0 || sample_uv.x > 1.0 || sample_uv.y < 0.0 || sample_uv.y > 1.0) {
+            discard;
+        }
+
+        // 7. Verify shard boundary to prevent ghost duplicates
+        vec2 check_st = sample_uv * grid_size;
+        vec2 check_i_st = floor(check_st);
+        vec2 check_f_st = fract(check_st);
+        vec2 check_cell = check_i_st;
+        float check_min_d = 10.0;
+
+        for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+                vec2 neighbor = vec2(float(x), float(y));
+                vec2 pt = hash2(check_i_st + neighbor);
+                float d = length(neighbor + pt - check_f_st);
+                if (d < check_min_d) {
+                    check_min_d = d;
+                    check_cell = check_i_st + neighbor;
+                }
+            }
+        }
+
+        if (distance(check_cell, closest_cell) > 0.01) {
+            discard;
+        }
+
+        // 8. Sample texture and apply late-stage fade
+        vec4 tex = texture(TEXTURE, sample_uv);
+        float alpha = smoothstep(1.0, fade_threshold, p);
+        COLOR = vec4(tex.rgb, tex.a * alpha);
+    }
+}

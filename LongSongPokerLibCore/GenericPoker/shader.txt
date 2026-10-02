@@ -1,0 +1,138 @@
+﻿shader_type canvas_item;
+
+// Animation controls
+uniform bool auto_play = true;
+uniform float duration : hint_range(0.5, 5.0) = 2.0;
+uniform float trigger_time = 0.0;
+
+// Shard parameters
+uniform vec2 grid_size = vec2(6.0, 8.0);
+uniform float shatter_force : hint_range(1.0, 8.0) = 3.5;
+uniform float rotation_speed : hint_range(0.0, 15.0) = 5.0;
+uniform float fade_threshold : hint_range(0.0, 1.0) = 0.15;
+
+vec2 hash2(vec2 p) {
+    p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+    return fract(sin(p) * 43758.5453123);
+}
+
+vec2 rotate(vec2 p, float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+    return vec2(c * p.x - s * p.y, s * p.x + c * p.y);
+}
+
+float get_progress() {
+    if (!auto_play) return 0.0;
+    float elapsed = (trigger_time > 0.0) ? (TIME - trigger_time) : mod(TIME, duration);
+    return clamp(elapsed / duration, 0.0, 1.0);
+}
+
+// ========================================================
+// VERTEX: Expand symmetrically around card center (0.5, 0.5)
+// ========================================================
+void vertex() {
+    float p = get_progress();
+    float expansion = 1.0 + p * shatter_force * 2.5;
+
+    // UV spans 0.0 -> 1.0. (UV - 0.5) is centered at (0, 0).
+    // This scales the quad equally in ALL four directions:
+    // Left pushes left, right pushes right, top pushes up, bottom pushes down.
+    VERTEX += (UV - vec2(0.5)) * VERTEX * (expansion - 1.0);
+}
+
+// ========================================================
+// FRAGMENT: True radial shard projection
+// ========================================================
+void fragment() {
+    float p = get_progress();
+
+    if (p <= 0.001) {
+        COLOR = texture(TEXTURE, UV);
+    } else if (p >= 0.999 && trigger_time > 0.0) {
+        discard;
+    } else {
+        float expansion = 1.0 + p * shatter_force * 2.5;
+
+        // Re-center UV so (0,0) is card center
+        vec2 centered_uv = (UV - vec2(0.5)) * expansion;
+
+        // Search neighboring shards to find which one lands on this pixel
+        vec2 base_cell_coord = centered_uv + vec2(0.5);
+        vec2 st = base_cell_coord * grid_size;
+        vec2 i_st = floor(st);
+
+        vec4 found_color = vec4(0.0);
+        bool hit = false;
+
+        // Search local neighborhood of shards
+        for (int y = -2; y <= 2; y++) {
+            for (int x = -2; x <= 2; x++) {
+                vec2 cell = i_st + vec2(float(x), float(y));
+
+                // Shard center in original [0, 1] UV space
+                vec2 pt = hash2(cell);
+                vec2 shard_center = (cell + pt) / grid_size;
+
+                // Outward radial direction from exact center (0.5, 0.5)
+                vec2 from_center = shard_center - vec2(0.5);
+                vec2 aspect = vec2(1.0, grid_size.y / grid_size.x);
+                vec2 radial_dir = normalize(from_center * aspect) / aspect;
+
+                if (length(from_center) < 0.001) {
+                    radial_dir = vec2(0.0, 1.0);
+                }
+
+                // Shard velocity and rotation
+                vec2 rand = hash2(cell);
+                float speed = mix(0.7, 1.4, rand.x);
+                vec2 flight = radial_dir * p * shatter_force * speed;
+                float angle = (rand.y - 0.5) * rotation_speed * p * 6.28318;
+
+                // Position of this shard's center after flying
+                vec2 moving_center = shard_center + flight;
+
+                // Inverse sample original texture for this shard
+                vec2 delta = (centered_uv + vec2(0.5)) - moving_center;
+                vec2 unrotated = rotate(delta, -angle);
+                vec2 orig_uv = shard_center + unrotated;
+
+                // Check if this pixel falls inside this shard's original cell
+                if (orig_uv.x >= 0.0 && orig_uv.x <= 1.0 && orig_uv.y >= 0.0 && orig_uv.y <= 1.0) {
+                    vec2 check_st = orig_uv * grid_size;
+                    vec2 check_i = floor(check_st);
+                    vec2 check_f = fract(check_st);
+
+                    // Verify closest cell matches
+                    vec2 test_cell = check_i;
+                    float min_d = 10.0;
+                    for (int ny = -1; ny <= 1; ny++) {
+                        for (int nx = -1; nx <= 1; nx++) {
+                            vec2 n = vec2(float(nx), float(ny));
+                            vec2 p_pt = hash2(check_i + n);
+                            float d = length(n + p_pt - check_f);
+                            if (d < min_d) {
+                                min_d = d;
+                                test_cell = check_i + n;
+                            }
+                        }
+                    }
+
+                    if (distance(test_cell, cell) < 0.01) {
+                        found_color = texture(TEXTURE, orig_uv);
+                        hit = true;
+                        break;
+                    }
+                }
+            }
+            if (hit) break;
+        }
+
+        if (!hit || found_color.a <= 0.001) {
+            discard;
+        }
+
+        float alpha = smoothstep(1.0, fade_threshold, p);
+        COLOR = vec4(found_color.rgb, found_color.a * alpha);
+    }
+}
