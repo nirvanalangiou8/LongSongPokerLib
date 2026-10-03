@@ -5,7 +5,7 @@ using GenericPoker.CardSimStatAnalysis;
 namespace GenericPoker
 {
     //public class AceCard : EightCardPokerCard , IJokerStraightable
-    public class AcePokerCard : SimPokerCard , IJokerStraightable
+    public class AcePokerCard : BasePokerCard , IJokerStraightable
     {
         private int _replacedNumber = 0;
         public int JokerPower => 100; // High value means low priority in sorting compared to real jokers

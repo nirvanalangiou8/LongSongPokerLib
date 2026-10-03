@@ -7,16 +7,16 @@ using System.Linq;
 namespace GenericPoker.CardSimStatAnalysis
 {
     
-    public class PokerCardComparer : IEqualityComparer<SimPokerCard>
+    public class PokerCardComparer : IEqualityComparer<BasePokerCard>
     {
-        public bool Equals(SimPokerCard x, SimPokerCard y)
+        public bool Equals(BasePokerCard x, BasePokerCard y)
         {
             bool retBool = x.Equals(y);
             if (!retBool) return false;
             return x.DeckID == y.DeckID; 
         }
 
-        public int GetHashCode(SimPokerCard obj)
+        public int GetHashCode(BasePokerCard obj)
         {
             return 1;
         }
@@ -25,7 +25,7 @@ namespace GenericPoker.CardSimStatAnalysis
     public class SimPokerCard :  BasePokerCard  // IEquatable<PokerCard> //
 	{
 
-		
+		/*
 		// Consider how many Joker's to count the maximum number of ModulatorScale.
 		// This is majorly used for count the hand power whenever need to compare card to card by using decimal concepts.
 		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*SimPokerHandCalculator.MaxPokerNumber;
@@ -50,10 +50,10 @@ namespace GenericPoker.CardSimStatAnalysis
 		// other card will only have 1 bit
 		private int _pokerRangeGroupBits;
 		
-		public static SimPokerCard CreateInstance(int id, int number, PokerSuit pokerSuit, int objectID = 0, int deckID = 1)
+		public static BasePokerCard CreateInstance(int id, int number, PokerSuit pokerSuit, int objectID = 0, int deckID = 1)
 		{
 			var data = number == PokerConst.AceBigNumber ? 
-				new AcePokerCard() : new SimPokerCard();
+				new AcePokerCard() : new BasePokerCard();
 		
 			data.Init(id, number, pokerSuit, objectID, deckID);
 			return data;
@@ -101,24 +101,9 @@ namespace GenericPoker.CardSimStatAnalysis
 		
 
 		private void _computePokerRangeGroup()
-		{/*
-			_pokerRangeGroupBits = 0b0000;
-			if (_number == 1) // ace case
-			{
-				_pokerRangeGroupBits = 0b0101;
-				return;
-			}
-			foreach (PokerCardRangeGroup rangeGroup in Enum.GetValues(typeof(PokerCardRangeGroup)) )
-			{
-				var lowerRange = MatchCardRangeNumberGroupDict[rangeGroup].Item1;
-				var upperRange = MatchCardRangeNumberGroupDict[rangeGroup].Item2;
-				if (_number >= lowerRange && _number <= upperRange)
-				{
-					_pokerRangeGroupBits |= (int)rangeGroup;
-					break;
-				}
-			}*/
+		{
 		}
+		*/
 		
 	}
     /*

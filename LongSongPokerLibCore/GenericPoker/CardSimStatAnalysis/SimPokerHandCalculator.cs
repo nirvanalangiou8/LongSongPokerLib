@@ -6,7 +6,7 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class SimPokerHandCalculator
     {
-        private List<SimPokerCard> _allPokerCards;
+        private List<BasePokerCard> _allPokerCards;
         private ICardRule _rule;
 
         public ICardRule Rule
@@ -66,9 +66,9 @@ namespace GenericPoker.CardSimStatAnalysis
 				{ "8_FlushStraight", SimCardsCompType.EightCardsFlushStraight }
 			};
 
-        public void SetupCards(List<SimPokerCard> inputPokerCardList)
+        public void SetupCards(List<BasePokerCard> inputPokerCardList)
         {
-            _allPokerCards = new List<SimPokerCard>(inputPokerCardList);
+            _allPokerCards = new List<BasePokerCard>(inputPokerCardList);
         }
 
         //static int counter = 0;
@@ -102,17 +102,17 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="minCardCountInGroup">Minimum number of cards of the same rank required.</param>
         /// <param name="noneJokerCards">The collection of cards (excluding jokers) to group.</param>
         /// <returns>A list of card groups, each containing cards of the same rank, ordered by rank descending.</returns>
-        private List<List<SimPokerCard>> GetNumberGroups(int minCardCountInGroup, List<SimPokerCard> noneJokerCards)
+        private List<List<BasePokerCard>> GetNumberGroups(int minCardCountInGroup, List<BasePokerCard> noneJokerCards)
         {
             // 使用 Dictionary 根據牌面點數（Number）進行分組
-            var rankGroupsDict = new Dictionary<int, List<SimPokerCard>>();
+            var rankGroupsDict = new Dictionary<int, List<BasePokerCard>>();
 
             // 遍歷所有非鬼牌，直接在一次 Pass 中完成分組，避免建立不必要的暫存排序清單
             foreach (var card in noneJokerCards)
             {
                 if (!rankGroupsDict.TryGetValue(card.Number, out var group))
                 {
-                    group = new List<SimPokerCard>();
+                    group = new List<BasePokerCard>();
                     rankGroupsDict[card.Number] = group;
                 }
                 group.Add(card);
@@ -139,7 +139,7 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="remainingCards">The list of cards remaining to be partitioned.</param>
         /// <param name="currentHandCandidates">The current hand structure being built.</param>
         /// <param name="results">The list of all valid complete hand structures found.</param>
-        private void RecursiveArrangeHands(List<SimPokerCard> remainingCards,
+        private void RecursiveArrangeHands(List<BasePokerCard> remainingCards,
             SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results)
         {
             var candidateProcessed = false;
@@ -185,7 +185,7 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="results">Output list of complete hand structures.</param>
         /// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
         /// <returns>True if a hand component was successfully added.</returns>
-        private bool ArrangeKindComps(List<List<SimPokerCard>> allKindGroups, List<SimPokerCard> remainingCards,
+        private bool ArrangeKindComps(List<List<BasePokerCard>> allKindGroups, List<BasePokerCard> remainingCards,
             SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results, bool hasRank)
         {
             foreach (var kindGroup in allKindGroups)
@@ -194,10 +194,10 @@ namespace GenericPoker.CardSimStatAnalysis
                 {
                     //var allPermutes = new List<List<PokerCard>>();
                     var handType = DetermineCompType(groupCardNum, CompType.Kind);
-                    var allPermutes = UtilFunc.GetPermutation<SimPokerCard>(kindGroup, groupCardNum);
+                    var allPermutes = UtilFunc.GetPermutation<BasePokerCard>(kindGroup, groupCardNum);
                     foreach (var permute in allPermutes)
                     {
-                        var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard> { CompRank = handType, Cards = permute };
+                        var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
                         currentHandCandidates.AddComp(newHandCandidateData);
                         var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                         RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
@@ -219,8 +219,8 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="kindGroupList">Available card groups to pick from.</param>
         /// <param name="currentList">The current accumulation of cards in the recursion.</param>
         /// <param name="resultList">Output list to store completed straight combinations.</param>
-        private static void RecursivePermuteStraight(int straightCount, List<List<SimPokerCard>> kindGroupList,
-	        List<SimPokerCard> currentList, List<List<SimPokerCard>> resultList)
+        private static void RecursivePermuteStraight(int straightCount, List<List<BasePokerCard>> kindGroupList,
+	        List<BasePokerCard> currentList, List<List<BasePokerCard>> resultList)
         {
 
 	        if (currentList.Count + kindGroupList.Count < straightCount) return;
@@ -229,7 +229,7 @@ namespace GenericPoker.CardSimStatAnalysis
 	        {
 		        // currentList is shared, so need to record at the moment when you added. If not, other hierarchy loop
 		        // will contaminate it.
-		        resultList.Add(new List<SimPokerCard>(currentList));
+		        resultList.Add(new List<BasePokerCard>(currentList));
 		        return;
 	        }
 
@@ -268,8 +268,8 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="straightableJokerCards">Available jokers that can be used in a straight.</param>
 		/// <param name="permutes">Output list where valid straight combinations will be added.</param>
 		/// <param name="assignedSuit">Optional suit restriction for flush-straights.</param>
-		private void ProcessPermuteStraight(int straightCount, List<List<SimPokerCard>> kindGroupList,
-			List<SimPokerCard> straightableJokerCards, List<List<SimPokerCard>> permutes,
+		private void ProcessPermuteStraight(int straightCount, List<List<BasePokerCard>> kindGroupList,
+			List<BasePokerCard> straightableJokerCards, List<List<BasePokerCard>> permutes,
 			PokerSuit assignedSuit = PokerSuit.NoSuit)
 		{
 
@@ -277,10 +277,10 @@ namespace GenericPoker.CardSimStatAnalysis
 			// so that to let 3,2,1 straight become available.
 			if (kindGroupList[0][0] is AcePokerCard)
 			{
-				var newKindGroup = new List<SimPokerCard>();
+				var newKindGroup = new List<BasePokerCard>();
 				foreach (var ace in kindGroupList[0])
 				{
-					var newAce = SimPokerCard.CreateInstance(ace);
+					var newAce = BasePokerCard.CreateInstance(ace);
 					((IJokerStraightable)newAce).SetStraightSub(1);
 					newKindGroup.Add(newAce);
 				}
@@ -299,7 +299,7 @@ namespace GenericPoker.CardSimStatAnalysis
 				if (jokerCountInvolved > straightableJokerCards.Count || pokerCardCountInvolved > kindGroupList.Count)
 					continue;
 				
-				var tempPermutes = UtilFunc.GetPermutation<List<SimPokerCard>>(kindGroupList, pokerCardCountInvolved);
+				var tempPermutes = UtilFunc.GetPermutation<List<BasePokerCard>>(kindGroupList, pokerCardCountInvolved);
 				foreach (var cardPermute in tempPermutes)
 				{
 					var numberList = cardPermute.Select(group => group[0].Number).ToList();
@@ -335,17 +335,17 @@ namespace GenericPoker.CardSimStatAnalysis
 					foreach (var pair in straightableJokerCards.Zip(
 						         gapNumbers, (obj, num) => new { jokerCard = obj, Number = num }))
 					{
-						var newJoker = SimPokerCard.CreateInstance((SimPokerCard)pair.jokerCard);
+						var newJoker = BasePokerCard.CreateInstance((BasePokerCard)pair.jokerCard);
 						((IJokerStraightable)newJoker).SetStraightSub(pair.Number);
 						if (assignedSuit != PokerSuit.NoSuit && newJoker is IJokerFlushable)
 							((IJokerFlushable)newJoker).SetSuitSub(assignedSuit);
-						cardPermute.Add(new List<SimPokerCard> { newJoker });
+						cardPermute.Add(new List<BasePokerCard> { newJoker });
 					}
 
 					var groupPermuteWithJokers = cardPermute.OrderByDescending(objList => objList[0].Number).ToList();
 
 					RecursivePermuteStraight(straightCount, groupPermuteWithJokers,
-						new List<SimPokerCard>(), permutes);
+						new List<BasePokerCard>(), permutes);
 
 				}
 			}
@@ -374,15 +374,15 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="results">Output list of complete hand structures.</param>
 		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
-		private bool ArrangeFlushOrFlushStraight(List<List<SimPokerCard>> flushGroups, List<SimPokerCard> remainingCards,
+		private bool ArrangeFlushOrFlushStraight(List<List<BasePokerCard>> flushGroups, List<BasePokerCard> remainingCards,
             SimPokerHandStructure currentHandStructure, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
 			foreach (var flushGroup in flushGroups)
 			{
 				for (var desiredCount = flushGroup.Count; desiredCount >= _rule.MinFlushStraightCount; desiredCount--)
 				{
-					var flushStraightPermutes = new List<List<SimPokerCard>>();
-					var flushOnlyPermutes = new List<List<SimPokerCard>>();
+					var flushStraightPermutes = new List<List<BasePokerCard>>();
+					var flushOnlyPermutes = new List<List<BasePokerCard>>();
 					
 					// To consider more general case for flush pairs, we need following codes to cluster them.
 					//var wrapperListInList = flushGroup.Select(item => new List<PokerCard> { item }).ToList();
@@ -391,14 +391,14 @@ namespace GenericPoker.CardSimStatAnalysis
 						.Select(group => group.ToList()) // Convert each group into a list
 						.ToList(); //
 					
-					ProcessPermuteStraight(desiredCount, wrapperListInList, new List<SimPokerCard>(), flushStraightPermutes);
+					ProcessPermuteStraight(desiredCount, wrapperListInList, new List<BasePokerCard>(), flushStraightPermutes);
 
 					if (flushStraightPermutes.Count > 0) { // Yes we have straight in suit group which implies @@flush-straight@@
 						var handType = DetermineCompType(desiredCount, CompType.FlushStraight);
 						if (handType == SimCardsCompType.None) continue;
 						foreach (var permute in flushStraightPermutes)
 						{
-							var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard>
+							var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
 								{ CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							var newRemainCards =
@@ -411,7 +411,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						}
 					} else { // no we don't have straight in suit group which implies @@flush@@
 
-						flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<SimPokerCard>(flushGroup, desiredCount));
+						flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<BasePokerCard>(flushGroup, desiredCount));
 						
 						
 						foreach (var permute in flushOnlyPermutes)
@@ -422,7 +422,7 @@ namespace GenericPoker.CardSimStatAnalysis
 							
 							var handType = DetermineCompTypeWithPairInFlush(desiredCount, CompType.Flush, pairCount);
 							if (handType == SimCardsCompType.None) continue;
-							var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard> { CompRank = handType, Cards = permute };
+							var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							// TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
 							// when do hash set, two J-spade will become single one.
@@ -449,7 +449,7 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="results">Output list of complete hand structures.</param>
 		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
-		private bool ArrangeStraightComps(List<List<List<SimPokerCard>>> allStraightClusters, List<SimPokerCard> remainingCards,
+		private bool ArrangeStraightComps(List<List<List<BasePokerCard>>> allStraightClusters, List<BasePokerCard> remainingCards,
             SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
           
@@ -463,13 +463,13 @@ namespace GenericPoker.CardSimStatAnalysis
                     for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
                     {
                         var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
-                        var allPermutes = new List<List<SimPokerCard>>();
+                        var allPermutes = new List<List<BasePokerCard>>();
                         var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
                         if (handType == SimCardsCompType.None) continue;
-                        RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster, new List<SimPokerCard>(), allPermutes);
+                        RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster, new List<BasePokerCard>(), allPermutes);
                         foreach (var permute in allPermutes)
                         {
-                            var newHandCandidateData = new PokerCardComponent<SimCardsCompType, SimPokerCard> { CompRank = handType, Cards = permute };
+                            var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
                             currentHandCandidates.AddComp(newHandCandidateData);
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
@@ -486,7 +486,7 @@ namespace GenericPoker.CardSimStatAnalysis
         }
         
         
-        private List<List<SimPokerCard>> GetKindGroups(int minCardCountInGroup, List<SimPokerCard> noneJokerCards)
+        private List<List<BasePokerCard>> GetKindGroups(int minCardCountInGroup, List<BasePokerCard> noneJokerCards)
         {
 	        var numberGroups = GetNumberGroups(minCardCountInGroup, noneJokerCards);
 	        numberGroups.Sort((x, y) => y.Count.CompareTo(x.Count));
@@ -499,12 +499,12 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="minCardCountInGroup">Minimum number of cards of the same suit required.</param>
 		/// <param name="allPokerCards">The collection of cards to evaluate.</param>
 		/// <returns>A list of card groups, each containing cards of the same suit, ordered by group size.</returns>
-		private List<List<SimPokerCard>> _evaluateFlushGroups(int minCardCountInGroup, List<SimPokerCard> allPokerCards)
+		private List<List<BasePokerCard>> _evaluateFlushGroups(int minCardCountInGroup, List<BasePokerCard> allPokerCards)
 		{
 
 			var sortedList = allPokerCards.OrderByDescending(item => item.PokerCardPower).ToList();
 
-			var suitGroups = new List<List<SimPokerCard>>();
+			var suitGroups = new List<List<BasePokerCard>>();
 
 
 			// sort the Enum entry list by its associated values. also filter out other PokerSuit, and only 4 normal suits
@@ -519,7 +519,7 @@ namespace GenericPoker.CardSimStatAnalysis
 			foreach (var pokerSuit in sortedEnumValues)
 			{
 				//List <PokerCard> sameSuitCards = sortedList.FindAll(e => ((int)e.Suit & (int)pokerSuit) != 0 );
-				List<SimPokerCard> sameSuitCards = sortedList.FindAll(e => e.Suit == pokerSuit);
+				List<BasePokerCard> sameSuitCards = sortedList.FindAll(e => e.Suit == pokerSuit);
 				if (sameSuitCards.Count > 0)
 				{
 					suitGroups.Add(sameSuitCards);
@@ -544,20 +544,20 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="straightCount">The minimum required length for a straight.</param>
         /// <param name="kindGroupList">List of cards grouped by their numerical rank.</param>
         /// <returns>A list of clusters, where each cluster is a list of consecutive rank groups.</returns>
-        private List<List<List<SimPokerCard>>> GetAllStraightCluster(int straightCount, List<List<SimPokerCard>> kindGroupList)
+        private List<List<List<BasePokerCard>>> GetAllStraightCluster(int straightCount, List<List<BasePokerCard>> kindGroupList)
         {
 	        if (kindGroupList.Count == 0)
 	        {
-		        return new List<List<List<SimPokerCard>>>();
+		        return new List<List<List<BasePokerCard>>>();
 	        } 
 	        // if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
 	        // so that to let 3,2,1 straight become available.
 	        if (kindGroupList[0][0] is AcePokerCard)
 	        {
-		        var newKindGroup = new List<SimPokerCard>();
+		        var newKindGroup = new List<BasePokerCard>();
 		        foreach (var ace in kindGroupList[0])
 		        {
-			        var newAce = SimPokerCard.CreateInstance(ace);
+			        var newAce = BasePokerCard.CreateInstance(ace);
 			        ((IJokerStraightable)newAce).SetStraightSub(1);
 			        newKindGroup.Add(newAce);
 		        }
@@ -566,10 +566,10 @@ namespace GenericPoker.CardSimStatAnalysis
 			
 	        // Clustering numberGroups
 	        var numberClusters = kindGroupList
-		        .Aggregate(new List<List<List<SimPokerCard>>>(), (acc, numGroup) =>
+		        .Aggregate(new List<List<List<BasePokerCard>>>(), (acc, numGroup) =>
 		        {
 			        if (acc.Count == 0 || acc.Last().Last()[0].Number - numGroup[0].Number != 1)
-				        acc.Add(new List<List<SimPokerCard>> { numGroup });
+				        acc.Add(new List<List<BasePokerCard>> { numGroup });
 			        else
 				        acc.Last().Add(numGroup);
 			        return acc;

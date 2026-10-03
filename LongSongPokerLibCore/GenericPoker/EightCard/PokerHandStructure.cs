@@ -11,8 +11,8 @@ namespace GenericPoker.EightCard
 	// That is this class constitutied the PokerCardCompoenents, and the remaining nothing cards. The atomic/smallest component is a pair.
 	public class PokerHandStructure : IComparable<PokerHandStructure>
 	{
-		public readonly List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> Components;
-		public List<EightCardPokerCard> remainingCards;
+		public readonly List<PokerCardComponent<EightCardsCompType, BasePokerCard>> Components;
+		public List<BasePokerCard> remainingCards;
 		
 		public string FinalCompsStr = "";
 
@@ -111,34 +111,34 @@ namespace GenericPoker.EightCard
 		
 		private void Init()
 		{
-			remainingCards = new List<EightCardPokerCard>();
+			remainingCards = new List<BasePokerCard>();
 			//_battleHands = new List<EightCardSubBattleHand>();
 		}
 		public PokerHandStructure()
 		{
-			Components = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
+			Components = new List<PokerCardComponent<EightCardsCompType, BasePokerCard>>();
 			Init();
 		}
 
 		public PokerHandStructure(PokerHandStructure other)
 		{
-			Components = new List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>>();
+			Components = new List<PokerCardComponent<EightCardsCompType, BasePokerCard>>();
 			Components.AddRange(other.Components);
 			Init();
 		}
 
-		public PokerHandStructure(List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> components)
+		public PokerHandStructure(List<PokerCardComponent<EightCardsCompType, BasePokerCard>> components)
 		{
 			Components = components;
 			Init();
 		}
 
-		public void AddComp(PokerCardComponent<EightCardsCompType, EightCardPokerCard> newComponent)
+		public void AddComp(PokerCardComponent<EightCardsCompType, BasePokerCard> newComponent)
 		{
 			Components.Add(newComponent);
 		}
 
-		public void SetRemainingCards(List<EightCardPokerCard> inputRemaining)
+		public void SetRemainingCards(List<BasePokerCard> inputRemaining)
 		{
 			remainingCards.AddRange(inputRemaining);
 		}

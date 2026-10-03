@@ -113,7 +113,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [Test, TestCaseSource(nameof(EightCardSimHandTypeTestData))]
         public void EightCardTestSimHandType(string inputCardStr, string expectedHandType)
         {
-            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
+            var cards = inputCardStr.Split(',').Select(s => BasePokerCard.CreateInstance(s.Trim())).ToList();
             //var calculator = new SimPokerHandCalculator();
             var calculator = new SimStatEstimator();
             calculator.SetupCards(cards);
@@ -128,7 +128,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [Test, TestCaseSource(nameof(NineCardSimHandTypeTestData))]
         public void NineCardTestSimHandType(string inputCardStr, string expectedHandType)
         {
-            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
+            var cards = inputCardStr.Split(',').Select(s => BasePokerCard.CreateInstance(s.Trim())).ToList();
             //var calculator = new SimPokerHandCalculator();
             var calculator = new SimStatEstimator();
             calculator.SetupCards(cards);

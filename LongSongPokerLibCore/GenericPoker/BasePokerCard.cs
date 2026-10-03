@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GenericPoker.EightCard;
+using System.Globalization;
 
 namespace GenericPoker
 {
@@ -43,10 +44,40 @@ namespace GenericPoker
 			{"✖️", PokerSuit.NoSuit}, {"♣️", PokerSuit.Club}, {"🔶", PokerSuit.Diamond }, {"❤️", PokerSuit.Heart}, 
 			{"♠️", PokerSuit.Spade}, {"⭐",  PokerSuit.Star}, {"🃏", PokerSuit.Wild},
 		};
+		
+		public enum PokerCardRangeGroup
+		{
+			Royal = 0b0100,
+			MiddleClass = 0b010,
+			LowerClass = 0b001,
+		}
+		
+		public static readonly Dictionary<PokerCardRangeGroup, (int, int)> MatchCardRangeNumberGroupDict = new Dictionary<PokerCardRangeGroup, (int, int)>
+		{
+			{ PokerCardRangeGroup.Royal, (10,14) },
+			{ PokerCardRangeGroup.MiddleClass, (6,9)},
+			{ PokerCardRangeGroup.LowerClass, (1,5) },
+		};
+		
 	}
 	
 	
-    public class BasePokerCard :  IComparable<BasePokerCard> // IEquatable<PokerCard> // 
+	public class PokerCardComparer : IEqualityComparer<BasePokerCard>
+	{
+		public bool Equals(BasePokerCard x, BasePokerCard y)
+		{
+			bool retBool = x.Equals(y);
+			if (!retBool) return false;
+			return x.DeckID == y.DeckID; 
+		}
+
+		public int GetHashCode(BasePokerCard obj)
+		{
+			return 1;
+		}
+	}
+	
+    public class BasePokerCard :  IComparable<BasePokerCard>  // IEquatable<PokerCard> // 
 	{
 		// This cardID will be unique ID to differentiated between cards?
 		protected int _cardID;
@@ -78,6 +109,10 @@ namespace GenericPoker
 		// This string is used for unit test for unit test inspection, Joker will override this.
 		// For the regular poker card, it's as same as CardStr.
 		public virtual string CardUnitTestStr => CardStr;
+		
+		// Consider how many Joker's to count the maximum number of ModulatorScale.
+		// This is majorly used for count the hand power whenever need to compare card to card by using decimal concepts.
+		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*PokerHandCalculator.MaxPokerNumber;
 
 		public int ObjectID
 		{
@@ -91,24 +126,7 @@ namespace GenericPoker
 			set { _deckID = value; } // Setter: sets the value of _objectID
 		}
 		
-		protected void Init(int id, int number, PokerSuit suit, int objectID, int deckID)
-		{
-			_cardID = id;
-			this._number = number;
-			this._suit = suit;
-			_objectID = objectID;
-			_deckID = deckID;
-		}
-
-		
-/*
-		public virtual bool MatchSuit(PokerSuit inputSuit)
-		{
-			return ((int)_suit & (int)inputSuit) != 0;
-		}
-*/
-
-		//public virtual bool IsNumberable => true;
+		public virtual bool IsNumberable => true;
 		
 		
 		// If we have last element of PokerSuit is Wild which has associated 31 value, then below will be 1/32. Using
@@ -121,6 +139,72 @@ namespace GenericPoker
 		// Ex: 7-Spade will be the power 7+8*(1/32) = 7+1/4, (Spade suit id is 4), and 7-club is 7+1*0.25 = 7+1/32.
 		//public virtual float PokerCardPower => BiggerNumber + (float)_suit * PokerCardPokerSuitModulationRatio;
 		public virtual float PokerCardPower => Number + (float)_suit * PokerCardPokerSuitModulationRatio;
+		
+		// to store poker Range group bits. Ex: Ace is like mini joker, will have 2 bits, (Royal and Lower class bits),
+		// other card will only have 1 bit
+		private int _pokerRangeGroupBits;
+		
+		
+		protected void Init(int id, int number, PokerSuit suit, int objectID, int deckID)
+		{
+			_cardID = id;
+			this._number = number;
+			this._suit = suit;
+			_objectID = objectID;
+			_deckID = deckID;
+		}
+
+		public static BasePokerCard CreateInstance(int id, int number, PokerSuit pokerSuit, int objectID = 0, int deckID = 1)
+		{
+			// TODO , will enable below remarks later.
+			//return null;
+			
+			var data = number == PokerConst.AceBigNumber ? 
+				new AcePokerCard() : new BasePokerCard();
+		
+			data.Init(id, number, pokerSuit, objectID, deckID);
+			return data;
+		}
+		
+		// The input string would be like 10♣️, or A♣️, since we don't know if first number has one or two chars, so
+		// we leverage "♣️" has always return "one" for length even these symbol actually occupy two bytes for uni-code.
+		private static (string value, string suit) SplitCard(string input)
+		{
+			// Use StringInfo to safely iterate over grapheme clusters
+			var si = new StringInfo(input);
+			int totalElements = si.LengthInTextElements;
+
+			// Assume the suit is always the last grapheme cluster
+			string suit = si.SubstringByTextElements(totalElements - 1);
+			string value = si.SubstringByTextElements(0, totalElements - 1);
+
+			return (value, suit);
+		}
+		
+		// The input pokerCardStr needs to be in the form like 10♣️, or A❤️, etc.
+		public static BasePokerCard CreateInstance(string pokerCardStr, int objectID = 0, int deckID = 1)
+		{
+			// TODO , will enable below remarks later.
+			
+			
+			var (numStr, suitSymbol) = SplitCard(pokerCardStr);
+			
+			var data = numStr == "A" ? new AcePokerCard() : new BasePokerCard();
+			
+			var number = PokerConst.PokerStringToNumberDict[numStr];
+			
+			var suit = PokerConst.SymbolToPokerSuit[suitSymbol];
+			var id = ((int)suit - 1) * PokerConst.MaxTotalCountInSameSuit + number;
+			data.Init(id, number, suit, objectID, deckID);
+			data._computePokerRangeGroup();
+			return data; 
+		}
+		
+		public static BasePokerCard CreateInstance(BasePokerCard another)
+		{
+			return CreateInstance(another._cardID, another._number, another._suit, another.ObjectID, deckID: another.DeckID);
+		}
+
 		
 		
 		// This function is for straight evaluation.
@@ -219,6 +303,26 @@ namespace GenericPoker
 				retNumber = PokerConst.AceBigNumber;
 			}
 			return 20*(int)_suit+retNumber;
+		}
+		
+		private void _computePokerRangeGroup()
+		{
+			_pokerRangeGroupBits = 0b0000;
+			if (_number == 1) // ace case
+			{
+				_pokerRangeGroupBits = 0b0101;
+				return;
+			}
+			foreach (PokerConst.PokerCardRangeGroup rangeGroup in Enum.GetValues(typeof(PokerConst.PokerCardRangeGroup)) )
+			{
+				var lowerRange = PokerConst.MatchCardRangeNumberGroupDict[rangeGroup].Item1;
+				var upperRange = PokerConst.MatchCardRangeNumberGroupDict[rangeGroup].Item2;
+				if (_number >= lowerRange && _number <= upperRange)
+				{
+					_pokerRangeGroupBits |= (int)rangeGroup;
+					break;
+				}
+			}
 		}
 	}
 }

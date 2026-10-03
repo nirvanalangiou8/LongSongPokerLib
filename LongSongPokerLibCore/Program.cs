@@ -182,7 +182,7 @@ namespace LongSongPokerLibCore
         static void DebugSimHandType()
         {
             var inputCardStr = "2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,4❤️,4♣️";
-            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
+            var cards = inputCardStr.Split(',').Select(s => BasePokerCard.CreateInstance(s.Trim())).ToList();
             var calculator = new SimStatEstimator();
             calculator.SetupCards(cards);
             var results = calculator.TestSimCards();

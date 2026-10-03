@@ -14,13 +14,13 @@ namespace GenericPoker.EightCard
 		}
 		
 		(EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps);
+			List<PokerCardComponent<EightCardsCompType, BasePokerCard>> comps);
 	}
 
 	public class BalancedStrategy : IBattleHandArrangeStrategy
 	{
 		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps)
+			List<PokerCardComponent<EightCardsCompType, BasePokerCard>> comps)
 		{
 			EightCardSubBattleHand firstEightCardSubBattleHand = null;
 			EightCardSubBattleHand secondEightCardSubBattleHand = null;
@@ -61,7 +61,7 @@ namespace GenericPoker.EightCard
 	{
 
 		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps)
+			List<PokerCardComponent<EightCardsCompType, BasePokerCard>> comps)
 		{
 			EightCardSubBattleHand firstEightCardSubBattleHand = null;
 			EightCardSubBattleHand secondEightCardSubBattleHand = null;
@@ -242,7 +242,7 @@ namespace GenericPoker.EightCard
 		}
 
 		// 取得某 component 的代表點位 (最大張的點數，2~14)。
-		private static int RepRank(PokerCardComponent<EightCardsCompType, EightCardPokerCard> comp)
+		private static int RepRank(PokerCardComponent<EightCardsCompType, BasePokerCard> comp)
 		{
 			int best = 2;
 			foreach (var card in comp.Cards)
@@ -380,7 +380,7 @@ namespace GenericPoker.EightCard
 		}
 
 		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps)
+			List<PokerCardComponent<EightCardsCompType, BasePokerCard>> comps)
 		{
 			EightCardSubBattleHand bestFirst = null;
 			EightCardSubBattleHand bestSecond = null;
@@ -484,7 +484,7 @@ namespace GenericPoker.EightCard
 	public class RuleTableStrategy : IBattleHandArrangeStrategy
 	{
 		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> comps)
+			List<PokerCardComponent<EightCardsCompType, BasePokerCard>> comps)
 		{
 			EightCardSubBattleHand firstEightCardSubBattleHand = null;
 			EightCardSubBattleHand secondEightCardSubBattleHand = null;

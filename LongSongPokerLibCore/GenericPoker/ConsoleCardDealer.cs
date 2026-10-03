@@ -39,7 +39,7 @@ namespace GenericPoker
                         }
                         else
                         {
-                            newPokerCard = EightCardPokerCard.CreateInstance(id, number, pokerSuit, 0, deckID: i + 1);
+                            newPokerCard = BasePokerCard.CreateInstance(id, number, pokerSuit, 0, deckID: i + 1);
                         }
                         _pokerCards.Add(newPokerCard);
                     }

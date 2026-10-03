@@ -6,20 +6,20 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class SimPokerHandStructure : IComparable<SimPokerHandStructure>
     {
-        public readonly List<PokerCardComponent<SimCardsCompType, SimPokerCard>> Components;
-        public List<SimPokerCard> remainingCards;
+        public readonly List<PokerCardComponent<SimCardsCompType, BasePokerCard>> Components;
+        public List<BasePokerCard> remainingCards;
         public string FinalCompsStr;
 
         public SimPokerHandStructure()
         {
-            Components = new List<PokerCardComponent<SimCardsCompType, SimPokerCard>>();
-            remainingCards = new List<SimPokerCard>();
+            Components = new List<PokerCardComponent<SimCardsCompType, BasePokerCard>>();
+            remainingCards = new List<BasePokerCard>();
         }
 
         public SimPokerHandStructure(SimPokerHandStructure other)
         {
-            Components = new List<PokerCardComponent<SimCardsCompType, SimPokerCard>>(other.Components);
-            remainingCards = new List<SimPokerCard>(other.remainingCards);
+            Components = new List<PokerCardComponent<SimCardsCompType, BasePokerCard>>(other.Components);
+            remainingCards = new List<BasePokerCard>(other.remainingCards);
         }
 
         public void Clear()
@@ -28,7 +28,7 @@ namespace GenericPoker.CardSimStatAnalysis
             remainingCards.Clear();
         }
         
-        public void AddComp(PokerCardComponent<SimCardsCompType, SimPokerCard> newComponent)
+        public void AddComp(PokerCardComponent<SimCardsCompType, BasePokerCard> newComponent)
         {
             Components.Add(newComponent);
         }
@@ -52,7 +52,7 @@ namespace GenericPoker.CardSimStatAnalysis
             FinalCompsStr = string.Join("_", compTypeCountsList);
         }
 
-        public void SetRemainingCards(List<SimPokerCard> inputRemaining)
+        public void SetRemainingCards(List<BasePokerCard> inputRemaining)
         {
             remainingCards.AddRange(inputRemaining);
         }

@@ -53,7 +53,11 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             // Normalize newlines for cross-platform comparison
             string normalizedActual = csvResult.Replace("\r\n", "\n").TrimEnd();
+            //help my write out normalizedActual into a file
+            File.WriteAllText("normalizedActual.txt", normalizedActual);
+
             string normalizedExpected = expectedResult.Replace("\r\n", "\n").TrimEnd();
+            File.WriteAllText("normalizedExpected.txt", normalizedExpected);
 
             Assert.That(normalizedActual, Is.EqualTo(normalizedExpected));
         }

@@ -15,7 +15,7 @@ namespace GenericPoker.CardSimStatAnalysis
 
         public List<SimPokerHandStructure> ProcessSimHands()
         {
-            var simCards = _pokerCards.Select(c => c as SimPokerCard ?? SimPokerCard.CreateInstance(c.CardStr)).ToList();
+            var simCards = _pokerCards.Select(c => c as BasePokerCard ?? BasePokerCard.CreateInstance(c.CardStr)).ToList();
             _pokerHandCalculator.SetupCards(simCards);
             return _pokerHandCalculator.TestSimCards();
         }

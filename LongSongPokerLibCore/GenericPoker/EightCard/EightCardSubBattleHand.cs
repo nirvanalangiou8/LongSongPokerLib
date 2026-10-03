@@ -59,7 +59,7 @@ namespace GenericPoker.EightCard
     }
     
     
-    public class EightCardSubBattleHand : BaseSubBattleHand <EightCardPokerCard>
+    public class EightCardSubBattleHand : BaseSubBattleHand <BasePokerCard>
     {
         
         public static readonly Dictionary<(BattleHandEnum, EightCardsBattleHandRank), int> EightCardsBattleHandPowerDict =
@@ -125,18 +125,18 @@ namespace GenericPoker.EightCard
         private BattleHandEnum _battleHandEnum;
         //private List<PokerCard> _cards;
         private EightCardsBattleHandRank _battleHandRank;
-        private List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> _components;
+        private List<PokerCardComponent<EightCardsCompType, BasePokerCard>> _components;
 
         //public override int HandPower => EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
         public EightCardsBattleHandRank BattleHandRank => _battleHandRank;
-        public List<PokerCardComponent<EightCardsCompType, EightCardPokerCard>> Components => _components;
+        public List<PokerCardComponent<EightCardsCompType, BasePokerCard>> Components => _components;
         
         private void Init()
         {
             _components = [];
         }
         public EightCardSubBattleHand(BattleHandEnum battleHandEnum, EightCardsBattleHandRank inputRank, 
-            params PokerCardComponent<EightCardsCompType, EightCardPokerCard>[] inputCombos)
+            params PokerCardComponent<EightCardsCompType, BasePokerCard>[] inputCombos)
         {
             Init();
             foreach(var comp in inputCombos)
@@ -149,9 +149,9 @@ namespace GenericPoker.EightCard
             _handPower = EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
         }
 
-        public List<EightCardPokerCard> AddMinorCards(List<EightCardPokerCard> remainingCards)
+        public List<BasePokerCard> AddMinorCards(List<BasePokerCard> remainingCards)
         {
-            var retCards = new List<EightCardPokerCard>(remainingCards);
+            var retCards = new List<BasePokerCard>(remainingCards);
             foreach (var card in remainingCards)
             {
                 if (Cards.Count >= (int)_battleHandEnum) break;
@@ -162,16 +162,16 @@ namespace GenericPoker.EightCard
         }
         
         
-        public List<EightCardPokerCard> AddOneMinorCard(List<EightCardPokerCard> remainingCards)
+        public List<BasePokerCard> AddOneMinorCard(List<BasePokerCard> remainingCards)
         {
-            var retCards = new List<EightCardPokerCard>(remainingCards);
+            var retCards = new List<BasePokerCard>(remainingCards);
             if (remainingCards.Count == 0 || Cards.Count >= (int)_battleHandEnum) return retCards;
             Cards.Add(retCards[0]);
             retCards.RemoveAt(0);
             return retCards;
         }
         
-        public override int CompareTo(BaseSubBattleHand<EightCardPokerCard> other)
+        public override int CompareTo(BaseSubBattleHand<BasePokerCard> other)
         {
             if (other == null) return 1;
             

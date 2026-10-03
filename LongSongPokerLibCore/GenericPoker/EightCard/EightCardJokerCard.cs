@@ -14,7 +14,7 @@ namespace GenericPoker
     
     
 
-    public class AceCard : EightCardPokerCard , IJokerStraightable
+    public class AceCard_old : BasePokerCard , IJokerStraightable
     {
         private int _replacedNumber = 0;
         public int JokerPower => 100; // High value means low priority in sorting compared to real jokers
@@ -28,7 +28,7 @@ namespace GenericPoker
         }
         
 /*
-        public override int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
+        public override int DecideBestFourCardAceNumber(BasePokerCard anotherCard)
         {
             var retPts = 0;
             var totalPts1 = (14 + anotherCard.Number) % 10;
@@ -58,7 +58,7 @@ namespace GenericPoker
     }
     
     
-    public class EightCardJokerCard : EightCardPokerCard, IJoker
+    public class EightCardJokerCard : BasePokerCard, IJoker
     {
         protected JokerType _jokerType;
 
