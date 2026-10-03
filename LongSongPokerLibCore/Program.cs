@@ -178,7 +178,58 @@ namespace LongSongPokerLibCore
 
             Console.WriteLine("\n==========================");
         }
+        
+        static void DebugSimHandType()
+        {
+            var inputCardStr = "2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,4❤️,4♣️";
+            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
+            var calculator = new SimStatEstimator();
+            calculator.SetupCards(cards);
+            var results = calculator.TestSimCards();
 
+            string foundTypes = string.Join(", ", results.Select(r => r.FinalCompsStr));
+            Console.WriteLine($"Input Cards: {inputCardStr}");
+            Console.WriteLine($"Found types: {foundTypes}");
+            foreach (var r in results)
+            {
+                Console.WriteLine($"Result Hand Type: {r.FinalCompsStr}");
+            }
+        }
+
+        static void TestHandSplit()
+        {
+            Console.WriteLine("Hello World!");
+            
+            //var inputCardStr = "J♣️,J🔶,3♣️,5��️,6♣️,A♣️,A❤️,A♠️";
+            //var inputCardStr = "J♣️,J🔶,3♣️,6♣️,6❤️,A♣️,A❤️,A♠️";
+            //var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3♣️,2♣️,A♣️";
+            var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♣️,2♣️"; // test for four pairs.
+            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
+            
+            //var handRes = pokerHand.Test8Cards();
+            
+            pokerHand.MinFlushStraightCards = 3;
+            var resHand = pokerHand.Test8CardsTwoHandsDeploy();
+
+            // Display front hand result
+            Console.WriteLine("\n=== Front Hand ===");
+            Console.WriteLine($"Rank: {resHand.FrontHand.BattleHandRank}");
+            Console.Write("Cards: ");
+            Console.WriteLine(resHand.FrontHand.GetHandString());
+
+            // Display back hand result
+            Console.WriteLine("\n=== Back Hand ===");
+            Console.WriteLine($"Rank: {resHand.BackHand.BattleHandRank}");
+            Console.Write("Cards: ");
+            Console.WriteLine(resHand.BackHand.GetHandString());
+
+            Console.WriteLine("\nSuccessfully created poker hand and deployed.");
+        }
+    }
+}
+
+
+/*
         public static class PokerEvaluator
         {
             // 假設這是在你統計圖表上查到的 CDF 邊界值
@@ -341,52 +392,4 @@ namespace LongSongPokerLibCore
                 return PokerMath.GetUnifiedWinRate(offsets, schema, 0.6450, 0.8154);
             }
         }
-
-        static void DebugSimHandType()
-        {
-            var inputCardStr = "2❤️,2♣️,2♠️,2🔶,3❤️,3♣️,4❤️,4♣️";
-            var cards = inputCardStr.Split(',').Select(s => SimPokerCard.CreateInstance(s.Trim())).ToList();
-            var calculator = new SimStatEstimator();
-            calculator.SetupCards(cards);
-            var results = calculator.TestSimCards();
-
-            string foundTypes = string.Join(", ", results.Select(r => r.FinalCompsStr));
-            Console.WriteLine($"Input Cards: {inputCardStr}");
-            Console.WriteLine($"Found types: {foundTypes}");
-            foreach (var r in results)
-            {
-                Console.WriteLine($"Result Hand Type: {r.FinalCompsStr}");
-            }
-        }
-
-        static void TestHandSplit()
-        {
-            Console.WriteLine("Hello World!");
-            
-            //var inputCardStr = "J♣️,J🔶,3♣️,5��️,6♣️,A♣️,A❤️,A♠️";
-            //var inputCardStr = "J♣️,J🔶,3♣️,6♣️,6❤️,A♣️,A❤️,A♠️";
-            //var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3♣️,2♣️,A♣️";
-            var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♣️,2♣️"; // test for four pairs.
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            
-            var handRes = pokerHand.Test8Cards();
-            
-            pokerHand.MinFlushStraightCards = 3;
-            var resHand = pokerHand.Test8CardsTwoHandsDeploy();
-
-            // Display front hand result
-            Console.WriteLine("\n=== Front Hand ===");
-            Console.WriteLine($"Rank: {resHand.FrontHand.BattleHandRank}");
-            Console.Write("Cards: ");
-            Console.WriteLine(resHand.FrontHand.GetHandString());
-
-            // Display back hand result
-            Console.WriteLine("\n=== Back Hand ===");
-            Console.WriteLine($"Rank: {resHand.BackHand.BattleHandRank}");
-            Console.Write("Cards: ");
-            Console.WriteLine(resHand.BackHand.GetHandString());
-
-            Console.WriteLine("\nSuccessfully created poker hand and deployed.");
-        }
-    }
-}
+        */

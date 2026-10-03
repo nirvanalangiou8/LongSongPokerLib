@@ -24,14 +24,7 @@ namespace GenericPoker.CardSimStatAnalysis
     
     public class SimPokerCard :  BasePokerCard  // IEquatable<PokerCard> //
 	{
-		/*
-		public static readonly Dictionary<PokerCardRangeGroup, (int, int)> MatchCardRangeNumberGroupDict = new Dictionary<PokerCardRangeGroup, (int, int)>
-		{
-			{ PokerCardRangeGroup.Royal, (10,14) },
-			{ PokerCardRangeGroup.MiddleClass, (6,9)},
-			{ PokerCardRangeGroup.LowerClass, (1,5) },
-		};*/
-    
+
 		
 		// Consider how many Joker's to count the maximum number of ModulatorScale.
 		// This is majorly used for count the hand power whenever need to compare card to card by using decimal concepts.

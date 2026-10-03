@@ -219,7 +219,7 @@ namespace GenericPoker.EightCard
 			return uniqueCandidates;
 		}
 
-		public EightCardHands Test8CardsTwoHandsDeploy()
+		public BaseCardHands Test8CardsTwoHandsDeploy()
 		{
 			var allCandidateComps = new List<PokerHandStructure>();
 			
@@ -232,7 +232,7 @@ namespace GenericPoker.EightCard
 			var arrangeStrategy = new BalancedStrategy();
 			
 			
-			var allPokerHands = new List<EightCardHands>();
+			var allPokerHands = new List<BaseCardHands>();
 			foreach (var pokerStructure in uniqueCandidates)
 				allPokerHands.Add(pokerStructure.ArrangeHands(arrangeStrategy));
 			

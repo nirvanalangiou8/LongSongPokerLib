@@ -45,7 +45,7 @@ namespace GenericPoker.EightCard
 			return EightCardsBattleHandRank.Nothing;
 		}
 			
-		public EightCardHands ArrangeHands(IBattleHandArrangeStrategy strategy)
+		public BaseCardHands ArrangeHands(IBattleHandArrangeStrategy strategy)
 		{
 			EightCardSubBattleHand firstEightCardSubBattleHand;
 			EightCardSubBattleHand secondEightCardSubBattleHand;
@@ -106,7 +106,7 @@ namespace GenericPoker.EightCard
 				Console.WriteLine("Fatal errors");
 			}	
 			
-			return new EightCardHands(firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+			return new BaseCardHands(firstEightCardSubBattleHand, secondEightCardSubBattleHand);
 		}
 		
 		private void Init()
