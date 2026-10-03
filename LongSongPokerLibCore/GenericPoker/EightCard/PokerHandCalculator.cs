@@ -160,7 +160,7 @@ namespace GenericPoker.EightCard
 
 			foreach (var card in _allPokerCards)
 			{
-				if (card is EightCardJokerCard) _jokerCards.Add(card);
+				if (card is BaseJokerCard) _jokerCards.Add(card);
 				else _noneJokerCards.Add(card);
 			}
 		}
@@ -184,7 +184,7 @@ namespace GenericPoker.EightCard
 				// So we need the second check to ensure it's real enum string matched.
 				if (Enum.TryParse<JokerType>(splitDeckStrs[0], out var jokerType) && Enum.IsDefined(typeof(JokerType), jokerType))
 				{
-					newCardList.Add(EightCardJokerCard.CreateInstance(jokerType, deckID: deckNumber));
+					newCardList.Add(BaseJokerCard.CreateInstance(jokerType, deckID: deckNumber));
 				} else {
 					newCardList.Add(BasePokerCard.CreateInstance(splitDeckStrs[0], deckID :deckNumber));
 				}
@@ -318,7 +318,7 @@ namespace GenericPoker.EightCard
 					foreach (var pair in straightableJokerCards.Zip(
 						         gapNumbers, (obj, num) => new { jokerCard = obj, Number = num }))
 					{
-						var newJoker = EightCardJokerCard.CreateInstance((EightCardJokerCard)pair.jokerCard);
+						var newJoker = BaseJokerCard.CreateInstance((BaseJokerCard)pair.jokerCard);
 						((IJokerStraightable)newJoker).SetStraightSub(pair.Number);
 						if (assignedSuit != PokerSuit.NoSuit && newJoker is IJokerFlushable)
 							((IJokerFlushable)newJoker).SetSuitSub(assignedSuit);
@@ -797,7 +797,7 @@ namespace GenericPoker.EightCard
 
 					foreach (var (jokerCard, index) in jokerCards.Select((value, i) => (value, i)))
 					{
-						var newJoker = EightCardJokerCard.CreateInstance((EightCardJokerCard)jokerCard);
+						var newJoker = BaseJokerCard.CreateInstance((BaseJokerCard)jokerCard);
 						((IJokerFlushable)newJoker).SetSuitSub(subSuit);
 						if (newJoker.IsNumberable)
 							((IJokerStraightable)newJoker).SetStraightSub(jokerReplacedNumCandidate[index]);
@@ -835,7 +835,7 @@ namespace GenericPoker.EightCard
 
 
 			flushableJokerCards =
-				flushableJokerCards.OrderByDescending(obj => ((EightCardJokerCard)obj).PokerCardPower).ToList();
+				flushableJokerCards.OrderByDescending(obj => ((BaseJokerCard)obj).PokerCardPower).ToList();
 
 
 			foreach (var gList in flushGroupLists)

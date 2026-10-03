@@ -14,7 +14,7 @@ namespace GenericPoker
     
     
 
-    public class AceCard_old : BasePokerCard , IJokerStraightable
+    public class AceCard : BasePokerCard , IJokerStraightable
     {
         private int _replacedNumber = 0;
         public int JokerPower => 100; // High value means low priority in sorting compared to real jokers
@@ -28,7 +28,7 @@ namespace GenericPoker
         }
         
 /*
-        public override int DecideBestFourCardAceNumber(BasePokerCard anotherCard)
+        public override int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
         {
             var retPts = 0;
             var totalPts1 = (14 + anotherCard.Number) % 10;
@@ -58,7 +58,7 @@ namespace GenericPoker
     }
     
     
-    public class EightCardJokerCard : BasePokerCard, IJoker
+    public class BaseJokerCard : BasePokerCard, IJoker
     {
         protected JokerType _jokerType;
 
@@ -68,14 +68,14 @@ namespace GenericPoker
 
         public int JokerPower => (int)_jokerType;
         
-        public static EightCardJokerCard CreateInstance(EightCardJokerCard another)
+        public static BaseJokerCard CreateInstance(BaseJokerCard another)
         {
             return CreateInstance(another._jokerType, another.ObjectID, deckID : another.DeckID);
         }
         
-        public static EightCardJokerCard CreateInstance(JokerType jokerType, int objectID = 0, int deckID = 1)
+        public static BaseJokerCard CreateInstance(JokerType jokerType, int objectID = 0, int deckID = 1)
         {
-            EightCardJokerCard data;
+            BaseJokerCard data;
             
             var id = PokerConst.TotalRegularPokerCardsWithoutJokers + (int)jokerType;
             
@@ -85,33 +85,33 @@ namespace GenericPoker
             switch (jokerType)
             {
                 case JokerType.MajorJoker:
-                    data = new EightCardJokerCardMajor();
+                    data = new BaseJokerCardMajor();
                     number = PokerConst.MaxTotalCountInSameSuit + (int)jokerType;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 case JokerType.MinorJoker:
-                    data = new EightCardJokerCardMinor();
+                    data = new BaseJokerCardMinor();
                     number = PokerConst.MaxTotalCountInSameSuit + (int)jokerType;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 case JokerType.SuitJoker:
-                    data = new EightCardJokerCardSuit();
+                    data = new BaseJokerCardSuit();
                     number = 0;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 case JokerType.StraightJoker:
-                    data = new EightCardJokerCardStraight();
+                    data = new BaseJokerCardStraight();
                     number = 0;
                     pokerSuit = PokerSuit.NoSuit;
                     break;
                 case JokerType.DrawCardJoker:
                     // TO BE REVISED
-                    data = new EightCardJokerCardSuit();
+                    data = new BaseJokerCardSuit();
                     number = 0;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 default:
-                    data = new EightCardJokerCardSuit();
+                    data = new BaseJokerCardSuit();
                     number = 0;
                     pokerSuit = PokerSuit.Wild;
                     break;
