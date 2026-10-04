@@ -193,9 +193,10 @@ namespace GenericPoker.CardSimStatAnalysis
             Console.WriteLine($"Results saved to {outputPath}");
         }
 
+        /*
         public static void SimCardRunStat(int totalIterations, int cardsPerHand, bool useParallel, string outputPath)
         {
             SimCardRunStat(outputPath, totalIterations, cardsPerHand, useParallel);
-        }
+        }*/
     }
 }

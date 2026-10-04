@@ -3,7 +3,7 @@ using GenericPoker;
 
 namespace GenericPoker.EightCard
 {
-    public class BaseCardHands : IComparable<BaseCardHands>
+    public class BaseBattleHands : IComparable<BaseBattleHands>
     {
         private EightCardSubBattleHand _firstHand;
         private EightCardSubBattleHand _secondHand;
@@ -13,13 +13,13 @@ namespace GenericPoker.EightCard
         public EightCardSubBattleHand FrontHand => _firstHand;
         public EightCardSubBattleHand BackHand => _secondHand;
 
-        public BaseCardHands(EightCardSubBattleHand firstHand, EightCardSubBattleHand secondHand)
+        public BaseBattleHands(EightCardSubBattleHand firstHand, EightCardSubBattleHand secondHand)
         {
             _firstHand = firstHand;
             _secondHand = secondHand;
         }
         
-        public int CompareTo(BaseCardHands other)
+        public int CompareTo(BaseBattleHands other)
         {
             if (other == null) return 1;
             if (_firstHand == other._firstHand && _secondHand == other._secondHand) return 0;
@@ -32,18 +32,18 @@ namespace GenericPoker.EightCard
             return 0;
         }
         
-        public static bool operator >(BaseCardHands left, BaseCardHands right) => left.CompareTo(right) > 0;
-        public static bool operator <(BaseCardHands left, BaseCardHands right) => left.CompareTo(right) < 0;
-        public static bool operator >=(BaseCardHands left, BaseCardHands right) => left.CompareTo(right) >= 0;
-        public static bool operator <=(BaseCardHands left, BaseCardHands right) => left.CompareTo(right) <= 0;
-        public static bool operator ==(BaseCardHands left, BaseCardHands right) => left?.Equals(right) ?? right is null;
-        public static bool operator !=(BaseCardHands left, BaseCardHands right) => !(left == right);
+        public static bool operator >(BaseBattleHands left, BaseBattleHands right) => left.CompareTo(right) > 0;
+        public static bool operator <(BaseBattleHands left, BaseBattleHands right) => left.CompareTo(right) < 0;
+        public static bool operator >=(BaseBattleHands left, BaseBattleHands right) => left.CompareTo(right) >= 0;
+        public static bool operator <=(BaseBattleHands left, BaseBattleHands right) => left.CompareTo(right) <= 0;
+        public static bool operator ==(BaseBattleHands left, BaseBattleHands right) => left?.Equals(right) ?? right is null;
+        public static bool operator !=(BaseBattleHands left, BaseBattleHands right) => !(left == right);
         
         
         // Override Equals and GetHashCode for proper equality checks
         public override bool Equals(object obj)
         {
-            if (obj is BaseCardHands other)
+            if (obj is BaseBattleHands other)
             {
                 if (TotalPower != other.TotalPower) return false;
                 else return true;

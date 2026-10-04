@@ -71,14 +71,10 @@ namespace GenericPoker.CardSimStatAnalysis
             _allPokerCards = new List<BasePokerCard>(inputPokerCardList);
         }
 
-        //static int counter = 0;
-        
+        /*
         public List<SimPokerHandStructure> TestSimCards()
         {
-
-            
-     
-            
+	        
             var allCandidateComps = new List<SimPokerHandStructure>();
         
             RecursiveArrangeHands(_allPokerCards, new SimPokerHandStructure(), allCandidateComps);
@@ -93,7 +89,7 @@ namespace GenericPoker.CardSimStatAnalysis
             
             return uniqueCandidates;
             
-        }
+        }*/
         
         
         /// <summary>
