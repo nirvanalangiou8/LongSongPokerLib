@@ -12,12 +12,12 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
     {
         private static string SplitHandToString(string handName, ICardRule? rule = null)
         {
-            List<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)> solutions;
+            List<(PokerOverAllHandRank Front, PokerOverAllHandRank Back)> solutions;
             if (handName == "Nothing")
             {
-                solutions = new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>
+                solutions = new List<(PokerOverAllHandRank, PokerOverAllHandRank)>
                 {
-                    (SimCardOverAllHandRank.Nothing, SimCardOverAllHandRank.Nothing)
+                    (PokerOverAllHandRank.Nothing, PokerOverAllHandRank.Nothing)
                 };
             }
             else

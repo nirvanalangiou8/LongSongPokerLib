@@ -9,7 +9,7 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class InitEightCardHandSplitProbAna
     {
-        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
+        public static (Dictionary<PokerOverAllHandRank, double> FrontStats, Dictionary<PokerOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
         {
             return Analyze(inputPath, outputPath, rule);
         }
@@ -115,7 +115,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return Path.Combine(sourceDir, "front_back_stats.csv");
         }
 
-        public static (Dictionary<SimCardOverAllHandRank, double> FrontStats, Dictionary<SimCardOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
+        public static (Dictionary<PokerOverAllHandRank, double> FrontStats, Dictionary<PokerOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
         {
             string resolvedInputPath = ResolveInputPath(inputPath);
             string resolvedOutputPath = ResolveOutputPath(outputPath, resolvedInputPath);
@@ -125,11 +125,11 @@ namespace GenericPoker.CardSimStatAnalysis
             if (!File.Exists(resolvedInputPath))
             {
                 Console.WriteLine($"Input file not found: {resolvedInputPath}");
-                return (new Dictionary<SimCardOverAllHandRank, double>(), new Dictionary<SimCardOverAllHandRank, double>());
+                return (new Dictionary<PokerOverAllHandRank, double>(), new Dictionary<PokerOverAllHandRank, double>());
             }
 
-            var frontHandStats = new Dictionary<SimCardOverAllHandRank, double>();
-            var backHandStats = new Dictionary<SimCardOverAllHandRank, double>();
+            var frontHandStats = new Dictionary<PokerOverAllHandRank, double>();
+            var backHandStats = new Dictionary<PokerOverAllHandRank, double>();
             long totalInputCount = 0;
 
             var lines = File.ReadAllLines(resolvedInputPath);
@@ -158,8 +158,8 @@ namespace GenericPoker.CardSimStatAnalysis
 
                 if (handName == "Nothing")
                 {
-                    backHandStats[SimCardOverAllHandRank.Nothing] = backHandStats.GetValueOrDefault(SimCardOverAllHandRank.Nothing) + count;
-                    frontHandStats[SimCardOverAllHandRank.Nothing] = frontHandStats.GetValueOrDefault(SimCardOverAllHandRank.Nothing) + count;
+                    backHandStats[PokerOverAllHandRank.Nothing] = backHandStats.GetValueOrDefault(PokerOverAllHandRank.Nothing) + count;
+                    frontHandStats[PokerOverAllHandRank.Nothing] = frontHandStats.GetValueOrDefault(PokerOverAllHandRank.Nothing) + count;
                     continue;
                 }
 
@@ -183,8 +183,8 @@ namespace GenericPoker.CardSimStatAnalysis
                 {
                     // If no valid split found (should not happen with legal hands), fallback to None
                     // This is for sanity check
-                    frontHandStats[SimCardOverAllHandRank.None] = frontHandStats.GetValueOrDefault(SimCardOverAllHandRank.None) + count;
-                    backHandStats[SimCardOverAllHandRank.None] = backHandStats.GetValueOrDefault(SimCardOverAllHandRank.None) + count;
+                    frontHandStats[PokerOverAllHandRank.None] = frontHandStats.GetValueOrDefault(PokerOverAllHandRank.None) + count;
+                    backHandStats[PokerOverAllHandRank.None] = backHandStats.GetValueOrDefault(PokerOverAllHandRank.None) + count;
                 }
             }
 
@@ -241,7 +241,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return comps.OrderByDescending(c => c.Power).ToList();
         }
 
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
             List<PokerComponents> comps,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
@@ -251,7 +251,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return SplitHand(comps, null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
         }
 
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
             List<PokerComponents> comps,
             ICardRule? rule,
             int minFlushStraightCards = -1,
@@ -259,7 +259,7 @@ namespace GenericPoker.CardSimStatAnalysis
             int minStraightCards = -1,
             int minKindCards = -1)
         {
-            if (comps == null || comps.Count == 0) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
+            if (comps == null || comps.Count == 0) return new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
 
             var effectiveRule = rule ?? comps.FirstOrDefault(c => c.Rule != null)?.Rule ?? EightCardRule.Default;
 
@@ -271,7 +271,7 @@ namespace GenericPoker.CardSimStatAnalysis
             // 2. Generate Cartesian Product of all candidate breakdowns across components.
             var candidateCombinations = PokerComponents.CartesianProduct(breakdownSequences);
 
-            var solutions = new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
+            var solutions = new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
 
             foreach (var combination in candidateCombinations)
             {
@@ -296,7 +296,7 @@ namespace GenericPoker.CardSimStatAnalysis
                         var backRank = effectiveRule.AssembleHandRank(backGroup);
 
                         // If either rank is None, it is an invalid split; skip it.
-                        if (frontRank == SimCardOverAllHandRank.None || backRank == SimCardOverAllHandRank.None) continue;
+                        if (frontRank == PokerOverAllHandRank.None || backRank == PokerOverAllHandRank.None) continue;
 
                         // Ensure back rank >= front rank (swap if necessary)
                         if ((int)frontRank > (int)backRank)
@@ -325,13 +325,13 @@ namespace GenericPoker.CardSimStatAnalysis
         /// Filters out candidate solutions that are dominated (obviously loser solutions).
         /// A solution (F2, B2) is dominated by (F1, B1) if F1 >= F2 and B1 >= B2, and at least one inequality is strict.
         /// </summary>
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> FilterDominatedSolutions(
-            IEnumerable<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)> solutions)
+        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> FilterDominatedSolutions(
+            IEnumerable<(PokerOverAllHandRank Front, PokerOverAllHandRank Back)> solutions)
         {
-            if (solutions == null) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
+            if (solutions == null) return new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
 
             var list = solutions.Distinct().ToList();
-            var filtered = new List<(SimCardOverAllHandRank Front, SimCardOverAllHandRank Back)>();
+            var filtered = new List<(PokerOverAllHandRank Front, PokerOverAllHandRank Back)>();
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -361,7 +361,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return filtered;
         }
 
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
             List<BaseCompType> compTypes,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
@@ -371,7 +371,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return SplitHand(compTypes, null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
         }
 
-        public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
+        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
             List<BaseCompType> compTypes,
             ICardRule? rule,
             int minFlushStraightCards = -1,
@@ -379,11 +379,11 @@ namespace GenericPoker.CardSimStatAnalysis
             int minStraightCards = -1,
             int minKindCards = -1)
         {
-            if (compTypes == null) return new List<(SimCardOverAllHandRank, SimCardOverAllHandRank)>();
+            if (compTypes == null) return new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
             return SplitHand(compTypes.Select(t => new PokerComponents(t, rule)).ToList(), rule, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
         }
 
-        public static void SaveStats(string path, Dictionary<SimCardOverAllHandRank, double> front, Dictionary<SimCardOverAllHandRank, double> back, string? inputPath = null, List<string>? headerNotes = null)
+        public static void SaveStats(string path, Dictionary<PokerOverAllHandRank, double> front, Dictionary<PokerOverAllHandRank, double> back, string? inputPath = null, List<string>? headerNotes = null)
         {
             string? dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))

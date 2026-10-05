@@ -32,14 +32,14 @@ namespace UnitTest
             var rule = new EightCardRule();
 
             // Test Single Component Direct Ranks
-            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.Pair));
-            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind }), Is.EqualTo(SimCardOverAllHandRank.ThreeOfKind));
-            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }), Is.EqualTo(SimCardOverAllHandRank.FiveCardsStraight));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.Pair));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind }), Is.EqualTo(PokerOverAllHandRank.ThreeOfKind));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }), Is.EqualTo(PokerOverAllHandRank.FiveCardsStraight));
 
             // Test Composite Ranks
-            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.FullHouse));
-            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.Mansion));
-            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.TwoPairs));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.FullHouse));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.Mansion));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
         }
 
         [Test]
@@ -49,7 +49,7 @@ namespace UnitTest
 
             // In our custom rule, ThreeCardsFlush + Pair is assembled into FullHouse
             var rank = customRule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlush, BaseCompType.Pair });
-            Assert.That(rank, Is.EqualTo(SimCardOverAllHandRank.FullHouse));
+            Assert.That(rank, Is.EqualTo(PokerOverAllHandRank.FullHouse));
         }
 
         [Test]
@@ -65,12 +65,12 @@ namespace UnitTest
 
         private class CustomTestRule : BaseCardRule
         {
-            public override SimCardOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes)
+            public override PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes)
             {
                 var list = new List<BaseCompType>(compTypes ?? new List<BaseCompType>());
                 if (list.Contains(BaseCompType.ThreeCardsFlush) && list.Contains(BaseCompType.Pair))
                 {
-                    return SimCardOverAllHandRank.FullHouse;
+                    return PokerOverAllHandRank.FullHouse;
                 }
                 return base.AssembleHandRank(compTypes);
             }

@@ -11,8 +11,8 @@ namespace GenericPoker
         int MinKindCount { get; set; }
         int CardCount { get; set; }
 
-        SimCardOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components);
-        SimCardOverAllHandRank AssembleHandRank(IEnumerable<GenericPoker.BaseCompType>? compTypes);
-        SimCardOverAllHandRank AssembleHandRank(params GenericPoker.BaseCompType[] compTypes);
+        PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components);
+        PokerOverAllHandRank AssembleHandRank(IEnumerable<GenericPoker.BaseCompType>? compTypes);
+        PokerOverAllHandRank AssembleHandRank(params GenericPoker.BaseCompType[] compTypes);
     }
 }

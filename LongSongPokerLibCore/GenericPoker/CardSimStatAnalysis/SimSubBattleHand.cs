@@ -2,13 +2,13 @@
 
 namespace GenericPoker.CardSimStatAnalysis
 {
-    public class SimSubBattleHand : BaseSubBattleHand<SimCardsBattleHandRank, BaseCompType, BasePokerCard>
+    public class SimSubBattleHand : BaseSubBattleHand<PokerBattleHandRank, BaseCompType, BasePokerCard>
     {
         public SimSubBattleHand() : base()
         {
         }
 
-        public SimSubBattleHand(SimCardsBattleHandRank inputRank, params PokerCardComponent<BaseCompType, BasePokerCard>[] inputCombos)
+        public SimSubBattleHand(PokerBattleHandRank inputRank, params PokerCardComponent<BaseCompType, BasePokerCard>[] inputCombos)
             : base(inputRank, inputCombos)
         {
         }
