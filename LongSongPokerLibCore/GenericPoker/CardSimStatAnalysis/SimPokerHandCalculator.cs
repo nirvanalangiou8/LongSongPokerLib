@@ -71,27 +71,7 @@ namespace GenericPoker.CardSimStatAnalysis
             _allPokerCards = new List<BasePokerCard>(inputPokerCardList);
         }
 
-        /*
-        public List<SimPokerHandStructure> TestSimCards()
-        {
-	        
-            var allCandidateComps = new List<SimPokerHandStructure>();
-        
-            RecursiveArrangeHands(_allPokerCards, new SimPokerHandStructure(), allCandidateComps);
-            foreach (var res in allCandidateComps)
-            {
-                res.SortCompsAndClassify();
-            }
-			
-            allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
-            var uniqueCandidates = allCandidateComps.Distinct().ToList();
-			
-            
-            return uniqueCandidates;
-            
-        }*/
-        
-        
+    
         /// <summary>
         /// Groups cards by their numerical rank (number) and filters based on a minimum count per rank.
         /// </summary>

@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using GenericPoker;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
     public class SimBattleHandArrangeStrategy
     {
-        public static (SimSubBattleHand firstBattleHand, SimSubBattleHand secondBattleHand) ArrangeComps(
+        public static (BaseSubBattleHand<SimCardsBattleHandRank, SimCardsCompType, BasePokerCard> firstBattleHand, 
+            BaseSubBattleHand<SimCardsBattleHandRank, SimCardsCompType, BasePokerCard> secondBattleHand) ArrangeComps(
             List<PokerCardComponent<SimCardsCompType, SimPokerCard>> comps, int totalCards)
         {
             // Generic splitting logic based on total cards

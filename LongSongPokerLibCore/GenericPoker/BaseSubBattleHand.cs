@@ -61,10 +61,6 @@ namespace GenericPoker
         protected List<TCard> _cards;
         public List<TCard> Cards {
             get => _cards;
-            //set
-            //{
-            //    _cards = value;
-            //}
         }
         private EightCardsBattleHandRank _battleHandRank;
         protected int _handPower;
@@ -87,14 +83,19 @@ namespace GenericPoker
         {
             return string.Join(separator, Cards.Select(card => card.CardStr));    
         }
-
-        // return example 6_Club_10_Heart
-       
         
         public EightCardsBattleHandRank BattleHandRank => _battleHandRank;
         
         
-        public virtual int CompareTo(BaseSubBattleHand<TCard> other)
+        public virtual void AddMinorCards(List<TCard> remainingCards)
+        {
+            if (remainingCards != null)
+            {
+                _cards.AddRange(remainingCards);
+            }
+        }
+
+        public virtual int CompareTo(BaseSubBattleHand<TCard>? other)
         {
             return 0;
         }
@@ -107,7 +108,7 @@ namespace GenericPoker
         public static bool operator !=(BaseSubBattleHand<TCard> left, BaseSubBattleHand<TCard> right) => !(left == right);
         
         // Override Equals and GetHashCode for proper equality checks
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return false;
         }
@@ -117,5 +118,79 @@ namespace GenericPoker
             return 1;
         }
         
+    }
+
+    public class BaseSubBattleHand<TRank, TCompEnum, TCard> : BaseSubBattleHand<TCard>
+        where TRank : Enum
+        where TCompEnum : Enum
+        where TCard : BasePokerCard
+    {
+        private TRank _battleHandRank;
+        public new TRank BattleHandRank => _battleHandRank;
+
+        public List<PokerCardComponent<TCompEnum, TCard>> Components { get; protected set; }
+
+        public BaseSubBattleHand() : base()
+        {
+            Components = new List<PokerCardComponent<TCompEnum, TCard>>();
+        }
+
+        public BaseSubBattleHand(List<TCard> cards) : base(cards)
+        {
+            Components = new List<PokerCardComponent<TCompEnum, TCard>>();
+        }
+
+        public BaseSubBattleHand(TRank inputRank, params PokerCardComponent<TCompEnum, TCard>[] inputCombos)
+        {
+            Components = new List<PokerCardComponent<TCompEnum, TCard>>();
+            _cards = new List<TCard>();
+            if (inputCombos != null)
+            {
+                foreach (var comp in inputCombos)
+                {
+                    Components.Add(comp);
+                    if (comp.Cards != null)
+                    {
+                        _cards.AddRange(comp.Cards);
+                    }
+                }
+            }
+            _battleHandRank = inputRank;
+        }
+
+        public override void AddMinorCards(List<TCard> remainingCards)
+        {
+            if (remainingCards != null)
+            {
+                _cards.AddRange(remainingCards);
+            }
+        }
+
+        public override int CompareTo(BaseSubBattleHand<TCard> other)
+        {
+            if (other is BaseSubBattleHand<TRank, TCompEnum, TCard> otherHand)
+            {
+                int rankCompare = ((IComparable)BattleHandRank).CompareTo(otherHand.BattleHandRank);
+                if (rankCompare != 0) return rankCompare;
+                
+                // Tie-breaker logic would go here
+            }
+            return base.CompareTo(other);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is BaseSubBattleHand<TRank, TCompEnum, TCard> other)
+            {
+                return EqualityComparer<TRank>.Default.Equals(BattleHandRank, other.BattleHandRank) &&
+                       Cards.SequenceEqual(other.Cards);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return BattleHandRank != null ? BattleHandRank.GetHashCode() : 0;
+        }
     }
 }
