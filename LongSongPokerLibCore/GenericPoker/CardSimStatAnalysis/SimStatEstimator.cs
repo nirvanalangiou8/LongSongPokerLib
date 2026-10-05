@@ -14,54 +14,54 @@ namespace GenericPoker.CardSimStatAnalysis
         
         public static readonly int MaxPokerNumber = 20;
         
-        private static readonly Dictionary<string, SimCardsCompType> SimCardsCompTypeDict = new()
+        private static readonly Dictionary<string, BaseCompType> SimCardsCompTypeDict = new()
 			{
-				{ "2_Kind", SimCardsCompType.Pair },
-				{ "3_Kind", SimCardsCompType.ThreeOfKind },
-				{ "4_Kind", SimCardsCompType.FourOfKind },
-				{ "5_Kind", SimCardsCompType.FiveOfKind },
-				{ "6_Kind", SimCardsCompType.SixOfKind },
-				{ "7_Kind", SimCardsCompType.SevenOfKind },
-				{ "8_Kind", SimCardsCompType.EightOfKind },
-				//{ "3_Flush", EightCardsCompType.ThreeCardsFlush },
-				//{ "3_Straight", EightCardsCompType.ThreeCardsStraight },
-				//{ "3_PairInFlush", EightCardsCompType.ThreeCardsPairInFlush},
-				{ "3_FlushStraight", SimCardsCompType.ThreeCardsFlushStraight },
-				//{ "4_Flush", EightCardsCompType.FourCardsFlush },
-				//{ "4_PairInFlush", EightCardsCompType.FourCardsPairInFlush},
-				//{ "4_TwoPairsInFlush", EightCardsCompType.FourCardsTwoPairsInFlush},
-				//{ "4_Straight", EightCardsCompType.FourCardStraight },
-				{ "4_FlushStraight", SimCardsCompType.FourCardsFlushStraight },
-				{ "5_Flush", SimCardsCompType.FiveCardsFlush },
-				//{ "5_PairInFlush", EightCardsCompType.FiveCardsPairInFlush},
-				//{ "5_TwoPairsInFlush", EightCardsCompType.FiveCardsTwoPairsInFlush},
-				{ "5_Straight", SimCardsCompType.FiveCardsStraight },
-				{ "5_FlushStraight", SimCardsCompType.FiveCardsFlushStraight },
-				{ "6_Flush", SimCardsCompType.SixCardsFlush },
-				{ "6_PairInFlush", SimCardsCompType.SixCardsPairInFlush},
-				{ "6_TwoPairsInFlush", SimCardsCompType.SixCardsTwoPairsInFlush},
-				{ "6_ThreePairsInFlush", SimCardsCompType.SixCardsThreePairsInFlush},
-				{ "7_Flush", SimCardsCompType.SevenCardsFlush },
-				{ "7_PairInFlush", SimCardsCompType.SevenCardsPairInFlush},
-				{ "7_TwoPairsInFlush", SimCardsCompType.SevenCardsTwoPairsInFlush},
-				{ "7_ThreePairsInFlush", SimCardsCompType.SevenCardsThreePairsInFlush},
-				{ "8_Flush", SimCardsCompType.EightCardsFlush },
-				{ "9_Flush", SimCardsCompType.NineCardsFlush },
-				{ "10_Flush", SimCardsCompType.TenCardsFlush },
-				{ "8_PairInFlush", SimCardsCompType.EightCardsPairInFlush},
-				{ "8_TwoPairsInFlush", SimCardsCompType.EightCardsTwoPairsInFlush},
-				{ "8_ThreePairsInFlush", SimCardsCompType.EightCardsThreePairsInFlush},
-				{ "8_FourPairsInFlush", SimCardsCompType.EightCardsFourPairsInFlush},
-				{ "6_Straight", SimCardsCompType.SixCardsStraight },
-				{ "7_Straight", SimCardsCompType.SevenCardsStraight },
-				{ "8_Straight", SimCardsCompType.EightCardsStraight },
-				{ "9_Straight", SimCardsCompType.NineCardsStraight },
-				{ "10_Straight", SimCardsCompType.TenCardsStraight },
-				{ "6_FlushStraight", SimCardsCompType.SixCardsFlushStraight },
-				{ "7_FlushStraight", SimCardsCompType.SevenCardsFlushStraight },
-				{ "8_FlushStraight", SimCardsCompType.EightCardsFlushStraight },
-				{ "9_FlushStraight", SimCardsCompType.NineCardsFlushStraight },
-				{ "10_FlushStraight", SimCardsCompType.TenCardsFlushStraight }
+				{ "2_Kind", BaseCompType.Pair },
+				{ "3_Kind", BaseCompType.ThreeOfKind },
+				{ "4_Kind", BaseCompType.FourOfKind },
+				{ "5_Kind", BaseCompType.FiveOfKind },
+				{ "6_Kind", BaseCompType.SixOfKind },
+				{ "7_Kind", BaseCompType.SevenOfKind },
+				{ "8_Kind", BaseCompType.EightOfKind },
+				//{ "3_Flush", BaseCompType.ThreeCardsFlush },
+				//{ "3_Straight", BaseCompType.ThreeCardsStraight },
+				//{ "3_PairInFlush", BaseCompType.ThreeCardsPairInFlush},
+				{ "3_FlushStraight", BaseCompType.ThreeCardsFlushStraight },
+				//{ "4_Flush", BaseCompType.FourCardsFlush },
+				//{ "4_PairInFlush", BaseCompType.FourCardsPairInFlush},
+				//{ "4_TwoPairsInFlush", BaseCompType.FourCardsTwoPairsInFlush},
+				//{ "4_Straight", BaseCompType.FourCardStraight },
+				{ "4_FlushStraight", BaseCompType.FourCardsFlushStraight },
+				{ "5_Flush", BaseCompType.FiveCardsFlush },
+				//{ "5_PairInFlush", BaseCompType.FiveCardsPairInFlush},
+				//{ "5_TwoPairsInFlush", BaseCompType.FiveCardsTwoPairsInFlush},
+				{ "5_Straight", BaseCompType.FiveCardsStraight },
+				{ "5_FlushStraight", BaseCompType.FiveCardsFlushStraight },
+				{ "6_Flush", BaseCompType.SixCardsFlush },
+				{ "6_PairInFlush", BaseCompType.SixCardsPairInFlush},
+				{ "6_TwoPairsInFlush", BaseCompType.SixCardsTwoPairsInFlush},
+				{ "6_ThreePairsInFlush", BaseCompType.SixCardsThreePairsInFlush},
+				{ "7_Flush", BaseCompType.SevenCardsFlush },
+				{ "7_PairInFlush", BaseCompType.SevenCardsPairInFlush},
+				{ "7_TwoPairsInFlush", BaseCompType.SevenCardsTwoPairsInFlush},
+				{ "7_ThreePairsInFlush", BaseCompType.SevenCardsThreePairsInFlush},
+				{ "8_Flush", BaseCompType.EightCardsFlush },
+				{ "9_Flush", BaseCompType.NineCardsFlush },
+				{ "10_Flush", BaseCompType.TenCardsFlush },
+				{ "8_PairInFlush", BaseCompType.EightCardsPairInFlush},
+				{ "8_TwoPairsInFlush", BaseCompType.EightCardsTwoPairsInFlush},
+				{ "8_ThreePairsInFlush", BaseCompType.EightCardsThreePairsInFlush},
+				{ "8_FourPairsInFlush", BaseCompType.EightCardsFourPairsInFlush},
+				{ "6_Straight", BaseCompType.SixCardsStraight },
+				{ "7_Straight", BaseCompType.SevenCardsStraight },
+				{ "8_Straight", BaseCompType.EightCardsStraight },
+				{ "9_Straight", BaseCompType.NineCardsStraight },
+				{ "10_Straight", BaseCompType.TenCardsStraight },
+				{ "6_FlushStraight", BaseCompType.SixCardsFlushStraight },
+				{ "7_FlushStraight", BaseCompType.SevenCardsFlushStraight },
+				{ "8_FlushStraight", BaseCompType.EightCardsFlushStraight },
+				{ "9_FlushStraight", BaseCompType.NineCardsFlushStraight },
+				{ "10_FlushStraight", BaseCompType.TenCardsFlushStraight }
 			};
 
         public void SetupCards(List<BasePokerCard> inputPokerCardList)
@@ -236,8 +236,8 @@ namespace GenericPoker.CardSimStatAnalysis
             if (!bFoundStructure && remainingCards.Count == _allPokerCards.Count)
             {
 	            var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
-	            var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
-		            { CompRank = SimCardsCompType.Nothing, Cards = remainingCards };
+	            var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+		            { CompRank = BaseCompType.Nothing, Cards = remainingCards };
 	            newCandidateComps.AddComp(newHandCandidateData);
 	            results.Add(newCandidateComps);
             }
@@ -283,17 +283,17 @@ namespace GenericPoker.CardSimStatAnalysis
             if (hasRank == false && remainingCards.Count == _allPokerCards.Count)
             {
 	            var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
-	            var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
-		            { CompRank = SimCardsCompType.Nothing, Cards = remainingCards };
+	            var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+		            { CompRank = BaseCompType.Nothing, Cards = remainingCards };
 	            newCandidateComps.AddComp(newHandCandidateData);
 	            results.Add(newCandidateComps);
             }
         }
         
-        private SimCardsCompType  DetermineCompType(int numCards, CompType compType)
+        private BaseCompType  DetermineCompType(int numCards, CompType compType)
         {
             var keyStr = $"{numCards}_{compType.ToString()}";
-            var retCompType = SimCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : SimCardsCompType.None;
+            var retCompType = SimCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
             return retCompType;
         }
         
@@ -319,7 +319,7 @@ namespace GenericPoker.CardSimStatAnalysis
                     var allPermutes = UtilFunc.GetPermutation<BasePokerCard>(kindGroup, groupCardNum);
                     foreach (var permute in allPermutes)
                     {
-                        var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
+                        var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
                         currentHandCandidates.AddComp(newHandCandidateData);
                         var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                         RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
@@ -354,7 +354,7 @@ namespace GenericPoker.CardSimStatAnalysis
 		        foreach (var kindGroup in allQualifiedGroups)
 		        {
 			        var handType = DetermineCompType(kindGroup.Count, CompType.Kind);
-			        var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
+			        var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
 				        { CompRank = handType, Cards = kindGroup };
 			        accumHandStructures.AddComp(newHandCandidateData);
 		        }
@@ -407,7 +407,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						var straight = straightCluster.Select(subList => subList[0]).ToList();
 						//accumAllRepresentedStraightCards.AddRange(straight);
 						var handType = DetermineCompType(straight.Count, CompType.FlushStraight);
-						var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
+						var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
 							{ CompRank = handType, Cards = straight };
 						accumHandStructures.AddComp(newHandCandidateData);
 						//componentAddCount++;
@@ -428,7 +428,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						// copy back the original hand structure before doing partial straight flush.
 						//accumHandStructures = new SimPokerHandStructure(accumHandStructuresCopy);
 						var handType = DetermineCompType(flushGroup.Count, CompType.Flush);
-						var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
+						var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
 							{ CompRank = handType, Cards = flushGroup };
 						accumHandStructures.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, flushGroup,
@@ -442,7 +442,7 @@ namespace GenericPoker.CardSimStatAnalysis
 				else if (flushGroup.Count >= _minFlushCards )
 				{
 					var handType = DetermineCompType(flushGroup.Count, CompType.Flush);
-					var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
+					var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
 						{ CompRank = handType, Cards = flushGroup };
 					accumHandStructures.AddComp(newHandCandidateData);
 					var newRemainCards = UtilFunc.GetExcludeList(remainingCards, flushGroup,
@@ -486,7 +486,7 @@ namespace GenericPoker.CardSimStatAnalysis
 				var isAllSameSuit = straight.All(card => card.Suit == straight[0].Suit);
 				var compType = isAllSameSuit ? CompType.FlushStraight : CompType.Straight;
 				var handType = DetermineCompType(straight.Count, compType);
-				var newHandCandidateData = new PokerCardComponent<SimCardsCompType, BasePokerCard>
+				var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
 						{ CompRank = handType, Cards = straight };
 				accumHandStructures.AddComp(newHandCandidateData);
 				var newRemainCards = UtilFunc.GetExcludeList(remainingCards, accumAllRepresentedStraightCards, new PokerCardComparer());

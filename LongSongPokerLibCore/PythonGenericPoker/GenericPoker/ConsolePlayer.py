@@ -7,7 +7,7 @@ from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
 from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
 from GenericPoker.EightCard.BattleHandArrangeStrategy import WinRateStrategy
 from GenericPoker.HandSplitResult import HandSplitResult
-from GenericPoker.PokerEnumAndDicts import EightCardsCompType
+from GenericPoker.PokerEnumAndDicts import BaseCompType
 from GenericPoker.PokerCardComponent import PokerCardComponent
 
 TPlayer = TypeVar('TPlayer', bound='ConsolePlayer')
@@ -106,7 +106,7 @@ class ConsolePlayer:
             if len(comps) == 0:
                 continue
 
-            used_comps: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]] = []
+            used_comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]] = []
             if len(comps) >= 2 and (
                 (comps[0].comp_rank, comps[1].comp_rank) in PokerHandCalculator.EightCardsCompComboToBattleRankDict
             ):
@@ -140,7 +140,7 @@ class ConsolePlayer:
 
     @classmethod
     def build_single_hand(cls, which: BattleHandEnum, rank: EightCardsBattleHandRank,
-                           comps: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]],
+                           comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]],
                            kickers: List[EightCardPokerCard]) -> EightCardSubBattleHand:
         hand = EightCardSubBattleHand(which, rank, *comps)
         sorted_kickers = sorted(kickers, key=lambda c: c.poker_card_power, reverse=True)

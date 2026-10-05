@@ -1,6 +1,6 @@
 ﻿from enum import Enum, IntEnum
 from typing import List, Dict, Tuple, Optional, Any
-from GenericPoker.PokerEnumAndDicts import EightCardsCompType
+from GenericPoker.PokerEnumAndDicts import BaseCompType
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
 
@@ -120,9 +120,9 @@ class EightCardSubBattleHand:
     EightCardsBattleHandPowerDict = EightCardsBattleHandPowerDict
 
     def __init__(self, battle_hand_enum: BattleHandEnum, input_rank: EightCardsBattleHandRank,
-                 *input_combos: PokerCardComponent[EightCardsCompType, EightCardPokerCard]):
+                 *input_combos: PokerCardComponent[BaseCompType, EightCardPokerCard]):
         self._cards: List[EightCardPokerCard] = []
-        self._components: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]] = []
+        self._components: List[PokerCardComponent[BaseCompType, EightCardPokerCard]] = []
         for comp in input_combos:
             self._components.append(comp)
             self._cards.extend(comp.cards)
@@ -136,7 +136,7 @@ class EightCardSubBattleHand:
         return self._cards
 
     @property
-    def components(self) -> List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]]:
+    def components(self) -> List[PokerCardComponent[BaseCompType, EightCardPokerCard]]:
         return self._components
 
     @property

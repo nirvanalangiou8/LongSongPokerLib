@@ -11,7 +11,7 @@ namespace GenericPoker.EightCard
 	// That is this class constitutied the PokerCardCompoenents, and the remaining nothing cards. The atomic/smallest component is a pair.
 	public class PokerHandStructure : IComparable<PokerHandStructure>
 	{
-		public readonly List<PokerCardComponent<EightCardsCompType, BasePokerCard>> Components;
+		public readonly List<PokerCardComponent<BaseCompType, BasePokerCard>> Components;
 		public List<BasePokerCard> remainingCards;
 		
 		public string FinalCompsStr = "";
@@ -33,7 +33,7 @@ namespace GenericPoker.EightCard
 			FinalCompsStr = string.Join("_", compTypeCountsList);
 		}
 
-		public static EightCardsBattleHandRank ConvertCompRankToBattleRank(EightCardsCompType compType)
+		public static EightCardsBattleHandRank ConvertCompRankToBattleRank(BaseCompType compType)
 		{
 			var enumName = compType.ToString(); // Get the name of the enum item as a string
 			
@@ -59,7 +59,7 @@ namespace GenericPoker.EightCard
 					// Process FrontHand two pairs
 					//var mergedCards = Components[1].Cards.Concat(Components[2].Cards).ToList();
 					var newBattleRank =
-						PokerHandCalculator.EightCardsCompComboToBattleRankDict[(EightCardsCompType.Pair, EightCardsCompType.Pair)];
+						PokerHandCalculator.EightCardsCompComboToBattleRankDict[(BaseCompType.Pair, BaseCompType.Pair)];
 					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, newBattleRank, Components[1], Components[2]);
 					
 					
@@ -116,24 +116,24 @@ namespace GenericPoker.EightCard
 		}
 		public PokerHandStructure()
 		{
-			Components = new List<PokerCardComponent<EightCardsCompType, BasePokerCard>>();
+			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
 			Init();
 		}
 
 		public PokerHandStructure(PokerHandStructure other)
 		{
-			Components = new List<PokerCardComponent<EightCardsCompType, BasePokerCard>>();
+			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
 			Components.AddRange(other.Components);
 			Init();
 		}
 
-		public PokerHandStructure(List<PokerCardComponent<EightCardsCompType, BasePokerCard>> components)
+		public PokerHandStructure(List<PokerCardComponent<BaseCompType, BasePokerCard>> components)
 		{
 			Components = components;
 			Init();
 		}
 
-		public void AddComp(PokerCardComponent<EightCardsCompType, BasePokerCard> newComponent)
+		public void AddComp(PokerCardComponent<BaseCompType, BasePokerCard> newComponent)
 		{
 			Components.Add(newComponent);
 		}

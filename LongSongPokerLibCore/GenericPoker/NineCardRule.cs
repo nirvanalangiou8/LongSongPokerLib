@@ -16,7 +16,7 @@ namespace GenericPoker
             CardCount = 9;
         }
 
-        public override SimCardOverAllHandRank AssembleHandRank(IEnumerable<GenericPoker.CardSimStatAnalysis.SimCardsCompType>? compTypes)
+        public override SimCardOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes)
         {
             return base.AssembleHandRank(compTypes);
         }

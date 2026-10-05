@@ -22,10 +22,10 @@ namespace GenericPoker
             return AssembleHandRank(compList);
         }
 
-        public virtual SimCardOverAllHandRank AssembleHandRank(IEnumerable<GenericPoker.CardSimStatAnalysis.SimCardsCompType>? compTypes)
+        public virtual SimCardOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes)
         {
             if (compTypes == null) return SimCardOverAllHandRank.Nothing;
-            var list = compTypes.Where(c => c != GenericPoker.CardSimStatAnalysis.SimCardsCompType.Nothing && c != GenericPoker.CardSimStatAnalysis.SimCardsCompType.None).ToList();
+            var list = compTypes.Where(c => c != BaseCompType.Nothing && c != BaseCompType.None).ToList();
             if (list.Count == 0) return SimCardOverAllHandRank.Nothing;
 
             // Sort high power to low power
@@ -45,10 +45,10 @@ namespace GenericPoker
                 var c1 = list[0];
                 var c2 = list[1];
 
-                if (c1 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeOfKind && c2 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair) return SimCardOverAllHandRank.FullHouse;
-                if (c1 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeCardsFlushStraight && c2 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair) return SimCardOverAllHandRank.Mansion;
-                if (c1 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair && c2 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair) return SimCardOverAllHandRank.TwoPairs;
-                if (c1 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeCardsFlushStraight && c2 == GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeCardsFlushStraight) return SimCardOverAllHandRank.ThreeCardsFlushStraight;
+                if (c1 == BaseCompType.ThreeOfKind && c2 == BaseCompType.Pair) return SimCardOverAllHandRank.FullHouse;
+                if (c1 == BaseCompType.ThreeCardsFlushStraight && c2 == BaseCompType.Pair) return SimCardOverAllHandRank.Mansion;
+                if (c1 == BaseCompType.Pair && c2 == BaseCompType.Pair) return SimCardOverAllHandRank.TwoPairs;
+                if (c1 == BaseCompType.ThreeCardsFlushStraight && c2 == BaseCompType.ThreeCardsFlushStraight) return SimCardOverAllHandRank.ThreeCardsFlushStraight;
 
                 return SimCardOverAllHandRank.None;
             }
@@ -56,9 +56,9 @@ namespace GenericPoker
             return SimCardOverAllHandRank.None;
         }
 
-        public virtual SimCardOverAllHandRank AssembleHandRank(params GenericPoker.CardSimStatAnalysis.SimCardsCompType[] compTypes)
+        public virtual SimCardOverAllHandRank AssembleHandRank(params BaseCompType[] compTypes)
         {
-            return AssembleHandRank((IEnumerable<GenericPoker.CardSimStatAnalysis.SimCardsCompType>)compTypes);
+            return AssembleHandRank((IEnumerable<BaseCompType>)compTypes);
         }
     }
 }

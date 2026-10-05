@@ -11,77 +11,77 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class PokerComponents : IComparable<PokerComponents>, IEquatable<PokerComponents>
     {
-        public SimCardsCompType CompType { get; set; }
+        public BaseCompType CompType { get; set; }
         public int CardCount { get; set; }
         public int Power => (int)CompType;
         public ICardRule? Rule { get; set; }
 
         public PokerComponents()
         {
-            CompType = SimCardsCompType.Nothing;
+            CompType = BaseCompType.Nothing;
             CardCount = 0;
         }
 
-        public PokerComponents(SimCardsCompType compType, ICardRule? rule = null)
+        public PokerComponents(BaseCompType compType, ICardRule? rule = null)
         {
             CompType = compType;
             CardCount = GetDefaultCardCount(compType);
             Rule = rule;
         }
 
-        public PokerComponents(SimCardsCompType compType, int cardCount, ICardRule? rule = null)
+        public PokerComponents(BaseCompType compType, int cardCount, ICardRule? rule = null)
         {
             CompType = compType;
             CardCount = cardCount;
             Rule = rule;
         }
 
-        public static int GetDefaultCardCount(SimCardsCompType comp)
+        public static int GetDefaultCardCount(BaseCompType comp)
         {
             return comp switch
             {
-                SimCardsCompType.Pair => 2,
-                SimCardsCompType.ThreeOfKind => 3,
-                SimCardsCompType.FourOfKind => 4,
-                SimCardsCompType.FiveOfKind => 5,
-                SimCardsCompType.SixOfKind => 6,
-                SimCardsCompType.SevenOfKind => 7,
-                SimCardsCompType.EightOfKind => 8,
-                SimCardsCompType.NineOfKind => 9,
-                SimCardsCompType.TenOfKind => 10,
+                BaseCompType.Pair => 2,
+                BaseCompType.ThreeOfKind => 3,
+                BaseCompType.FourOfKind => 4,
+                BaseCompType.FiveOfKind => 5,
+                BaseCompType.SixOfKind => 6,
+                BaseCompType.SevenOfKind => 7,
+                BaseCompType.EightOfKind => 8,
+                BaseCompType.NineOfKind => 9,
+                BaseCompType.TenOfKind => 10,
 
-                SimCardsCompType.ThreeCardsFlush => 3,
-                SimCardsCompType.FourCardsFlush => 4,
-                SimCardsCompType.FiveCardsFlush => 5,
-                SimCardsCompType.SixCardsFlush => 6,
-                SimCardsCompType.SevenCardsFlush => 7,
-                SimCardsCompType.EightCardsFlush => 8,
-                SimCardsCompType.NineCardsFlush => 9,
-                SimCardsCompType.TenCardsFlush => 10,
+                BaseCompType.ThreeCardsFlush => 3,
+                BaseCompType.FourCardsFlush => 4,
+                BaseCompType.FiveCardsFlush => 5,
+                BaseCompType.SixCardsFlush => 6,
+                BaseCompType.SevenCardsFlush => 7,
+                BaseCompType.EightCardsFlush => 8,
+                BaseCompType.NineCardsFlush => 9,
+                BaseCompType.TenCardsFlush => 10,
 
-                SimCardsCompType.ThreeCardsStraight => 3,
-                SimCardsCompType.FourCardStraight => 4,
-                SimCardsCompType.FiveCardsStraight => 5,
-                SimCardsCompType.SixCardsStraight => 6,
-                SimCardsCompType.SevenCardsStraight => 7,
-                SimCardsCompType.EightCardsStraight => 8,
-                SimCardsCompType.NineCardsStraight => 9,
-                SimCardsCompType.TenCardsStraight => 10,
+                BaseCompType.ThreeCardsStraight => 3,
+                BaseCompType.FourCardStraight => 4,
+                BaseCompType.FiveCardsStraight => 5,
+                BaseCompType.SixCardsStraight => 6,
+                BaseCompType.SevenCardsStraight => 7,
+                BaseCompType.EightCardsStraight => 8,
+                BaseCompType.NineCardsStraight => 9,
+                BaseCompType.TenCardsStraight => 10,
 
-                SimCardsCompType.ThreeCardsFlushStraight => 3,
-                SimCardsCompType.FourCardsFlushStraight => 4,
-                SimCardsCompType.FiveCardsFlushStraight => 5,
-                SimCardsCompType.SixCardsFlushStraight => 6,
-                SimCardsCompType.SevenCardsFlushStraight => 7,
-                SimCardsCompType.EightCardsFlushStraight => 8,
-                SimCardsCompType.NineCardsFlushStraight => 9,
-                SimCardsCompType.TenCardsFlushStraight => 10,
+                BaseCompType.ThreeCardsFlushStraight => 3,
+                BaseCompType.FourCardsFlushStraight => 4,
+                BaseCompType.FiveCardsFlushStraight => 5,
+                BaseCompType.SixCardsFlushStraight => 6,
+                BaseCompType.SevenCardsFlushStraight => 7,
+                BaseCompType.EightCardsFlushStraight => 8,
+                BaseCompType.NineCardsFlushStraight => 9,
+                BaseCompType.TenCardsFlushStraight => 10,
 
                 _ => 0
             };
         }
 
-        public static int GetCompPower(SimCardsCompType comp)
+        public static int GetCompPower(BaseCompType comp)
         {
             return (int)comp;
         }
@@ -95,105 +95,105 @@ namespace GenericPoker.CardSimStatAnalysis
             Other
         }
 
-        public static ComponentCategory GetComponentCategory(SimCardsCompType type)
+        public static ComponentCategory GetComponentCategory(BaseCompType type)
         {
             return type switch
             {
-                SimCardsCompType.Pair or
-                SimCardsCompType.ThreeOfKind or
-                SimCardsCompType.FourOfKind or
-                SimCardsCompType.FiveOfKind or
-                SimCardsCompType.SixOfKind or
-                SimCardsCompType.SevenOfKind or
-                SimCardsCompType.EightOfKind or
-                SimCardsCompType.NineOfKind or
-                SimCardsCompType.TenOfKind => ComponentCategory.Kind,
+                BaseCompType.Pair or
+                BaseCompType.ThreeOfKind or
+                BaseCompType.FourOfKind or
+                BaseCompType.FiveOfKind or
+                BaseCompType.SixOfKind or
+                BaseCompType.SevenOfKind or
+                BaseCompType.EightOfKind or
+                BaseCompType.NineOfKind or
+                BaseCompType.TenOfKind => ComponentCategory.Kind,
 
-                SimCardsCompType.ThreeCardsFlushStraight or
-                SimCardsCompType.FourCardsFlushStraight or
-                SimCardsCompType.FiveCardsFlushStraight or
-                SimCardsCompType.SixCardsFlushStraight or
-                SimCardsCompType.SevenCardsFlushStraight or
-                SimCardsCompType.EightCardsFlushStraight or
-                SimCardsCompType.NineCardsFlushStraight or
-                SimCardsCompType.TenCardsFlushStraight => ComponentCategory.FlushStraight,
+                BaseCompType.ThreeCardsFlushStraight or
+                BaseCompType.FourCardsFlushStraight or
+                BaseCompType.FiveCardsFlushStraight or
+                BaseCompType.SixCardsFlushStraight or
+                BaseCompType.SevenCardsFlushStraight or
+                BaseCompType.EightCardsFlushStraight or
+                BaseCompType.NineCardsFlushStraight or
+                BaseCompType.TenCardsFlushStraight => ComponentCategory.FlushStraight,
 
-                SimCardsCompType.ThreeCardsFlush or
-                SimCardsCompType.FourCardsFlush or
-                SimCardsCompType.FiveCardsFlush or
-                SimCardsCompType.SixCardsFlush or
-                SimCardsCompType.SevenCardsFlush or
-                SimCardsCompType.EightCardsFlush or
-                SimCardsCompType.NineCardsFlush or
-                SimCardsCompType.TenCardsFlush => ComponentCategory.Flush,
+                BaseCompType.ThreeCardsFlush or
+                BaseCompType.FourCardsFlush or
+                BaseCompType.FiveCardsFlush or
+                BaseCompType.SixCardsFlush or
+                BaseCompType.SevenCardsFlush or
+                BaseCompType.EightCardsFlush or
+                BaseCompType.NineCardsFlush or
+                BaseCompType.TenCardsFlush => ComponentCategory.Flush,
 
-                SimCardsCompType.ThreeCardsStraight or
-                SimCardsCompType.FourCardStraight or
-                SimCardsCompType.FiveCardsStraight or
-                SimCardsCompType.SixCardsStraight or
-                SimCardsCompType.SevenCardsStraight or
-                SimCardsCompType.EightCardsStraight or
-                SimCardsCompType.NineCardsStraight or
-                SimCardsCompType.TenCardsStraight => ComponentCategory.Straight,
+                BaseCompType.ThreeCardsStraight or
+                BaseCompType.FourCardStraight or
+                BaseCompType.FiveCardsStraight or
+                BaseCompType.SixCardsStraight or
+                BaseCompType.SevenCardsStraight or
+                BaseCompType.EightCardsStraight or
+                BaseCompType.NineCardsStraight or
+                BaseCompType.TenCardsStraight => ComponentCategory.Straight,
 
                 _ => ComponentCategory.Other
             };
         }
 
-        public static SimCardsCompType GetComponentType(ComponentCategory category, int count)
+        public static BaseCompType GetComponentType(ComponentCategory category, int count)
         {
             return category switch
             {
                 ComponentCategory.Kind => count switch
                 {
-                    2 => SimCardsCompType.Pair,
-                    3 => SimCardsCompType.ThreeOfKind,
-                    4 => SimCardsCompType.FourOfKind,
-                    5 => SimCardsCompType.FiveOfKind,
-                    6 => SimCardsCompType.SixOfKind,
-                    7 => SimCardsCompType.SevenOfKind,
-                    8 => SimCardsCompType.EightOfKind,
-                    9 => SimCardsCompType.NineOfKind,
-                    10 => SimCardsCompType.TenOfKind,
-                    _ => SimCardsCompType.Nothing
+                    2 => BaseCompType.Pair,
+                    3 => BaseCompType.ThreeOfKind,
+                    4 => BaseCompType.FourOfKind,
+                    5 => BaseCompType.FiveOfKind,
+                    6 => BaseCompType.SixOfKind,
+                    7 => BaseCompType.SevenOfKind,
+                    8 => BaseCompType.EightOfKind,
+                    9 => BaseCompType.NineOfKind,
+                    10 => BaseCompType.TenOfKind,
+                    _ => BaseCompType.Nothing
                 },
                 ComponentCategory.FlushStraight => count switch
                 {
-                    3 => SimCardsCompType.ThreeCardsFlushStraight,
-                    4 => SimCardsCompType.FourCardsFlushStraight,
-                    5 => SimCardsCompType.FiveCardsFlushStraight,
-                    6 => SimCardsCompType.SixCardsFlushStraight,
-                    7 => SimCardsCompType.SevenCardsFlushStraight,
-                    8 => SimCardsCompType.EightCardsFlushStraight,
-                    9 => SimCardsCompType.NineCardsFlushStraight,
-                    10 => SimCardsCompType.TenCardsFlushStraight,
-                    _ => SimCardsCompType.Nothing
+                    3 => BaseCompType.ThreeCardsFlushStraight,
+                    4 => BaseCompType.FourCardsFlushStraight,
+                    5 => BaseCompType.FiveCardsFlushStraight,
+                    6 => BaseCompType.SixCardsFlushStraight,
+                    7 => BaseCompType.SevenCardsFlushStraight,
+                    8 => BaseCompType.EightCardsFlushStraight,
+                    9 => BaseCompType.NineCardsFlushStraight,
+                    10 => BaseCompType.TenCardsFlushStraight,
+                    _ => BaseCompType.Nothing
                 },
                 ComponentCategory.Flush => count switch
                 {
-                    3 => SimCardsCompType.ThreeCardsFlush,
-                    4 => SimCardsCompType.FourCardsFlush,
-                    5 => SimCardsCompType.FiveCardsFlush,
-                    6 => SimCardsCompType.SixCardsFlush,
-                    7 => SimCardsCompType.SevenCardsFlush,
-                    8 => SimCardsCompType.EightCardsFlush,
-                    9 => SimCardsCompType.NineCardsFlush,
-                    10 => SimCardsCompType.TenCardsFlush,
-                    _ => SimCardsCompType.Nothing
+                    3 => BaseCompType.ThreeCardsFlush,
+                    4 => BaseCompType.FourCardsFlush,
+                    5 => BaseCompType.FiveCardsFlush,
+                    6 => BaseCompType.SixCardsFlush,
+                    7 => BaseCompType.SevenCardsFlush,
+                    8 => BaseCompType.EightCardsFlush,
+                    9 => BaseCompType.NineCardsFlush,
+                    10 => BaseCompType.TenCardsFlush,
+                    _ => BaseCompType.Nothing
                 },
                 ComponentCategory.Straight => count switch
                 {
-                    3 => SimCardsCompType.ThreeCardsStraight,
-                    4 => SimCardsCompType.FourCardStraight,
-                    5 => SimCardsCompType.FiveCardsStraight,
-                    6 => SimCardsCompType.SixCardsStraight,
-                    7 => SimCardsCompType.SevenCardsStraight,
-                    8 => SimCardsCompType.EightCardsStraight,
-                    9 => SimCardsCompType.NineCardsStraight,
-                    10 => SimCardsCompType.TenCardsStraight,
-                    _ => SimCardsCompType.Nothing
+                    3 => BaseCompType.ThreeCardsStraight,
+                    4 => BaseCompType.FourCardStraight,
+                    5 => BaseCompType.FiveCardsStraight,
+                    6 => BaseCompType.SixCardsStraight,
+                    7 => BaseCompType.SevenCardsStraight,
+                    8 => BaseCompType.EightCardsStraight,
+                    9 => BaseCompType.NineCardsStraight,
+                    10 => BaseCompType.TenCardsStraight,
+                    _ => BaseCompType.Nothing
                 },
-                _ => SimCardsCompType.Nothing
+                _ => BaseCompType.Nothing
             };
         }
 

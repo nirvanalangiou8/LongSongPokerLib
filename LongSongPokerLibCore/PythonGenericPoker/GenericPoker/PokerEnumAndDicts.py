@@ -48,7 +48,8 @@ class EightCardsPokerRank(Enum):
     EightCardsFlushStraight = "EightCardsFlushStraight"
 
 
-class EightCardsCompType(Enum):
+class BaseCompType(Enum):
+    Nothing = "Nothing"
     Pair = "Pair"
     ThreeCardsFlush = "ThreeCardsFlush"
     ThreeCardsPairInFlush = "ThreeCardsPairInFlush"
@@ -89,13 +90,18 @@ class EightCardsCompType(Enum):
     SixOfKind = "SixOfKind"
     SevenOfKind = "SevenOfKind"
     EightOfKind = "EightOfKind"
-    NineCardsStraight = "NineCardsStraight"
     NineCardsFlush = "NineCardsFlush"
-    NineCardsStraightFlush = "NineCardsStraightFlush"
+    NineCardsStraight = "NineCardsStraight"
+    NineCardsFlushStraight = "NineCardsFlushStraight"
+    NineOfKind = "NineOfKind"
+    TenCardsFlush = "TenCardsFlush"
+    TenCardsStraight = "TenCardsStraight"
+    TenCardsFlushStraight = "TenCardsFlushStraight"
+    TenOfKind = "TenOfKind"
     None_ = "None"
 
     def __str__(self):
-        if self == EightCardsCompType.None_:
+        if self == BaseCompType.None_:
             return "None"
         return self.value
 

@@ -1,6 +1,6 @@
 ﻿from typing import List, Dict, Tuple, Optional, Any
 import functools
-from GenericPoker.PokerEnumAndDicts import PokerSuit, CompType, EightCardsCompType, PokerRankTypes
+from GenericPoker.PokerEnumAndDicts import PokerSuit, CompType, BaseCompType, PokerRankTypes
 from GenericPoker.UtilFunc import UtilFunc
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
@@ -13,48 +13,48 @@ from GenericPoker.AcePokerCard import AcePokerCard
 class PokerHandCalculator:
     MaxPokerNumber = 20
 
-    EightCardsCompComboToBattleRankDict: Dict[Tuple[EightCardsCompType, EightCardsCompType], EightCardsBattleHandRank] = {
-        (EightCardsCompType.Pair, EightCardsCompType.Pair): EightCardsBattleHandRank.TwoPairs,
-        (EightCardsCompType.ThreeCardsPairInFlush, EightCardsCompType.Pair): EightCardsBattleHandRank.TownHouse,
-        (EightCardsCompType.ThreeOfKind, EightCardsCompType.Pair): EightCardsBattleHandRank.FullHouse,
-        (EightCardsCompType.ThreeCardsFlushStraight, EightCardsCompType.Pair): EightCardsBattleHandRank.Mansion,
+    EightCardsCompComboToBattleRankDict: Dict[Tuple[BaseCompType, BaseCompType], EightCardsBattleHandRank] = {
+        (BaseCompType.Pair, BaseCompType.Pair): EightCardsBattleHandRank.TwoPairs,
+        (BaseCompType.ThreeCardsPairInFlush, BaseCompType.Pair): EightCardsBattleHandRank.TownHouse,
+        (BaseCompType.ThreeOfKind, BaseCompType.Pair): EightCardsBattleHandRank.FullHouse,
+        (BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair): EightCardsBattleHandRank.Mansion,
     }
 
-    EightCardsCompTypeDict: Dict[str, EightCardsCompType] = {
-        "2_Kind": EightCardsCompType.Pair,
-        "3_Kind": EightCardsCompType.ThreeOfKind,
-        "4_Kind": EightCardsCompType.FourOfKind,
-        "5_Kind": EightCardsCompType.FiveOfKind,
-        "6_Kind": EightCardsCompType.SixOfKind,
-        "7_Kind": EightCardsCompType.SevenOfKind,
-        "8_Kind": EightCardsCompType.EightOfKind,
-        "3_FlushStraight": EightCardsCompType.ThreeCardsFlushStraight,
-        "4_FlushStraight": EightCardsCompType.FourCardsFlushStraight,
-        "5_Flush": EightCardsCompType.FiveCardsFlush,
-        "5_Straight": EightCardsCompType.FiveCardsStraight,
-        "5_FlushStraight": EightCardsCompType.FiveCardsFlushStraight,
-        "6_Flush": EightCardsCompType.SixCardsFlush,
-        "6_PairInFlush": EightCardsCompType.SixCardsPairInFlush,
-        "6_TwoPairsInFlush": EightCardsCompType.SixCardsTwoPairsInFlush,
-        "6_ThreePairsInFlush": EightCardsCompType.SixCardsThreePairsInFlush,
-        "7_Flush": EightCardsCompType.SevenCardsFlush,
-        "7_PairInFlush": EightCardsCompType.SevenCardsPairInFlush,
-        "7_TwoPairsInFlush": EightCardsCompType.SevenCardsTwoPairsInFlush,
-        "7_ThreePairsInFlush": EightCardsCompType.SevenCardsThreePairsInFlush,
-        "8_Flush": EightCardsCompType.EightCardsFlush,
-        "9_Flush": EightCardsCompType.NineCardsFlush,
-        "8_PairInFlush": EightCardsCompType.EightCardsPairInFlush,
-        "8_TwoPairsInFlush": EightCardsCompType.EightCardsTwoPairsInFlush,
-        "8_ThreePairsInFlush": EightCardsCompType.EightCardsThreePairsInFlush,
-        "8_FourPairsInFlush": EightCardsCompType.EightCardsFourPairsInFlush,
-        "6_Straight": EightCardsCompType.SixCardsStraight,
-        "7_Straight": EightCardsCompType.SevenCardsStraight,
-        "8_Straight": EightCardsCompType.EightCardsStraight,
-        "9_Straight": EightCardsCompType.NineCardsStraight,
-        "6_FlushStraight": EightCardsCompType.SixCardsFlushStraight,
-        "7_FlushStraight": EightCardsCompType.SevenCardsFlushStraight,
-        "8_FlushStraight": EightCardsCompType.EightCardsFlushStraight,
-        "9_FlushStraight": EightCardsCompType.NineCardsStraightFlush
+    BaseCardsCompTypeDict: Dict[str, BaseCompType] = {
+        "2_Kind": BaseCompType.Pair,
+        "3_Kind": BaseCompType.ThreeOfKind,
+        "4_Kind": BaseCompType.FourOfKind,
+        "5_Kind": BaseCompType.FiveOfKind,
+        "6_Kind": BaseCompType.SixOfKind,
+        "7_Kind": BaseCompType.SevenOfKind,
+        "8_Kind": BaseCompType.EightOfKind,
+        "3_FlushStraight": BaseCompType.ThreeCardsFlushStraight,
+        "4_FlushStraight": BaseCompType.FourCardsFlushStraight,
+        "5_Flush": BaseCompType.FiveCardsFlush,
+        "5_Straight": BaseCompType.FiveCardsStraight,
+        "5_FlushStraight": BaseCompType.FiveCardsFlushStraight,
+        "6_Flush": BaseCompType.SixCardsFlush,
+        "6_PairInFlush": BaseCompType.SixCardsPairInFlush,
+        "6_TwoPairsInFlush": BaseCompType.SixCardsTwoPairsInFlush,
+        "6_ThreePairsInFlush": BaseCompType.SixCardsThreePairsInFlush,
+        "7_Flush": BaseCompType.SevenCardsFlush,
+        "7_PairInFlush": BaseCompType.SevenCardsPairInFlush,
+        "7_TwoPairsInFlush": BaseCompType.SevenCardsTwoPairsInFlush,
+        "7_ThreePairsInFlush": BaseCompType.SevenCardsThreePairsInFlush,
+        "8_Flush": BaseCompType.EightCardsFlush,
+        "9_Flush": BaseCompType.NineCardsFlush,
+        "8_PairInFlush": BaseCompType.EightCardsPairInFlush,
+        "8_TwoPairsInFlush": BaseCompType.EightCardsTwoPairsInFlush,
+        "8_ThreePairsInFlush": BaseCompType.EightCardsThreePairsInFlush,
+        "8_FourPairsInFlush": BaseCompType.EightCardsFourPairsInFlush,
+        "6_Straight": BaseCompType.SixCardsStraight,
+        "7_Straight": BaseCompType.SevenCardsStraight,
+        "8_Straight": BaseCompType.EightCardsStraight,
+        "9_Straight": BaseCompType.NineCardsStraight,
+        "6_FlushStraight": BaseCompType.SixCardsFlushStraight,
+        "7_FlushStraight": BaseCompType.SevenCardsFlushStraight,
+        "8_FlushStraight": BaseCompType.EightCardsFlushStraight,
+        "9_FlushStraight": BaseCompType.NineCardsFlushStraight
     }
 
     def __init__(self):
@@ -112,9 +112,9 @@ class PokerHandCalculator:
             return structures[0].arrange_hands(strat)
         return None
 
-    def _determine_comp_type(self, num_cards: int, comp_type: CompType) -> EightCardsCompType:
+    def _determine_comp_type(self, num_cards: int, comp_type: CompType) -> BaseCompType:
         key_str = f"{num_cards}_{comp_type.value}"
-        return self.EightCardsCompTypeDict.get(key_str, EightCardsCompType.None_)
+        return self.BaseCardsCompTypeDict.get(key_str, BaseCompType.None_)
 
     def _get_number_groups(self, min_card_count_in_group: int, none_joker_cards: List[EightCardPokerCard]) -> List[List[EightCardPokerCard]]:
         rank_groups_dict: Dict[int, List[EightCardPokerCard]] = {}

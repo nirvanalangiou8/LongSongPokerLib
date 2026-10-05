@@ -29,15 +29,15 @@ namespace GenericPoker.SevenCard
              return new SevenCardHandCalculator(newCardList);
         }
 
-        public List<PokerCardComponent<EightCardsCompType, SevenCardPokerCard>> GetAllKindGroups(int minCount)
+        public List<PokerCardComponent<BaseCompType, SevenCardPokerCard>> GetAllKindGroups(int minCount)
         {
-            var result = new List<PokerCardComponent<EightCardsCompType, SevenCardPokerCard>>();
+            var result = new List<PokerCardComponent<BaseCompType, SevenCardPokerCard>>();
             var groups = _noneJokerCards.GroupBy(c => c.Number).Where(g => g.Count() >= minCount);
             foreach (var g in groups)
             {
                 var rankName = g.Count() == 2 ? "Pair" : (g.Count() == 3 ? "ThreeOfKind" : (g.Count() == 4 ? "FourOfKind" : "None"));
-                var rank = (EightCardsCompType)Enum.Parse(typeof(EightCardsCompType), rankName);
-                result.Add(new PokerCardComponent<EightCardsCompType, SevenCardPokerCard> { CompRank = rank, Cards = g.ToList() });
+                var rank = (BaseCompType)Enum.Parse(typeof(BaseCompType), rankName);
+                result.Add(new PokerCardComponent<BaseCompType, SevenCardPokerCard> { CompRank = rank, Cards = g.ToList() });
             }
             return result;
         }

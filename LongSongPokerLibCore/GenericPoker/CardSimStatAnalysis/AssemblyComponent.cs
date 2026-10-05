@@ -16,20 +16,20 @@ namespace GenericPoker.CardSimStatAnalysis
             return effectiveRule.AssembleHandRank(components);
         }
 
-        public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<SimCardsCompType>? compTypes, ICardRule? rule = null)
+        public static SimCardOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes, ICardRule? rule = null)
         {
             var effectiveRule = rule ?? DefaultRule;
             return effectiveRule.AssembleHandRank(compTypes);
         }
 
-        public static SimCardOverAllHandRank AssembleHandRank(params SimCardsCompType[] compTypes)
+        public static SimCardOverAllHandRank AssembleHandRank(params BaseCompType[] compTypes)
         {
-            return DefaultRule.AssembleHandRank((IEnumerable<SimCardsCompType>)compTypes);
+            return DefaultRule.AssembleHandRank((IEnumerable<BaseCompType>)compTypes);
         }
 
-        public static SimCardOverAllHandRank AssembleHandRank(ICardRule rule, params SimCardsCompType[] compTypes)
+        public static SimCardOverAllHandRank AssembleHandRank(ICardRule rule, params BaseCompType[] compTypes)
         {
-            return rule.AssembleHandRank((IEnumerable<SimCardsCompType>)compTypes);
+            return rule.AssembleHandRank((IEnumerable<BaseCompType>)compTypes);
         }
     }
 }

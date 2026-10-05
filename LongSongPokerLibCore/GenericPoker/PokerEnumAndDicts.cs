@@ -42,11 +42,9 @@ namespace GenericPoker
 		EightCardsFlushStraight,
 	}
 
-
-	
-
-	public enum EightCardsCompType
+	public enum BaseCompType
 	{
+		Nothing,
 		Pair,
 		ThreeCardsFlush,
 		ThreeCardsPairInFlush,
@@ -55,8 +53,8 @@ namespace GenericPoker
 		FourCardStraight,
 		FiveCardsStraight,
 		FiveCardsFlush,
-		FourCardsPairInFlush, //
-		FourCardsTwoPairsInFlush, //
+		FourCardsPairInFlush,
+		FourCardsTwoPairsInFlush,
 		ThreeOfKind,
 		FiveCardsPairInFlush,
 		FiveCardsTwoPairsInFlush,
@@ -87,58 +85,16 @@ namespace GenericPoker
 		SixOfKind,
 		SevenOfKind,
 		EightOfKind,
-		NineCardsStraight,
 		NineCardsFlush,
-		NineCardsStraightFlush,
+		NineCardsStraight,
+		NineCardsFlushStraight,
+		NineOfKind,
+		TenCardsFlush,
+		TenCardsStraight,
+		TenCardsFlushStraight,
+		TenOfKind,
 		None,
 	}
-	
-	
-	public enum SimCardsCompType
-	{
-		Pair,
-		ThreeCardsFlush,
-		ThreeCardsPairInFlush,
-		ThreeCardsStraight,
-		FourCardsFlush,
-		FourCardStraight,
-		FiveCardsStraight,
-		FiveCardsFlush,
-		FourCardsPairInFlush, //
-		FourCardsTwoPairsInFlush, //
-		ThreeOfKind,
-		FiveCardsPairInFlush,
-		FiveCardsTwoPairsInFlush,
-		ThreeCardsFlushStraight,
-		FourCardsFlushStraight,
-		FourOfKind,
-		FiveCardsFlushStraight,
-		SixCardsFlush,
-		SixCardsStraight,
-		SixCardsPairInFlush,
-		SixCardsTwoPairsInFlush,
-		SixCardsFlushStraight,
-		SixCardsThreePairsInFlush,
-		SevenCardsFlush,
-		SevenCardsStraight,
-		SevenCardsPairInFlush,
-		SevenCardsTwoPairsInFlush,
-		SevenCardsThreePairsInFlush,
-		SevenCardsFlushStraight,
-		EightCardsFlush,
-		EightCardsPairInFlush,
-		EightCardsTwoPairsInFlush,
-		EightCardsStraight,
-		FiveOfKind,
-		EightCardsFlushStraight,
-		EightCardsThreePairsInFlush,
-		EightCardsFourPairsInFlush,
-		SixOfKind,
-		SevenOfKind,
-		EightOfKind,
-		None,
-	}
-	
 	
 	/*
 	public enum EightCardQualifiedExceptionalBackHand
@@ -188,7 +144,7 @@ namespace GenericPoker
 	}
 	*/
 
-public enum PokerRankTypes
+	public enum PokerRankTypes
 	{
 		FiveOfKind = 500,
 		RoyalFlushStraight = 300,
@@ -265,50 +221,3 @@ public enum PokerRankTypes
 		
 }
 
-
-/*
-	public enum EightCardsBackHandRank
-	{
-		EightCardsFourPairsInFlush,
-		EightCardsFlushStraight,
-		SevenOfKind,
-		EightCardsThreePairsInFlush,
-		SevenCardsFlushStraight,
-		EightCardsFlush,
-		SixOfKind,
-		EightCardsTwoPairsInFlush,
-		SevenCardsThreePairsInFlush,
-		EightCardsPairInFlush,
-		SixCardsThreePairsInFlush,
-		SixCardsFlushStraight,
-		SevenCardsTwoPairsInFlush,
-		SevenCardsFlush,
-		FiveOfKind,
-		EightCardsStraight,
-		SevenCardsPairInFlush,
-		FiveCardsFlushStraight,
-		SixCardsTwoPairsInFlush,
-		FiveCardsTwoPairsInFlush,
-		FourCardsTwoPairsInFlush,
-		SevenCardsStraight,
-		SixCardsPairInFlush,
-		SixCardsFlush,
-		FourCardsFlushStraight,
-		FourOfKind,
-		SixCardsStraight,
-		FiveCardsPairInFlush,
-		ThreeCardsFlushStraightAndPair,
-		FiveCardsFlush,
-		ThreeCardsFlushStraight,
-		ThreeOfKindAndPair,
-		FiveCardsStraight,
-		FourCardsPairInFlush,
-		ThreeCardsPairInFlushAndPair,
-		ThreeOfKind,
-		ThreeCardsPairInFlush,
-		FourCardsFlush,
-		FourCardStraight,
-		TwoPairs,
-		Pair,
-	}
-	*/

@@ -19,20 +19,35 @@ namespace GenericPoker.EightCard
 		private readonly List<BasePokerCard> _noneJokerCards;
 		private readonly List<BasePokerCard> _jokerCards;
 		private PokerRankTypes _bestRank;
+		private ICardRule _rule;
 
+		public ICardRule Rule
+		{
+			get => _rule;
+			set => _rule = value;
+		}
 
 		// This is the possible estimated max poker number, consider A is 14, small joker is 15, larger joker is 16, and some reverse space.
 		// This number might be used for computing the possible Single Card Rank comparision, or other usage. See which function use this to understand
 		// the purpose of this variable.
 		public static readonly int MaxPokerNumber = 20;
-		private int _minFlushStraightCards = 3;
-		private int _minStraightCards = 5;
-		private int _minFlushCards = 5;
-		
+
 		public int MinFlushStraightCards
 		{
-			get { return _minFlushStraightCards; }
-			set { _minFlushStraightCards = value; }
+			get => _rule.MinFlushStraightCount;
+			set => _rule.MinFlushStraightCount = value;
+		}
+
+		public int MinStraightCards
+		{
+			get => _rule.MinStraightCount;
+			set => _rule.MinStraightCount = value;
+		}
+
+		public int MinFlushCards
+		{
+			get => _rule.MinFlushCount;
+			set => _rule.MinFlushCount = value;
 		}
 
 		
@@ -71,72 +86,74 @@ namespace GenericPoker.EightCard
 
 		
 		
-		public static readonly Dictionary<(EightCardsCompType, EightCardsCompType), EightCardsBattleHandRank> EightCardsCompComboToBattleRankDict =
+		public static readonly Dictionary<(BaseCompType, BaseCompType), EightCardsBattleHandRank> EightCardsCompComboToBattleRankDict =
 			new()
 			{
-				{ (EightCardsCompType.Pair, EightCardsCompType.Pair ), EightCardsBattleHandRank.TwoPairs},
-				{ (EightCardsCompType.ThreeCardsPairInFlush, EightCardsCompType.Pair ), EightCardsBattleHandRank.TownHouse},
-				{ (EightCardsCompType.ThreeOfKind, EightCardsCompType.Pair ), EightCardsBattleHandRank.FullHouse},
-				{ (EightCardsCompType.ThreeCardsFlushStraight, EightCardsCompType.Pair ), EightCardsBattleHandRank.Mansion},
+				{ (BaseCompType.Pair, BaseCompType.Pair ), EightCardsBattleHandRank.TwoPairs},
+				{ (BaseCompType.ThreeCardsPairInFlush, BaseCompType.Pair ), EightCardsBattleHandRank.TownHouse},
+				{ (BaseCompType.ThreeOfKind, BaseCompType.Pair ), EightCardsBattleHandRank.FullHouse},
+				{ (BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair ), EightCardsBattleHandRank.Mansion},
 			};
 		
 		
-		private static readonly Dictionary<string, EightCardsCompType> EightCardsCompTypeDict = new()
+		private static readonly Dictionary<string, BaseCompType> BaseCardsCompTypeDict = new()
 			{
-				{ "2_Kind", EightCardsCompType.Pair },
-				{ "3_Kind", EightCardsCompType.ThreeOfKind },
-				{ "4_Kind", EightCardsCompType.FourOfKind },
-				{ "5_Kind", EightCardsCompType.FiveOfKind },
-				{ "6_Kind", EightCardsCompType.SixOfKind },
-				{ "7_Kind", EightCardsCompType.SevenOfKind },
-				{ "8_Kind", EightCardsCompType.EightOfKind },
-				//{ "3_Flush", EightCardsCompType.ThreeCardsFlush },
-				//{ "3_Straight", EightCardsCompType.ThreeCardsStraight },
-				//{ "3_PairInFlush", EightCardsCompType.ThreeCardsPairInFlush},
-				{ "3_FlushStraight", EightCardsCompType.ThreeCardsFlushStraight },
-				//{ "4_Flush", EightCardsCompType.FourCardsFlush },
-				//{ "4_PairInFlush", EightCardsCompType.FourCardsPairInFlush},
-				//{ "4_TwoPairsInFlush", EightCardsCompType.FourCardsTwoPairsInFlush},
-				//{ "4_Straight", EightCardsCompType.FourCardStraight },
-				{ "4_FlushStraight", EightCardsCompType.FourCardsFlushStraight },
-				{ "5_Flush", EightCardsCompType.FiveCardsFlush },
-				//{ "5_PairInFlush", EightCardsCompType.FiveCardsPairInFlush},
-				//{ "5_TwoPairsInFlush", EightCardsCompType.FiveCardsTwoPairsInFlush},
-				{ "5_Straight", EightCardsCompType.FiveCardsStraight },
-				{ "5_FlushStraight", EightCardsCompType.FiveCardsFlushStraight },
-				{ "6_Flush", EightCardsCompType.SixCardsFlush },
-				{ "6_PairInFlush", EightCardsCompType.SixCardsPairInFlush},
-				{ "6_TwoPairsInFlush", EightCardsCompType.SixCardsTwoPairsInFlush},
-				{ "6_ThreePairsInFlush", EightCardsCompType.SixCardsThreePairsInFlush},
-				{ "7_Flush", EightCardsCompType.SevenCardsFlush },
-				{ "7_PairInFlush", EightCardsCompType.SevenCardsPairInFlush},
-				{ "7_TwoPairsInFlush", EightCardsCompType.SevenCardsTwoPairsInFlush},
-				{ "7_ThreePairsInFlush", EightCardsCompType.SevenCardsThreePairsInFlush},
-				{ "8_Flush", EightCardsCompType.EightCardsFlush },
-				{ "8_PairInFlush", EightCardsCompType.EightCardsPairInFlush},
-				{ "8_TwoPairsInFlush", EightCardsCompType.EightCardsTwoPairsInFlush},
-				{ "8_ThreePairsInFlush", EightCardsCompType.EightCardsThreePairsInFlush},
-				{ "8_FourPairsInFlush", EightCardsCompType.EightCardsFourPairsInFlush},
-				{ "6_Straight", EightCardsCompType.SixCardsStraight },
-				{ "7_Straight", EightCardsCompType.SevenCardsStraight },
-				{ "8_Straight", EightCardsCompType.EightCardsStraight },
-				{ "6_FlushStraight", EightCardsCompType.SixCardsFlushStraight },
-				{ "7_FlushStraight", EightCardsCompType.SevenCardsFlushStraight },
-				{ "8_FlushStraight", EightCardsCompType.EightCardsFlushStraight }
+				{ "2_Kind", BaseCompType.Pair },
+				{ "3_Kind", BaseCompType.ThreeOfKind },
+				{ "4_Kind", BaseCompType.FourOfKind },
+				{ "5_Kind", BaseCompType.FiveOfKind },
+				{ "6_Kind", BaseCompType.SixOfKind },
+				{ "7_Kind", BaseCompType.SevenOfKind },
+				{ "8_Kind", BaseCompType.EightOfKind },
+				//{ "3_Flush", BaseCompType.ThreeCardsFlush },
+				//{ "3_Straight", BaseCompType.ThreeCardsStraight },
+				//{ "3_PairInFlush", BaseCompType.ThreeCardsPairInFlush},
+				{ "3_FlushStraight", BaseCompType.ThreeCardsFlushStraight },
+				//{ "4_Flush", BaseCompType.FourCardsFlush },
+				//{ "4_PairInFlush", BaseCompType.FourCardsPairInFlush},
+				//{ "4_TwoPairsInFlush", BaseCompType.FourCardsTwoPairsInFlush},
+				//{ "4_Straight", BaseCompType.FourCardStraight },
+				{ "4_FlushStraight", BaseCompType.FourCardsFlushStraight },
+				{ "5_Flush", BaseCompType.FiveCardsFlush },
+				//{ "5_PairInFlush", BaseCompType.FiveCardsPairInFlush},
+				//{ "5_TwoPairsInFlush", BaseCompType.FiveCardsTwoPairsInFlush},
+				{ "5_Straight", BaseCompType.FiveCardsStraight },
+				{ "5_FlushStraight", BaseCompType.FiveCardsFlushStraight },
+				{ "6_Flush", BaseCompType.SixCardsFlush },
+				{ "6_PairInFlush", BaseCompType.SixCardsPairInFlush},
+				{ "6_TwoPairsInFlush", BaseCompType.SixCardsTwoPairsInFlush},
+				{ "6_ThreePairsInFlush", BaseCompType.SixCardsThreePairsInFlush},
+				{ "7_Flush", BaseCompType.SevenCardsFlush },
+				{ "7_PairInFlush", BaseCompType.SevenCardsPairInFlush},
+				{ "7_TwoPairsInFlush", BaseCompType.SevenCardsTwoPairsInFlush},
+				{ "7_ThreePairsInFlush", BaseCompType.SevenCardsThreePairsInFlush},
+				{ "8_Flush", BaseCompType.EightCardsFlush },
+				{ "8_PairInFlush", BaseCompType.EightCardsPairInFlush},
+				{ "8_TwoPairsInFlush", BaseCompType.EightCardsTwoPairsInFlush},
+				{ "8_ThreePairsInFlush", BaseCompType.EightCardsThreePairsInFlush},
+				{ "8_FourPairsInFlush", BaseCompType.EightCardsFourPairsInFlush},
+				{ "6_Straight", BaseCompType.SixCardsStraight },
+				{ "7_Straight", BaseCompType.SevenCardsStraight },
+				{ "8_Straight", BaseCompType.EightCardsStraight },
+				{ "6_FlushStraight", BaseCompType.SixCardsFlushStraight },
+				{ "7_FlushStraight", BaseCompType.SevenCardsFlushStraight },
+				{ "8_FlushStraight", BaseCompType.EightCardsFlushStraight },
+				{ "9_Flush", BaseCompType.NineCardsFlush },
+				{ "10_Flush", BaseCompType.TenCardsFlush },
+				{ "9_Straight", BaseCompType.NineCardsStraight },
+				{ "10_Straight", BaseCompType.TenCardsStraight },
+				{ "9_FlushStraight", BaseCompType.NineCardsFlushStraight },
+				{ "10_FlushStraight", BaseCompType.TenCardsFlushStraight }
 			};
 
-		public PokerHandCalculator()
+		public PokerHandCalculator(ICardRule? rule = null)
 		{
+			_rule = rule ?? EightCardRule.Default;
 			_allPokerCards = new List<BasePokerCard>();
 			_noneJokerCards = new List<BasePokerCard>();
 			_jokerCards = new List<BasePokerCard>();
 
 			_bestRank = PokerRankTypes.Nothing;
-
-			var test = new List<PokerCardComponent<EightCardsCompType, BasePokerCard>>();
-		     var b = new PokerHandStructure(test);
-
-		     //InitTempEvaluateData();
 		}
 		
 		
@@ -157,7 +174,7 @@ namespace GenericPoker.EightCard
 		}
 		
 		
-		public static PokerHandCalculator CreateInstance(string wholeCardStr)
+		public static PokerHandCalculator CreateInstance(string wholeCardStr, ICardRule? rule = null)
 		{
 			var inputCardStrs = wholeCardStr.Split(',');
 			var newCardList = new List<BasePokerCard>();
@@ -181,7 +198,7 @@ namespace GenericPoker.EightCard
 				}
 			}
 
-			var data = new PokerHandCalculator();
+			var data = new PokerHandCalculator(rule);
 			data.SetupCards(newCardList);
 			return data;
 		}
@@ -515,7 +532,7 @@ namespace GenericPoker.EightCard
 		}
 
 		
-		private EightCardsCompType DetermineCompTypeWithPairInFlush(int numCards, CompType CompType, int pairsInFlush = 0)
+		private BaseCompType DetermineCompTypeWithPairInFlush(int numCards, CompType CompType, int pairsInFlush = 0)
 		{
 			/*var keyStr = "";
 			Dictionary<int, string> localDict = new Dictionary<int, string>{{1, "PairIn"}, {2, "TwoPairsIn"},  {3, "ThreePairsIn"}, {4, "FourPairsIn"}};
@@ -523,16 +540,16 @@ namespace GenericPoker.EightCard
 				$"{numCards}_{localDict[pairsInFlush]}{CompType.ToString()}";*/
 
 			var keyStr = $"{numCards}_{CompType.ToString()}";
-			var retCompType = EightCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : EightCardsCompType.None;
+			var retCompType = BaseCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
 			
 			return retCompType;
 		}
 		
 		
-		private EightCardsCompType  DetermineCompType(int numCards, CompType compType)
+		private BaseCompType DetermineCompType(int numCards, CompType compType)
 		{
 			var keyStr = $"{numCards}_{compType.ToString()}";
-			var retCompType = EightCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : EightCardsCompType.None;
+			var retCompType = BaseCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
 			return retCompType;
 		}
 		/// <summary>
@@ -543,14 +560,14 @@ namespace GenericPoker.EightCard
 		/// <param name="remainingCards">Available cards.</param>
 		/// <param name="currentHandStructure">Current state of hand composition.</param>
 		/// <param name="results">Output list of complete hand structures.</param>
-		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeFlushOrFlushStraight(List<List<BasePokerCard>> flushGroups, List<BasePokerCard> remainingCards,
-            PokerHandStructure currentHandStructure, List<PokerHandStructure> results, bool hasRank)
+            PokerHandStructure currentHandStructure, List<PokerHandStructure> results, bool candidateProcessed)
         {
 			foreach (var flushGroup in flushGroups)
 			{
-				for (var desiredCount = flushGroup.Count; desiredCount >= _minFlushStraightCards; desiredCount--)
+				for (var desiredCount = flushGroup.Count; desiredCount >= _rule.MinFlushStraightCount; desiredCount--)
 				{
 					var flushStraightPermutes = new List<List<BasePokerCard>>();
 					var flushOnlyPermutes = new List<List<BasePokerCard>>();
@@ -566,22 +583,22 @@ namespace GenericPoker.EightCard
 
 					if (flushStraightPermutes.Count > 0) { // Yes we have straight in suit group which implies @@flush-straight@@
 						var handType = DetermineCompType(desiredCount, CompType.FlushStraight);
-						if (handType == EightCardsCompType.None) continue;
+						if (handType == BaseCompType.None) continue;
 						foreach (var permute in flushStraightPermutes)
 						{
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType, BasePokerCard>
+							var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
 								{ CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							var newRemainCards =
 								UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
+							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+							candidateProcessed = true;
 							currentHandStructure.RemoveLastComp();
-							hasRank = true;
 						}
-					} else { // Yes we have straight in suit group which implies @@flush@@
+					} else { // no we don't have straight in suit group which implies @@flush@@
 
 						flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<BasePokerCard>(flushGroup, desiredCount));
-						
 						
 						foreach (var permute in flushOnlyPermutes)
 						{
@@ -590,20 +607,21 @@ namespace GenericPoker.EightCard
 								.Count(g => g.Count() >= 2);
 							
 							var handType = DetermineCompTypeWithPairInFlush(desiredCount, CompType.Flush, pairCount);
-							if (handType == EightCardsCompType.None) continue;
-							var newHandCandidateData = new PokerCardComponent<EightCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
+							if (handType == BaseCompType.None) continue;
+							var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
 							currentHandStructure.AddComp(newHandCandidateData);
 							// TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
 							// when do hash set, two J-spade will become single one.
 							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
+							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+							candidateProcessed = true;
 							currentHandStructure.RemoveLastComp();
-							hasRank = true;
 						}
 					}
 				}
 			}
-            return hasRank;
+            return candidateProcessed;
         }
 		
 		
@@ -615,10 +633,10 @@ namespace GenericPoker.EightCard
 		/// <param name="remainingCards">Available cards.</param>
 		/// <param name="currentHandCandidates">Current state of hand composition.</param>
 		/// <param name="results">Output list of complete hand structures.</param>
-		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeStraightComps(List<List<List<BasePokerCard>>> allStraightClusters, List<BasePokerCard> remainingCards,
-            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool hasRank)
+            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool candidateProcessed)
         {
           
             foreach (var straightCluster in allStraightClusters)
@@ -626,30 +644,30 @@ namespace GenericPoker.EightCard
                 //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
                 // Ex: we have 5 cards straights, 8,7,6,5,4, we still need to visit all sub straights, such as 3-card straight and 4 cards straight and also
                 // full set of 5 cards straights.
-                for (var targetSCount = straightCluster.Count; targetSCount >= _minStraightCards; targetSCount--)
+                for (var targetSCount = straightCluster.Count; targetSCount >= _rule.MinFlushStraightCount; targetSCount--)
                 {
                     for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
                     {
                         var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
                         var allPermutes = new List<List<BasePokerCard>>();
                         var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
-                        if (handType == EightCardsCompType.None) continue;
+                        if (handType == BaseCompType.None) continue;
                         RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster, new List<BasePokerCard>(), allPermutes);
                         foreach (var permute in allPermutes)
                         {
-                            var newHandCandidateData = new PokerCardComponent<EightCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
+                            var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
                             currentHandCandidates.AddComp(newHandCandidateData);
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
+                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+                            candidateProcessed = true;
                             currentHandCandidates.RemoveLastComp();
-                            hasRank = true;
                         }
                     }
                 }
-                //hasRank = true;
             }
             
-            return hasRank;
+            return candidateProcessed;
         }
 		
 		/// <summary>
@@ -674,14 +692,14 @@ namespace GenericPoker.EightCard
 					var allPermutes = UtilFunc.GetPermutation<BasePokerCard>(kindGroup, groupCardNum);
 					foreach (var permute in allPermutes)
 					{
-						var newHandCandidateData = new PokerCardComponent<EightCardsCompType, BasePokerCard> { CompRank = handType, Cards = permute };
+						var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
 						currentHandCandidates.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 						RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
 						currentHandCandidates.RemoveLastComp();
+						hasRank = true;
 					}
 				}
-				hasRank = true;
 			}
 			return hasRank;
 		}
@@ -696,29 +714,42 @@ namespace GenericPoker.EightCard
 		private void RecursiveArrangeHands(List<BasePokerCard> remainingCards,
 			PokerHandStructure currentHandCandidates, List<PokerHandStructure> results)
 		{
-			var hasRank = false;
+			var candidateProcessed = false;
 			
 			var kindGroupList = GetNumberGroups(1, remainingCards);
-			var flushGroups = _evaluateFlushGroups(_minFlushStraightCards, remainingCards);
+			var flushGroups = _evaluateFlushGroups(_rule.MinFlushStraightCount, remainingCards);
 			
 			//1. Sort the number in each suit, try to find suit first and find straight by the way to see if we have flush Straight.
-			hasRank = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, currentHandCandidates, results, hasRank);
+			candidateProcessed = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, currentHandCandidates, results, candidateProcessed);
 			
 			// 2. Sort majorly for straight
-			var allStraightClusters = GetAllStraightCluster(_minFlushStraightCards, kindGroupList);
-			hasRank = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates, results, hasRank);
+			var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
+			candidateProcessed = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates, results, candidateProcessed);
 			
 			// 3. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
 			var allKindGroups = GetKindGroups(2, remainingCards);
-			hasRank = ArrangeKindComps(allKindGroups, remainingCards, currentHandCandidates, results, hasRank);
+			candidateProcessed = ArrangeKindComps(allKindGroups, remainingCards, currentHandCandidates, results, candidateProcessed);
 			
-			// When code comes here, it means there are nothing else worthy to record, so that put all current into Results.
-			if (hasRank == false && currentHandCandidates.Components.Count > 0)
+			// When code comes here, if the candidateProcessed still false (not processed), and if we have some candidates,
+			// so process the current candidates into Results.
+			if (candidateProcessed == false && currentHandCandidates.Components.Count > 0)
 			{
 				var newCandidateComps = new PokerHandStructure(currentHandCandidates);
 				newCandidateComps.SetRemainingCards(remainingCards);
 				results.Add(newCandidateComps);
 			}
+		}
+
+		private BaseCompType MapToCompRank(int count, CompType type)
+		{
+			if (type == CompType.Kind)
+			{
+				if (count == 2) return BaseCompType.Pair;
+				if (count == 3) return BaseCompType.ThreeOfKind;
+				if (count == 4) return BaseCompType.FourOfKind;
+				if (count == 5) return BaseCompType.FiveOfKind;
+			}
+			return BaseCompType.None;
 		}
 		
 		//===================================================================

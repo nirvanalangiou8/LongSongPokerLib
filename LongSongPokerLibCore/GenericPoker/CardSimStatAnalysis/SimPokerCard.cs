@@ -28,7 +28,7 @@ namespace GenericPoker.CardSimStatAnalysis
 		/*
 		// Consider how many Joker's to count the maximum number of ModulatorScale.
 		// This is majorly used for count the hand power whenever need to compare card to card by using decimal concepts.
-		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*SimPokerHandCalculator.MaxPokerNumber;
+		public static readonly int PokerPowerModulatorScale = (PokerConst.AceBigNumber + 1)*PokerHandCalculator.MaxPokerNumber;
 		
 		
 		public virtual bool IsNumberable => true;

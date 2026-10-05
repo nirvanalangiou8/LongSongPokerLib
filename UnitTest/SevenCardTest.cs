@@ -24,7 +24,7 @@ namespace SevenCardsProbTest
             var pairs = calculator.GetAllKindGroups(2);
 
             Assert.That(threeOfKind.Count, Is.EqualTo(1));
-            Assert.That(threeOfKind[0].CompRank, Is.EqualTo(EightCardsCompType.ThreeOfKind));
+            Assert.That(threeOfKind[0].CompRank, Is.EqualTo(BaseCompType.ThreeOfKind));
             
             // Should find 3-pair and 4-pair (Total 2)
             Assert.That(pairs.Count, Is.EqualTo(2));

@@ -1,6 +1,6 @@
 ﻿from typing import List, Optional, Any
 import functools
-from GenericPoker.PokerEnumAndDicts import EightCardsCompType
+from GenericPoker.PokerEnumAndDicts import BaseCompType
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
 from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
@@ -10,7 +10,7 @@ from GenericPoker.EightCard.EightCardHands import EightCardHands
 class PokerHandStructure:
     def __init__(self, other: Optional['PokerHandStructure'] = None):
         if other is not None:
-            self.components: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]] = [
+            self.components: List[PokerCardComponent[BaseCompType, EightCardPokerCard]] = [
                 PokerCardComponent(c.comp_rank, list(c.cards)) for c in other.components
             ]
             self.remaining_cards: List[EightCardPokerCard] = list(other.remaining_cards)
@@ -25,7 +25,7 @@ class PokerHandStructure:
         self.remaining_cards.clear()
         self.final_comps_str = ""
 
-    def add_comp(self, new_component: PokerCardComponent[EightCardsCompType, EightCardPokerCard]) -> None:
+    def add_comp(self, new_component: PokerCardComponent[BaseCompType, EightCardPokerCard]) -> None:
         self.components.append(new_component)
 
     def remove_last(self, count: int = 1) -> None:
@@ -50,7 +50,7 @@ class PokerHandStructure:
         self.final_comps_str = "_".join(comp_type_counts_list)
 
     @staticmethod
-    def convert_comp_rank_to_battle_rank(comp_type: EightCardsCompType) -> EightCardsBattleHandRank:
+    def convert_comp_rank_to_battle_rank(comp_type: BaseCompType) -> EightCardsBattleHandRank:
         name = comp_type.value if hasattr(comp_type, 'value') else str(comp_type)
         for rank in EightCardsBattleHandRank:
             if rank.value == name or rank.name == name:
@@ -67,7 +67,7 @@ class PokerHandStructure:
 
         if len(self.components) == 4:
             new_battle_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict.get(
-                (EightCardsCompType.Pair, EightCardsCompType.Pair), EightCardsBattleHandRank.TwoPairs
+                (BaseCompType.Pair, BaseCompType.Pair), EightCardsBattleHandRank.TwoPairs
             )
             first_hand = EightCardSubBattleHand(BattleHandEnum.FirstHand, new_battle_rank, self.components[1], self.components[2])
             second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, new_battle_rank, self.components[0], self.components[3])

@@ -3,7 +3,7 @@ using GenericPoker;
 using GenericPoker.CardSimStatAnalysis;
 using NUnit.Framework;
 
-namespace GenericPoker.CardSimStatAnalysis.UnitTest
+namespace UnitTest
 {
     [TestFixture]
     public class SimCardRuleTest
@@ -32,14 +32,14 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             var rule = new EightCardRule();
 
             // Test Single Component Direct Ranks
-            Assert.That(rule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.Pair));
-            Assert.That(rule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeOfKind }), Is.EqualTo(SimCardOverAllHandRank.ThreeOfKind));
-            Assert.That(rule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.FiveCardsStraight }), Is.EqualTo(SimCardOverAllHandRank.FiveCardsStraight));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.Pair));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind }), Is.EqualTo(SimCardOverAllHandRank.ThreeOfKind));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }), Is.EqualTo(SimCardOverAllHandRank.FiveCardsStraight));
 
             // Test Composite Ranks
-            Assert.That(rule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeOfKind, GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.FullHouse));
-            Assert.That(rule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeCardsFlushStraight, GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.Mansion));
-            Assert.That(rule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair, GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.TwoPairs));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.FullHouse));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.Mansion));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }), Is.EqualTo(SimCardOverAllHandRank.TwoPairs));
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             var customRule = new CustomTestRule();
 
             // In our custom rule, ThreeCardsFlush + Pair is assembled into FullHouse
-            var rank = customRule.AssembleHandRank(new[] { GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeCardsFlush, GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair });
+            var rank = customRule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlush, BaseCompType.Pair });
             Assert.That(rank, Is.EqualTo(SimCardOverAllHandRank.FullHouse));
         }
 
@@ -56,7 +56,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         public void TestPokerComponentsWithRule()
         {
             var rule = new EightCardRule { MinFlushStraightCount = 4 };
-            var comp = new PokerComponents(GenericPoker.CardSimStatAnalysis.SimCardsCompType.FourCardsFlushStraight, rule);
+            var comp = new PokerComponents(BaseCompType.FourCardsFlushStraight, rule);
 
             Assert.That(comp.Rule, Is.SameAs(rule));
             var breakdown = comp.BreakDown(rule);
@@ -65,10 +65,10 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
         private class CustomTestRule : BaseCardRule
         {
-            public override SimCardOverAllHandRank AssembleHandRank(IEnumerable<GenericPoker.CardSimStatAnalysis.SimCardsCompType>? compTypes)
+            public override SimCardOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes)
             {
-                var list = new List<GenericPoker.CardSimStatAnalysis.SimCardsCompType>(compTypes ?? new List<GenericPoker.CardSimStatAnalysis.SimCardsCompType>());
-                if (list.Contains(GenericPoker.CardSimStatAnalysis.SimCardsCompType.ThreeCardsFlush) && list.Contains(GenericPoker.CardSimStatAnalysis.SimCardsCompType.Pair))
+                var list = new List<BaseCompType>(compTypes ?? new List<BaseCompType>());
+                if (list.Contains(BaseCompType.ThreeCardsFlush) && list.Contains(BaseCompType.Pair))
                 {
                     return SimCardOverAllHandRank.FullHouse;
                 }

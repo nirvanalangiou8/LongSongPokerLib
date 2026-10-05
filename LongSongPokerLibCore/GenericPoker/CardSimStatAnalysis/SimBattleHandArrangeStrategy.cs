@@ -5,9 +5,9 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class SimBattleHandArrangeStrategy
     {
-        public static (BaseSubBattleHand<SimCardsBattleHandRank, SimCardsCompType, BasePokerCard> firstBattleHand, 
-            BaseSubBattleHand<SimCardsBattleHandRank, SimCardsCompType, BasePokerCard> secondBattleHand) ArrangeComps(
-            List<PokerCardComponent<SimCardsCompType, SimPokerCard>> comps, int totalCards)
+        public static (BaseSubBattleHand<SimCardsBattleHandRank, BaseCompType, BasePokerCard> firstBattleHand, 
+            BaseSubBattleHand<SimCardsBattleHandRank, BaseCompType, BasePokerCard> secondBattleHand) ArrangeComps(
+            List<PokerCardComponent<BaseCompType, SimPokerCard>> comps, int totalCards)
         {
             // Generic splitting logic based on total cards
             // 8 cards -> 3 and 5

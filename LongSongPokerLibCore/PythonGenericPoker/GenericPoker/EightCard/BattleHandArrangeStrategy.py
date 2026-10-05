@@ -1,7 +1,7 @@
 ﻿from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Optional, Any
 from GenericPoker.UtilFunc import UtilFunc
-from GenericPoker.PokerEnumAndDicts import EightCardsCompType
+from GenericPoker.PokerEnumAndDicts import BaseCompType
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
 from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
@@ -13,12 +13,12 @@ class IBattleHandArrangeStrategy(ABC):
         return 0.5
 
     @abstractmethod
-    def arrange_comps(self, comps: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
         pass
 
 
 class BalancedStrategy(IBattleHandArrangeStrategy):
-    def arrange_comps(self, comps: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 
@@ -59,7 +59,7 @@ class BalancedStrategy(IBattleHandArrangeStrategy):
 
 
 class RuleTableStrategy(IBattleHandArrangeStrategy):
-    def arrange_comps(self, comps: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 
@@ -186,7 +186,7 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
         return PokerMath.get_unified_win_rate(offsets_copy, schema, min_val, max_val)
 
     @staticmethod
-    def _rep_rank(comp: PokerCardComponent[EightCardsCompType, EightCardPokerCard]) -> int:
+    def _rep_rank(comp: PokerCardComponent[BaseCompType, EightCardPokerCard]) -> int:
         best = 2
         for card in comp.cards:
             if card.number > best:
@@ -285,7 +285,7 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
     def calc_hand_win_rate(self, first_battle_hand: EightCardSubBattleHand, second_battle_hand: EightCardSubBattleHand) -> float:
         return float(self.get_sub_hand_win_rate(first_battle_hand) + self.get_sub_hand_win_rate(second_battle_hand))
 
-    def arrange_comps(self, comps: List[PokerCardComponent[EightCardsCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 

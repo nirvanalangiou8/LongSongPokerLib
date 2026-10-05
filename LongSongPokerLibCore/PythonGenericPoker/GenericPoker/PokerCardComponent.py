@@ -35,7 +35,7 @@ class PokerCardComponent(Generic[TEnum, TCard]):
             # Enum comparison in C#: compare enum values/names or underlying int if IntEnum
             val_self = self.comp_rank.value if hasattr(self.comp_rank, 'value') else self.comp_rank
             val_other = other.comp_rank.value if hasattr(other.comp_rank, 'value') else other.comp_rank
-            # For SimCardsCompType / EightCardsCompType in C#, it's enum index / order
+            # For SimCardsCompType / BaseCompType in C#, it's enum index / order
             # To match C# Enum.CompareTo, we can compare enum names or values
             # But in C# Enum CompareTo compares underlying int values!
             if hasattr(self.comp_rank, '__class__') and issubclass(self.comp_rank.__class__, object):

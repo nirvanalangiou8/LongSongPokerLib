@@ -231,7 +231,7 @@ namespace GenericPoker.CardSimStatAnalysis
                     count = int.Parse(subParts[1]);
                 }
 
-                if (Enum.TryParse<SimCardsCompType>(typeStr, out var compType))
+                if (Enum.TryParse<BaseCompType>(typeStr, out var compType))
                 {
                     for (int i = 0; i < count; i++)
                         comps.Add(new PokerComponents(compType, rule));
@@ -362,7 +362,7 @@ namespace GenericPoker.CardSimStatAnalysis
         }
 
         public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
-            List<SimCardsCompType> compTypes,
+            List<BaseCompType> compTypes,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
             int minStraightCards = -1,
@@ -372,7 +372,7 @@ namespace GenericPoker.CardSimStatAnalysis
         }
 
         public static List<(SimCardOverAllHandRank, SimCardOverAllHandRank)> SplitHand(
-            List<SimCardsCompType> compTypes,
+            List<BaseCompType> compTypes,
             ICardRule? rule,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,

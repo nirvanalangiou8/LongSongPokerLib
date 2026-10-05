@@ -6,19 +6,19 @@ namespace GenericPoker.CardSimStatAnalysis
 {
     public class SimPokerHandStructure : IComparable<SimPokerHandStructure>
     {
-        public readonly List<PokerCardComponent<SimCardsCompType, BasePokerCard>> Components;
+        public readonly List<PokerCardComponent<BaseCompType, BasePokerCard>> Components;
         public List<BasePokerCard> remainingCards;
         public string FinalCompsStr;
 
         public SimPokerHandStructure()
         {
-            Components = new List<PokerCardComponent<SimCardsCompType, BasePokerCard>>();
+            Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
             remainingCards = new List<BasePokerCard>();
         }
 
         public SimPokerHandStructure(SimPokerHandStructure other)
         {
-            Components = new List<PokerCardComponent<SimCardsCompType, BasePokerCard>>(other.Components);
+            Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>(other.Components);
             remainingCards = new List<BasePokerCard>(other.remainingCards);
         }
 
@@ -28,7 +28,7 @@ namespace GenericPoker.CardSimStatAnalysis
             remainingCards.Clear();
         }
         
-        public void AddComp(PokerCardComponent<SimCardsCompType, BasePokerCard> newComponent)
+        public void AddComp(PokerCardComponent<BaseCompType, BasePokerCard> newComponent)
         {
             Components.Add(newComponent);
         }
