@@ -197,18 +197,6 @@ namespace GenericPoker.CardSimStatAnalysis
             };
         }
 
-        /// <summary>
-        /// Breaks this component down into all valid candidate sets of smaller atomic components using integer partition mathematics.
-        /// </summary>
-        /*
-        public List<List<PokerComponents>> BreakDown(
-            int minFlushStraightCards = -1,
-            int minFlushCards = -1,
-            int minStraightCards = -1,
-            int minKindCards = -1)
-        {
-            return BreakDown(null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
-        }*/
 
         /// <summary>
         /// Breaks this component down into all valid candidate sets of smaller atomic components using integer partition mathematics.

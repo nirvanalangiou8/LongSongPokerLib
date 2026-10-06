@@ -6,6 +6,7 @@ using GenericPoker;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
+    /*
     public static class AssemblyComponent
     {
         public static ICardRule DefaultRule { get; set; } = EightCardRule.Default;
@@ -31,5 +32,5 @@ namespace GenericPoker.CardSimStatAnalysis
         {
             return rule.AssembleHandRank((IEnumerable<BaseCompType>)compTypes);
         }
-    }
+    }*/
 }
