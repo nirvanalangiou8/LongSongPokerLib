@@ -4,6 +4,7 @@ using GenericPoker;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
+	/*
     public class SimPokerHandCalculator
     {
         private List<BasePokerCard> _allPokerCards;
@@ -329,11 +330,7 @@ namespace GenericPoker.CardSimStatAnalysis
         
 		private BaseCompType DetermineCompTypeWithPairInFlush(int numCards, CompType CompType, int pairsInFlush = 0)
 		{
-			/*var keyStr = "";
-			Dictionary<int, string> localDict = new Dictionary<int, string>{{1, "PairIn"}, {2, "TwoPairsIn"},  {3, "ThreePairsIn"}, {4, "FourPairsIn"}};
-			keyStr = pairsInFlush == 0 ? $"{numCards}_{CompType.ToString()}" :
-				$"{numCards}_{localDict[pairsInFlush]}{CompType.ToString()}";*/
-
+	
 			var keyStr = $"{numCards}_{CompType.ToString()}";
 			var retCompType = SimCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
 			
@@ -572,5 +569,5 @@ namespace GenericPoker.CardSimStatAnalysis
             }
             return BaseCompType.None;
         }
-    }
+    } */
 }

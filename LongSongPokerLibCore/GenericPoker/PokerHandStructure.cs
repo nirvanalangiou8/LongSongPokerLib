@@ -16,7 +16,6 @@ namespace GenericPoker.EightCard
 		
 		public string FinalCompsStr = "";
 
-		//private List<EightCardSubBattleHand> _battleHands;
 
 		private IBattleHandArrangeStrategy _strategy;
 		

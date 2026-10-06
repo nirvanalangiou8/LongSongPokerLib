@@ -243,92 +243,11 @@ namespace GenericPoker.CardSimStatAnalysis
             }
         }
         
-        private void RecursiveArrangeHands_old(List<BasePokerCard> remainingCards,
-            SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results)
-        {
-            var hasRank = false;
-            
-            // make copy of input currentHandCandidates
-            var accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
-            
-            //1. Sort the number in each suit, try to find suits first and find straight by the way to see if we have flush Straight.
-            var flushGroups = _evaluateFlushGroups(_minFlushStraightCards, remainingCards);
-            hasRank = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, accumHandStructures, results, hasRank);
-           
-			
-            // 2. Sort majorly for straight
-            accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
-            var numberGroupList = _getNumberGroups(1, remainingCards);
-            var allStraightClusters = GetAllStraightCluster(_minStraightCards, numberGroupList);
-            hasRank = ArrangeStraightComps(allStraightClusters, remainingCards, accumHandStructures, results, hasRank);
-          
-			
-            // 3. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
-            accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
-            var allKindGroups = GetKindGroups(2, remainingCards);
-            hasRank = ArrangeKindComps(allKindGroups, remainingCards, accumHandStructures, results, hasRank);
-          
-			
-            // When code comes here, it means there are nothing else worthy to record, so that put all current into Results.
-            // If hasRank is true, it means those process function has already handled those RecursiveXXX for remaning.
-            // Only process if hasRank is false, means notthing else to record, so formally process currentHandCandidates.
-            if (hasRank == false && currentHandCandidates.Components.Count > 0)
-            {
-                var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
-                newCandidateComps.SetRemainingCards(remainingCards);
-                results.Add(newCandidateComps);
-            }
-
-            // Process if all remaining cards are not touches (meaning = _allPokerCards.count), so it's nothing. 
-            if (hasRank == false && remainingCards.Count == _allPokerCards.Count)
-            {
-	            var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
-	            var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
-		            { CompRank = BaseCompType.Nothing, Cards = remainingCards };
-	            newCandidateComps.AddComp(newHandCandidateData);
-	            results.Add(newCandidateComps);
-            }
-        }
-        
         private BaseCompType  DetermineCompType(int numCards, CompType compType)
         {
             var keyStr = $"{numCards}_{compType.ToString()}";
             var retCompType = SimCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
             return retCompType;
-        }
-        
-        /// <summary>
-        /// Attempts to arrange remaining cards into kind-based components (pairs, triples, etc.).
-        /// Part of the recursive hand-splitting logic.
-        /// </summary>
-        /// <param name="allKindGroups">Cards grouped by rank with at least 2 cards.</param>
-        /// <param name="remainingCards">Available cards.</param>
-        /// <param name="currentHandCandidates">Current state of hand composition.</param>
-        /// <param name="results">Output list of complete hand structures.</param>
-        /// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
-        /// <returns>True if a hand component was successfully added.</returns>
-        private bool ArrangeKindComps_old(List<List<BasePokerCard>> allKindGroups, List<BasePokerCard> remainingCards,
-            SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results, bool hasRank)
-        {
-            foreach (var kindGroup in allKindGroups)
-            {
-                for (var groupCardNum = kindGroup.Count; groupCardNum >= 2; groupCardNum--)
-                {
-                    //var allPermutes = new List<List<PokerCard>>();
-                    var handType = DetermineCompType(groupCardNum, CompType.Kind);
-                    var allPermutes = UtilFunc.GetPermutation<BasePokerCard>(kindGroup, groupCardNum);
-                    foreach (var permute in allPermutes)
-                    {
-                        var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
-                        currentHandCandidates.AddComp(newHandCandidateData);
-                        var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                        RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
-                        currentHandCandidates.Components.RemoveAt(currentHandCandidates.Components.Count - 1);
-                    }
-                }
-                hasRank = true;
-            }
-            return hasRank;
         }
         
         
