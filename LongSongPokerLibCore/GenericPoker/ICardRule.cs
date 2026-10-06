@@ -12,7 +12,5 @@ namespace GenericPoker
         int CardCount { get; set; }
 
         PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components);
-        PokerOverAllHandRank AssembleHandRank(IEnumerable<GenericPoker.BaseCompType>? compTypes);
-        PokerOverAllHandRank AssembleHandRank(params GenericPoker.BaseCompType[] compTypes);
     }
 }

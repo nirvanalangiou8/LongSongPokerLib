@@ -16,12 +16,6 @@ namespace GenericPoker
             CardCount = 9;
         }
         /*
-
-        public override PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? compTypes)
-        {
-            return base.AssembleHandRank(compTypes);
-        }
-
         public override PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components)
         {
             return base.AssembleHandRank(components);
