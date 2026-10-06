@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
-    
+    /*
     public class PokerCardComparer : IEqualityComparer<BasePokerCard>
     {
         public bool Equals(BasePokerCard x, BasePokerCard y)
@@ -21,7 +21,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return 1;
         }
     }
-    
+	*/    
     public class SimPokerCard :  BasePokerCard  // IEquatable<PokerCard> //
 	{
 
@@ -106,76 +106,4 @@ namespace GenericPoker.CardSimStatAnalysis
 		*/
 		
 	}
-    /*
-    public class SimCardPokerCard : BasePokerCard
-    {
-        public bool IsNumberable => true;
-        public SimCardPokerCard() : base() { }
-
-        public SimCardPokerCard(string cardStr)
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(cardStr, @"^([2-9]|10|[JQKA]|Joker)(.*)$");
-            if (match.Success)
-            {
-                string numPart = match.Groups[1].Value;
-                string suitPart = match.Groups[2].Value;
-                int number = numPart == "Joker" ? 0 : PokerConst.PokerStringToNumberDict[numPart];
-                PokerSuit suit = PokerConst.SymbolToPokerSuit.TryGetValue(suitPart, out var s) ? s : PokerSuit.NoSuit;
-                Init(0, number, suit, 0, 0);
-            }
-        }
-
-        public static SimCardPokerCard CreateInstance(int id, int number, PokerSuit suit, int objectID, int deckID)
-        {
-            var card = new SimCardPokerCard();
-            card.Init(id, number, suit, objectID, deckID);
-            return card;
-        }
-
-        public static SimCardPokerCard CreateInstance(BasePokerCard other)
-        {
-            if (other is IJoker)
-            {
-                return new SimCardJokerCard(other.CardStr);
-            }
-            return new SimCardPokerCard(other.CardStr);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is SimCardPokerCard other)
-            {
-                return CardStr == other.CardStr;
-            }
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return CardStr.GetHashCode();
-        }
-    }
-
-    public class SimCardJokerCard : SimCardPokerCard, IJoker
-    {
-        public new bool IsNumberable => true;
-        public int JokerPower => 100;
-        public SimCardJokerCard(string cardStr) : base(cardStr) { }
-    }
-
-    public class SimCardPokerCardComparer : IEqualityComparer<SimCardPokerCard>
-    {
-        public bool Equals(SimCardPokerCard x, SimCardPokerCard y)
-        {
-            if (ReferenceEquals(x, y)) return true;
-            if (ReferenceEquals(x, null)) return false;
-            if (ReferenceEquals(y, null)) return false;
-            return x.CardStr == y.CardStr;
-        }
-
-        public int GetHashCode(SimCardPokerCard obj)
-        {
-            return obj.CardStr.GetHashCode();
-        }
-    }*/
 }

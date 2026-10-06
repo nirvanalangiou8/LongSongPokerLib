@@ -39,17 +39,17 @@ namespace LongSongPokerLibCore
 
                     if (args.Length >= 3)
                     {
-                        InitEightCardHandSplitProbAna.Run(args[1], args[2], selectedRule);
+                        PostSimStatHandSplitProbAna.Run(args[1], args[2], selectedRule);
                     }
                     else if (args.Length >= 2)
                     {
-                        InitEightCardHandSplitProbAna.Run(args[1], rule: selectedRule);
+                        PostSimStatHandSplitProbAna.Run(args[1], rule: selectedRule);
                     }
                     else
                     {
                         // Explicitly run with 8-card or 9-card rule
-                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "twohands_prob_8cards.csv", new EightCardRule());
-                        InitEightCardHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "twohands_prob_9cards.csv", new NineCardRule());
+                        PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "twohands_prob_8cards.csv", new EightCardRule());
+                        PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "twohands_prob_9cards.csv", new NineCardRule());
                         
                     }
                     break;

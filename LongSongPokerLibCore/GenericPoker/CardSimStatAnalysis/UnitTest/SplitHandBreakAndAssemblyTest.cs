@@ -22,8 +22,8 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
             }
             else
             {
-                var components = InitEightCardHandSplitProbAna.ParseHandName(handName, rule);
-                solutions = InitEightCardHandSplitProbAna.SplitHand(components, rule);
+                var components = PostSimStatHandSplitProbAna.ParseHandName(handName, rule);
+                solutions = PostSimStatHandSplitProbAna.SplitHand(components, rule);
             }
 
             return string.Join(",", solutions.Select(s => $"[{s.Front},{s.Back}]"));

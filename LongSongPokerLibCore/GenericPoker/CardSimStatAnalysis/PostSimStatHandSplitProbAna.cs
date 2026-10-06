@@ -7,7 +7,7 @@ using GenericPoker.EightCard;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
-    public class InitEightCardHandSplitProbAna
+    public class PostSimStatHandSplitProbAna
     {
         public static (Dictionary<PokerOverAllHandRank, double> FrontStats, Dictionary<PokerOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
         {
@@ -163,10 +163,6 @@ namespace GenericPoker.CardSimStatAnalysis
                     continue;
                 }
 
-                if (handName == "ThreeCardsFlushStraight_ThreeOfKind*2")
-                {
-                    Console.WriteLine($"Invalid hand name: {handName}");
-                }
                 var components = ParseHandName(handName, effectiveRule);
 
                 var solutions = SplitHand(components, effectiveRule);

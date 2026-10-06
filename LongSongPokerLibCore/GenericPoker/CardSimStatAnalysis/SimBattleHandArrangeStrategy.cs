@@ -3,6 +3,7 @@ using GenericPoker;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
+    /*
     public class SimBattleHandArrangeStrategy
     {
         public static (BaseSubBattleHand<PokerBattleHandRank, BaseCompType, BasePokerCard> firstBattleHand, 
@@ -20,5 +21,5 @@ namespace GenericPoker.CardSimStatAnalysis
             // For simulation, we might just need the components found.
             return (null, null);
         }
-    }
+    }*/
 }
