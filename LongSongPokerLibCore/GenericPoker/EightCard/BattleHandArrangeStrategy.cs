@@ -465,7 +465,7 @@ namespace GenericPoker.EightCard
 			// bestFirst 比較時是以 SecondHand 建立的，這裡重建為 FirstHand，
 			// 以便後續配發散牌時前墩容量正確 (前墩最多 3 張)。
 			// 僅在該牌型對前墩合法 (存在於 FirstHand 牌力表) 時才轉換。
-			if (EightCardSubBattleHand.EightCardsBattleHandPowerDict.ContainsKey(
+			if (PokerConst.EightCardsBattleHandPowerDict.ContainsKey(
 				    (BattleHandEnum.FirstHand, bestFirst.BattleHandRank)))
 			{
 				bestFirst = new EightCardSubBattleHand(

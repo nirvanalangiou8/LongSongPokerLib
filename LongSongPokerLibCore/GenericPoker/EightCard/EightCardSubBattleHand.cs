@@ -5,48 +5,11 @@ using System.Linq;
 namespace GenericPoker.EightCard
 {
     
-    public enum BattleHandEnum
-    {
-        FirstHand = 3,
-        SecondHand = 5,
-    }
-    
+
     
     public class EightCardSubBattleHand : BaseSubBattleHand <BasePokerCard>
     {
-        public static readonly Dictionary<(BattleHandEnum, PokerOverAllHandRank), int> EightCardsBattleHandPowerDict =
-        new()
-        {
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing ), 0},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.Pair ), 1},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.TwoPairs ), 2},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.ThreeCardsFlushStraight ), 24},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.ThreeOfKind ), 15},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.FourOfKind ), 32},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.FourCardsFlushStraight ), 40},
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing), 0 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Pair), 1 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.TwoPairs), 2 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.ThreeOfKind), 10 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsStraight), 24 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FullHouse), 28 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.ThreeCardsFlushStraight), 32 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsFlush), 40 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Mansion), 48 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsStraight), 62 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FourOfKind), 80 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FourCardsFlushStraight), 100 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsFlush), 120 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsStraight), 200 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsFlushStraight), 360 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsStraight), 500 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsFlush), 800 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsFlushStraight), 1000 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsFlush), 20000 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsFlushStraight), 40000 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsFlushStraight), 400000 },
-        };
-        
+       
         private BattleHandEnum _battleHandEnum;
         //private List<PokerCard> _cards;
         private PokerOverAllHandRank _battleHandRank;
@@ -71,28 +34,20 @@ namespace GenericPoker.EightCard
             }
             _battleHandRank = inputRank;
             _battleHandEnum = battleHandEnum;
-            _handPower = EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
+            _handPower = PokerConst.EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
         }
 
-        public List<BasePokerCard> AddMinorCards(List<BasePokerCard> remainingCards)
+        public List<BasePokerCard> AddMinorCards(List<BasePokerCard> remainingCards, int count = int.MaxValue)
         {
+            if (remainingCards == null) return new List<BasePokerCard>();
             var retCards = new List<BasePokerCard>(remainingCards);
-            foreach (var card in remainingCards)
+            int added = 0;
+            while (retCards.Count > 0 && Cards.Count < (int)_battleHandEnum && added < count)
             {
-                if (Cards.Count >= (int)_battleHandEnum) break;
-                Cards.Add(card);
+                Cards.Add(retCards[0]);
                 retCards.RemoveAt(0);
+                added++;
             }
-            return retCards;
-        }
-        
-        
-        public List<BasePokerCard> AddOneMinorCard(List<BasePokerCard> remainingCards)
-        {
-            var retCards = new List<BasePokerCard>(remainingCards);
-            if (remainingCards.Count == 0 || Cards.Count >= (int)_battleHandEnum) return retCards;
-            Cards.Add(retCards[0]);
-            retCards.RemoveAt(0);
             return retCards;
         }
         
@@ -105,8 +60,8 @@ namespace GenericPoker.EightCard
             
             if (BattleHandRank != otherEightCard.BattleHandRank)
             {
-                int myPower = EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
-                int otherPower = EightCardsBattleHandPowerDict[(otherEightCard._battleHandEnum, otherEightCard.BattleHandRank)];
+                int myPower = PokerConst.EightCardsBattleHandPowerDict[(_battleHandEnum, BattleHandRank)];
+                int otherPower = PokerConst.EightCardsBattleHandPowerDict[(otherEightCard._battleHandEnum, otherEightCard.BattleHandRank)];
                 if (myPower != otherPower) return myPower.CompareTo(otherPower);
                 return BattleHandRank.CompareTo(otherEightCard.BattleHandRank);
             }

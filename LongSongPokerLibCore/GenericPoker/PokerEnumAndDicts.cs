@@ -100,7 +100,12 @@ namespace GenericPoker
 		FlushStraight,
 	}
 	
-	
+	public enum BattleHandEnum
+	{
+		FirstHand = 3,
+		SecondHand = 5,
+	}
+
 	
 	
 	public enum PokerOverAllHandRank
@@ -263,6 +268,41 @@ namespace GenericPoker
 				{ (13, CompType.FlushStraight), PokerCardCompRank.ThirteenCardFlushStraight },
 				{ (14, CompType.Straight), PokerCardCompRank.FourteenCardStraight },
 			};
+
+        public static readonly Dictionary<(BattleHandEnum, PokerOverAllHandRank), int> EightCardsBattleHandPowerDict =
+        new()
+        {
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing ), 0},
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.Pair ), 1},
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.TwoPairs ), 2},
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.ThreeCardsFlushStraight ), 24},
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.ThreeOfKind ), 15},
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.FourOfKind ), 32},
+            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.FourCardsFlushStraight ), 40},
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing), 0 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Pair), 1 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.TwoPairs), 2 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.ThreeOfKind), 10 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsStraight), 24 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FullHouse), 28 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.ThreeCardsFlushStraight), 32 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsFlush), 40 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Mansion), 48 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsStraight), 62 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FourOfKind), 80 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FourCardsFlushStraight), 100 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsFlush), 120 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsStraight), 200 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsFlushStraight), 360 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsStraight), 500 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsFlush), 800 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsFlushStraight), 1000 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsFlush), 20000 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsFlushStraight), 40000 },
+            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsFlushStraight), 400000 },
+        };
+        
+		
 	}
 	
 		

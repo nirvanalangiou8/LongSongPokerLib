@@ -96,7 +96,7 @@ namespace GenericPoker.EightCard
 			// The minor cards assigned is to place the largest card in secondHand first to ensure second is larger than first
 			// The fill the firsthand with minor cards until it reach the maximum card for first hand (regularly it's 3)
 			// If there are remaining, assign back to second hand.
-			var newRemainingCards = secondEightCardSubBattleHand.AddOneMinorCard(sortedRemainingCards);
+			var newRemainingCards = secondEightCardSubBattleHand.AddMinorCards(sortedRemainingCards, 1);
 			newRemainingCards = firstEightCardSubBattleHand.AddMinorCards(newRemainingCards);
 			newRemainingCards = secondEightCardSubBattleHand.AddMinorCards(newRemainingCards);
 

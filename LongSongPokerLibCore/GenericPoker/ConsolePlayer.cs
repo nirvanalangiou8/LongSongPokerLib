@@ -131,7 +131,7 @@ namespace GenericPoker
                     usedComps.Add(comps[0]);
                 }
 
-                if (!EightCardSubBattleHand.EightCardsBattleHandPowerDict.ContainsKey((which, rank)))
+                if (!PokerConst.EightCardsBattleHandPowerDict.ContainsKey((which, rank)))
                     continue;
 
                 var usedSet = new HashSet<BasePokerCard>(usedComps.SelectMany(c => c.Cards));
