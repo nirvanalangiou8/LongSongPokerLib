@@ -1,59 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GenericPoker.EightCard;
 
 namespace GenericPoker
 {
     
     
-    public enum BaseBattleHandRank
-    {
-        Nothing,
-        Pair,
-        TwoPairs,
-        FourCardStraight,
-        FourCardsFlush,
-        ThreeCardsPairInFlush,
-        ThreeOfKind,
-        TownHouse, // ThreeCardsPairInFlush_Pair
-        FourCardsPairInFlush,
-        FiveCardsStraight,
-        FullHouse,
-        ThreeCardsFlushStraight,
-        FiveCardsFlush,
-        Mansion, // ThreeCardsFlushStraight_Pair,
-        FiveCardsPairInFlush,
-        SixCardsStraight,
-        FourOfKind,
-        FourCardsFlushStraight,
-        SixCardsFlush,
-        SixCardsPairInFlush,
-        SevenCardsStraight,
-        FourCardsTwoPairsInFlush,
-        FiveCardsTwoPairsInFlush,
-        SixCardsTwoPairsInFlush,
-        FiveCardsFlushStraight,
-        SevenCardsPairInFlush,
-        EightCardsStraight,
-        FiveOfKind,
-        SevenCardsFlush,
-        SevenCardsTwoPairsInFlush,
-        SixCardsFlushStraight,
-        SixCardsThreePairsInFlush,
-        EightCardsPairInFlush,
-        SevenCardsThreePairsInFlush,
-        EightCardsTwoPairsInFlush,
-        SixOfKind,
-        EightCardsFlush,
-        SevenCardsFlushStraight,
-        EightCardsThreePairsInFlush,
-        SevenOfKind,
-        EightCardsFlushStraight,
-        EightCardsFourPairsInFlush,
-        EightOfKind
-    }
-    
+   
     
     public class BaseSubBattleHand<TCard>: IComparable<BaseSubBattleHand<TCard>> where TCard : BasePokerCard
     {
@@ -62,7 +15,7 @@ namespace GenericPoker
         public List<TCard> Cards {
             get => _cards;
         }
-        private EightCardsBattleHandRank _battleHandRank;
+        private PokerOverAllHandRank _battleHandRank;
         protected int _handPower;
         protected string _handName;
         
@@ -84,7 +37,7 @@ namespace GenericPoker
             return string.Join(separator, Cards.Select(card => card.CardStr));    
         }
         
-        public EightCardsBattleHandRank BattleHandRank => _battleHandRank;
+        public PokerOverAllHandRank BattleHandRank => _battleHandRank;
         
         
         public virtual void AddMinorCards(List<TCard> remainingCards)
@@ -120,6 +73,7 @@ namespace GenericPoker
         
     }
 
+    
     public class BaseSubBattleHand<TRank, TCompEnum, TCard> : BaseSubBattleHand<TCard>
         where TRank : Enum
         where TCompEnum : Enum

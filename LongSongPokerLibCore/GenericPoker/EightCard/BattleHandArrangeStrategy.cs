@@ -28,7 +28,7 @@ namespace GenericPoker.EightCard
 			if (comps.Count == 3)
 			{
 				if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
-					    (comps[1].CompRank, comps[2].CompRank), out EightCardsBattleHandRank newBattleRank))
+					    (comps[1].CompRank, comps[2].CompRank), out PokerOverAllHandRank newBattleRank))
 				{
 					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand,
 						PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
@@ -118,7 +118,7 @@ namespace GenericPoker.EightCard
 				if (remainingComps.Count == 2)
 				{
 					if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
-						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out EightCardsBattleHandRank secondRank))
+						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 					{
 						var secondHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
 						(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = FinalizeHands(firstHand, secondHand);
@@ -151,7 +151,7 @@ namespace GenericPoker.EightCard
 	/// 勝率加權排牌策略 (Win-Rate Weighted Strategy)
 	///
 	/// 核心思想 (對應 Program.cs 的 PokerEvaluator 範例)：
-	/// 1. 每一個牌型 (EightCardsBattleHandRank) 在 stats_result.csv 的累積分布 (CDF) 上佔有一段
+	/// 1. 每一個牌型 (PokerOverAllHandRank) 在 stats_result.csv 的累積分布 (CDF) 上佔有一段
 	///    機率區間 (min, max)。越強的牌型，其區間越靠近 1。
 	/// 2. 在這段區間之內，再依據手牌實際的點位結構，利用 PokerMath.GetUnifiedWinRate 做相對排名內插，
 	///    算出這手牌「精準」的勝率落點。
@@ -162,49 +162,46 @@ namespace GenericPoker.EightCard
 	{
 		// stats_result.csv (5000 萬次模擬) 統計到的各牌型出現機率。
 		// 依 SecondHand 的牌力由弱到強排序，用來建立累積分布 (CDF) 區間。
-		private static readonly (EightCardsBattleHandRank rank, double prob)[] StatProbLadder =
+		private static readonly (PokerOverAllHandRank rank, double prob)[] StatProbLadder =
 		{
-			(EightCardsBattleHandRank.Nothing,                0.171982),
-			(EightCardsBattleHandRank.Pair,                   0.138407),
-			(EightCardsBattleHandRank.TwoPairs,               0.256321), // Pair*2
-			(EightCardsBattleHandRank.ThreeCardsPairInFlush,  0.034262), // ThreeCardsFlushStraight_Pair 近似
-			(EightCardsBattleHandRank.ThreeOfKind,            0.025718),
-			(EightCardsBattleHandRank.TownHouse,              0.001622), // ThreeCardsFlushStraight_ThreeOfKind 近似
-			(EightCardsBattleHandRank.FiveCardsStraight,      0.106110),
-			(EightCardsBattleHandRank.FullHouse,              0.038412), // ThreeOfKind_Pair
-			(EightCardsBattleHandRank.ThreeCardsFlushStraight,0.024445),
-			(EightCardsBattleHandRank.FiveCardsFlush,         0.051904),
-			(EightCardsBattleHandRank.Mansion,                0.034262), // ThreeCardsFlushStraight_Pair
-			(EightCardsBattleHandRank.SixCardsStraight,       0.028945),
-			(EightCardsBattleHandRank.FourOfKind,             0.001126),
-			(EightCardsBattleHandRank.FourCardsFlushStraight, 0.003965),
-			(EightCardsBattleHandRank.SixCardsFlush,          0.005314),
-			(EightCardsBattleHandRank.SevenCardsStraight,     0.004747),
-			(EightCardsBattleHandRank.FiveCardsFlushStraight, 0.000421),
-			(EightCardsBattleHandRank.EightCardsStraight,     0.000367),
-			(EightCardsBattleHandRank.SevenCardsFlush,        0.000247),
-			(EightCardsBattleHandRank.SixCardsFlushStraight,  0.000029),
-			(EightCardsBattleHandRank.EightCardsFlush,        0.000004),
+			(PokerOverAllHandRank.Nothing,                0.171982),
+			(PokerOverAllHandRank.Pair,                   0.138407),
+			(PokerOverAllHandRank.TwoPairs,               0.256321), // Pair*2
+			(PokerOverAllHandRank.ThreeOfKind,            0.025718),
+			(PokerOverAllHandRank.FiveCardsStraight,      0.106110),
+			(PokerOverAllHandRank.FullHouse,              0.038412), // ThreeOfKind_Pair
+			(PokerOverAllHandRank.ThreeCardsFlushStraight,0.024445),
+			(PokerOverAllHandRank.FiveCardsFlush,         0.051904),
+			(PokerOverAllHandRank.Mansion,                0.034262), // ThreeCardsFlushStraight_Pair
+			(PokerOverAllHandRank.SixCardsStraight,       0.028945),
+			(PokerOverAllHandRank.FourOfKind,             0.001126),
+			(PokerOverAllHandRank.FourCardsFlushStraight, 0.003965),
+			(PokerOverAllHandRank.SixCardsFlush,          0.005314),
+			(PokerOverAllHandRank.SevenCardsStraight,     0.004747),
+			(PokerOverAllHandRank.FiveCardsFlushStraight, 0.000421),
+			(PokerOverAllHandRank.EightCardsStraight,     0.000367),
+			(PokerOverAllHandRank.SevenCardsFlush,        0.000247),
+			(PokerOverAllHandRank.SixCardsFlushStraight,  0.000029),
+			(PokerOverAllHandRank.EightCardsFlush,        0.000004),
 		};
 
 		// 由上面的階梯機率建立每個牌型的 CDF 機率區間 (min, max)。
-		private static readonly Dictionary<EightCardsBattleHandRank, (double min, double max)> CdfBandDict =
+		private static readonly Dictionary<PokerOverAllHandRank, (double min, double max)> CdfBandDict =
 			BuildCdfBands();
 
-		private static Dictionary<EightCardsBattleHandRank, (double min, double max)> BuildCdfBands()
+		private static Dictionary<PokerOverAllHandRank, (double min, double max)> BuildCdfBands()
 		{
 			double total = 0;
 			foreach (var entry in StatProbLadder) total += entry.prob;
 			if (total <= 0) total = 1;
 
-			var dict = new Dictionary<EightCardsBattleHandRank, (double, double)>();
+			var dict = new Dictionary<PokerOverAllHandRank, (double, double)>();
 			double cum = 0;
 			foreach (var entry in StatProbLadder)
 			{
 				double min = cum / total;
 				cum += entry.prob;
 				double max = cum / total;
-				// 同名牌型可能在階梯出現兩次 (例如 ThreeCardsPairInFlush)，以較寬區間為準。
 				if (dict.TryGetValue(entry.rank, out var old))
 					dict[entry.rank] = (System.Math.Min(old.Item1, min), System.Math.Max(old.Item2, max));
 				else
@@ -216,10 +213,10 @@ namespace GenericPoker.EightCard
 		/// <summary>
 		/// 取得某牌型在 CDF 上的機率區間 (min, max)。查不到時退回最弱 (Nothing) 區間。
 		/// </summary>
-		private static (double min, double max) GetBand(EightCardsBattleHandRank rank)
+		private static (double min, double max) GetBand(PokerOverAllHandRank rank)
 		{
 			if (CdfBandDict.TryGetValue(rank, out var band)) return band;
-			return (0.0, CdfBandDict.TryGetValue(EightCardsBattleHandRank.Nothing, out var n) ? n.max : 0.1);
+			return (0.0, CdfBandDict.TryGetValue(PokerOverAllHandRank.Nothing, out var n) ? n.max : 0.1);
 		}
 
 		/// <summary>
@@ -263,7 +260,7 @@ namespace GenericPoker.EightCard
 
 			switch (hand.BattleHandRank)
 			{
-				case EightCardsBattleHandRank.Nothing:
+				case PokerOverAllHandRank.Nothing:
 				{
 					// 純散牌：取最大的 (最多 3 張) 點位做組合內插。排牌階段往往尚無散牌，直接退回區間下限。
 					var ranks = hand.Cards.Select(c => c.Number).OrderByDescending(n => n).Take(3).ToList();
@@ -273,14 +270,14 @@ namespace GenericPoker.EightCard
 					return SafeUnifiedWinRate(offsets, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.Pair:
+				case PokerOverAllHandRank.Pair:
 				{
 					if (comps.Count == 0) return min;
 					var schema = new[] { new SpaceDef(SpaceType.Cartesian, 13, 1) };
 					return SafeUnifiedWinRate(new[] { RepRank(comps[0]) - 2 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.TwoPairs:
+				case PokerOverAllHandRank.TwoPairs:
 				{
 					if (comps.Count < 2) return min;
 					var schema = new[]
@@ -293,15 +290,14 @@ namespace GenericPoker.EightCard
 					return SafeUnifiedWinRate(new[] { hi - 2, lo - 2 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.ThreeOfKind:
+				case PokerOverAllHandRank.ThreeOfKind:
 				{
 					if (comps.Count == 0) return min;
 					var schema = new[] { new SpaceDef(SpaceType.Cartesian, 13, 1) };
 					return SafeUnifiedWinRate(new[] { RepRank(comps[0]) - 2 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.FullHouse:   // ThreeOfKind + Pair
-				case EightCardsBattleHandRank.TownHouse:    // ThreeCardsPairInFlush + Pair
+				case PokerOverAllHandRank.FullHouse:   // ThreeOfKind + Pair
 				{
 					if (comps.Count < 2) return min;
 					var schema = new[]
@@ -312,9 +308,9 @@ namespace GenericPoker.EightCard
 					return SafeUnifiedWinRate(new[] { RepRank(comps[0]) - 2, RepRank(comps[1]) - 2 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.ThreeCardsFlushStraight:
-				case EightCardsBattleHandRank.FourCardsFlushStraight:
-				case EightCardsBattleHandRank.FiveCardsFlushStraight:
+				case PokerOverAllHandRank.ThreeCardsFlushStraight:
+				case PokerOverAllHandRank.FourCardsFlushStraight:
+				case PokerOverAllHandRank.FiveCardsFlushStraight:
 				{
 					if (comps.Count == 0) return min;
 					// 同花順以最大張當基準，4-high 為最小。
@@ -322,7 +318,7 @@ namespace GenericPoker.EightCard
 					return SafeUnifiedWinRate(new[] { RepRank(comps[0]) - 4 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.Mansion:     // ThreeCardsFlushStraight + Pair
+				case PokerOverAllHandRank.Mansion:     // ThreeCardsFlushStraight + Pair
 				{
 					if (comps.Count < 2) return min;
 					var schema = new[]
@@ -336,27 +332,27 @@ namespace GenericPoker.EightCard
 					return SafeUnifiedWinRate(new[] { straightHigh - 4, pairRank - 2 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.FiveCardsStraight:
-				case EightCardsBattleHandRank.SixCardsStraight:
-				case EightCardsBattleHandRank.SevenCardsStraight:
-				case EightCardsBattleHandRank.EightCardsStraight:
+				case PokerOverAllHandRank.FiveCardsStraight:
+				case PokerOverAllHandRank.SixCardsStraight:
+				case PokerOverAllHandRank.SevenCardsStraight:
+				case PokerOverAllHandRank.EightCardsStraight:
 				{
 					if (comps.Count == 0) return min;
 					var schema = new[] { new SpaceDef(SpaceType.Cartesian, 11, 1) };
 					return SafeUnifiedWinRate(new[] { RepRank(comps[0]) - 4 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.FiveCardsFlush:
-				case EightCardsBattleHandRank.SixCardsFlush:
-				case EightCardsBattleHandRank.SevenCardsFlush:
-				case EightCardsBattleHandRank.EightCardsFlush:
+				case PokerOverAllHandRank.FiveCardsFlush:
+				case PokerOverAllHandRank.SixCardsFlush:
+				case PokerOverAllHandRank.SevenCardsFlush:
+				case PokerOverAllHandRank.EightCardsFlush:
 				{
 					if (comps.Count == 0) return min;
 					var schema = new[] { new SpaceDef(SpaceType.Cartesian, 13, 1) };
 					return SafeUnifiedWinRate(new[] { RepRank(comps[0]) - 2 }, schema, min, max);
 				}
 
-				case EightCardsBattleHandRank.FourOfKind:
+				case PokerOverAllHandRank.FourOfKind:
 				{
 					if (comps.Count == 0) return min;
 					var schema = new[] { new SpaceDef(SpaceType.Cartesian, 13, 1) };
@@ -430,7 +426,7 @@ namespace GenericPoker.EightCard
 				}
 				else if (remainingComps.Count == 0)
 				{
-					var handB = new EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing);
+					var handB = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					Consider(handA, handB);
 				}
 			}
@@ -492,7 +488,7 @@ namespace GenericPoker.EightCard
 			if (comps.Count == 3)
 			{
 				if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
-					    (comps[1].CompRank, comps[2].CompRank), out EightCardsBattleHandRank newBattleRank))
+					    (comps[1].CompRank, comps[2].CompRank), out PokerOverAllHandRank newBattleRank))
 				{
 					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand,
 						PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);

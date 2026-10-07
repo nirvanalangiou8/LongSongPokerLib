@@ -51,13 +51,12 @@ namespace GenericPoker.EightCard
 		}
 
 		
-		public static readonly Dictionary<(BaseCompType, BaseCompType), EightCardsBattleHandRank> EightCardsCompComboToBattleRankDict =
+		public static readonly Dictionary<(BaseCompType, BaseCompType), PokerOverAllHandRank> EightCardsCompComboToBattleRankDict =
 			new()
 			{
-				{ (BaseCompType.Pair, BaseCompType.Pair ), EightCardsBattleHandRank.TwoPairs},
-				{ (BaseCompType.ThreeCardsPairInFlush, BaseCompType.Pair ), EightCardsBattleHandRank.TownHouse},
-				{ (BaseCompType.ThreeOfKind, BaseCompType.Pair ), EightCardsBattleHandRank.FullHouse},
-				{ (BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair ), EightCardsBattleHandRank.Mansion},
+				{ (BaseCompType.Pair, BaseCompType.Pair ), PokerOverAllHandRank.TwoPairs},
+				{ (BaseCompType.ThreeOfKind, BaseCompType.Pair ), PokerOverAllHandRank.FullHouse},
+				{ (BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair ), PokerOverAllHandRank.Mansion},
 			};
 		
 		
@@ -168,12 +167,6 @@ namespace GenericPoker.EightCard
 			return data;
 		}
 		
-		private List<PokerCardComponent<PokerCardCompRank, BasePokerCard> > ListsToPokerComp(List<List<BasePokerCard>> inputListInList,
-			PokerCardCompRank pokerCardCompRank)
-		{
-			return inputListInList
-				.Select(subList => new PokerCardComponent<PokerCardCompRank, BasePokerCard> { CompRank = pokerCardCompRank, Cards = subList }).ToList();
-		}
 		
 
 		public List<PokerHandStructure> Test8Cards()
@@ -722,6 +715,12 @@ namespace GenericPoker.EightCard
 		//======== The codes from below are For unit Test only ==============
 		//===================================================================
 		//===================================================================
+		private List<PokerCardComponent<PokerCardCompRank, BasePokerCard> > ListsToPokerComp(List<List<BasePokerCard>> inputListInList,
+			PokerCardCompRank pokerCardCompRank)
+		{
+			return inputListInList
+				.Select(subList => new PokerCardComponent<PokerCardCompRank, BasePokerCard> { CompRank = pokerCardCompRank, Cards = subList }).ToList();
+		}
 		
 		/// <summary>
 		/// Retrieves all possible straight combinations of a specified card count.

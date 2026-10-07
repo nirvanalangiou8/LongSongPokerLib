@@ -32,16 +32,16 @@ namespace GenericPoker.EightCard
 			FinalCompsStr = string.Join("_", compTypeCountsList);
 		}
 
-		public static EightCardsBattleHandRank ConvertCompRankToBattleRank(BaseCompType compType)
+		public static PokerOverAllHandRank ConvertCompRankToBattleRank(BaseCompType compType)
 		{
 			var enumName = compType.ToString(); // Get the name of the enum item as a string
 			
 			// Try to parse the string into Enum2
-			if (Enum.TryParse<EightCardsBattleHandRank>(enumName, out EightCardsBattleHandRank result))
+			if (Enum.TryParse<PokerOverAllHandRank>(enumName, out PokerOverAllHandRank result))
 			{
 				return result; // Return the matching Enum2 value
 			}
-			return EightCardsBattleHandRank.Nothing;
+			return PokerOverAllHandRank.Nothing;
 		}
 			
 		public BaseBattleHands ArrangeHands(IBattleHandArrangeStrategy strategy)
@@ -74,21 +74,21 @@ namespace GenericPoker.EightCard
 					break;
 				case 1:
 					// Add first hand
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing);
+					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					
 					// Add second Hand
 					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank), Components[0]);
 					break;
 				case 0: // Nothing for whole 8 cards
 					// Add first hand
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing);
+					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					// Add second Hand
-					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, EightCardsBattleHandRank.Nothing);
+					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
 					break;
 				default:
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing);
+					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					// Add second Hand
-					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, EightCardsBattleHandRank.Nothing);
+					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
 					break;
 			}
 
