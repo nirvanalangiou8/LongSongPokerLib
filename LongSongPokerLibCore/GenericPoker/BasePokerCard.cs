@@ -6,60 +6,7 @@ using System.Globalization;
 
 namespace GenericPoker
 {
-	
-	public enum PokerSuit
-	{
-		NoSuit = 0, // Some joker can not be replaced as suit, but straight, so set this extra options.
-		Club = 1,
-		Diamond = 2,
-		Heart = 4,
-		Spade = 8, 
-		Star = 15,
-		Wild = 31,
-	}
-	//🂿 ♣ ♠️♠️♣️ ❤️, 🃏⭐ ♠️, 🔶 ♣️ ✖️
-	
-	
-	public static class PokerConst
-	{
-		public const int MaxTotalCountInSameSuit = 13;
-		public const int TotalRegularSuitCount = 4;
-		public const int TotalRegularPokerCardsWithoutJokers = MaxTotalCountInSameSuit * TotalRegularSuitCount;
-		public const int AceBigNumber = PokerConst.MaxTotalCountInSameSuit + 1;
-		
-		public static readonly Dictionary<int, string> PokerNumberNameDict = new Dictionary<int, string> {
-			{ 1, "A" }, { 2, "2" }, { 3, "3" }, { 4, "4" }, { 5, "5" }, { 6, "6" },
-			{ 7, "7" }, { 8, "8" }, { 9, "9" }, { 10, "10" }, { 11, "J" }, { 12, "Q" }, { 13, "K" }, {14, "A"}, {15, "Joker"}, {16, "Joker"}, {17, "Joker"}, {18, "Joker"},};
-    
-		public static readonly Dictionary<string, int> PokerStringToNumberDict = new Dictionary<string, int> {
-			{"A", 14 }, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6 }, {"7", 7}, {"8", 8}, {"9", 9}, 
-			{"10", 10}, {"J", 11}, {"Q", 12}, {"K", 13}, {"Joker", 15}};
-		
-		public static readonly Dictionary<PokerSuit, string> PokerSuitToSymbol = new Dictionary<PokerSuit, string> {
-			{PokerSuit.NoSuit , "✖️" }, { PokerSuit.Club, "♣️" }, { PokerSuit.Diamond, "🔶" }, { PokerSuit.Heart, "❤️" }, 
-			{ PokerSuit.Spade, "♠️" }, { PokerSuit.Star, "⭐" }, { PokerSuit.Wild, "🃏" },
-		};
-		
-		public static readonly Dictionary<string, PokerSuit> SymbolToPokerSuit = new Dictionary<string, PokerSuit> {
-			{"✖️", PokerSuit.NoSuit}, {"♣️", PokerSuit.Club}, {"🔶", PokerSuit.Diamond }, {"❤️", PokerSuit.Heart}, 
-			{"♠️", PokerSuit.Spade}, {"⭐",  PokerSuit.Star}, {"🃏", PokerSuit.Wild},
-		};
-		
-		public enum PokerCardRangeGroup
-		{
-			Royal = 0b0100,
-			MiddleClass = 0b010,
-			LowerClass = 0b001,
-		}
-		
-		public static readonly Dictionary<PokerCardRangeGroup, (int, int)> MatchCardRangeNumberGroupDict = new Dictionary<PokerCardRangeGroup, (int, int)>
-		{
-			{ PokerCardRangeGroup.Royal, (10,14) },
-			{ PokerCardRangeGroup.MiddleClass, (6,9)},
-			{ PokerCardRangeGroup.LowerClass, (1,5) },
-		};
-		
-	}
+
 	
 	
 	public class PokerCardComparer : IEqualityComparer<BasePokerCard>

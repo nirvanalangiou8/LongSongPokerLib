@@ -51,41 +51,6 @@ namespace GenericPoker.EightCard
 		}
 
 		
-		private static readonly Dictionary<(int, CompType), PokerCardCompRank> PokerCompNameDict =
-			new Dictionary<(int, CompType), PokerCardCompRank>
-			{
-				{ (3, CompType.Kind), PokerCardCompRank.ThreeOfKind },
-				{ (3, CompType.Flush), PokerCardCompRank.ThreeCardFlush },
-				{ (3, CompType.Straight), PokerCardCompRank.ThreeCardStraight },
-				{ (3, CompType.FlushStraight), PokerCardCompRank.ThreeCardFlushStraight },
-				{ (4, CompType.Kind), PokerCardCompRank.FourOfKind },
-				{ (4, CompType.Flush), PokerCardCompRank.FourCardFlush },
-				{ (4, CompType.Straight), PokerCardCompRank.FourCardStraight },
-				{ (4, CompType.FlushStraight), PokerCardCompRank.FourCardFlushStraight },
-				{ (5, CompType.Kind), PokerCardCompRank.FiveOfKind },
-				{ (6, CompType.Kind), PokerCardCompRank.SixOfKind },
-				{ (7, CompType.Kind), PokerCardCompRank.SevenOfKind },
-				{ (8, CompType.Kind), PokerCardCompRank.EightOfKind },
-				{ (5, CompType.Flush), PokerCardCompRank.FiveCardFlush },
-				{ (5, CompType.Straight), PokerCardCompRank.FiveCardStraight },
-				{ (5, CompType.FullHouse), PokerCardCompRank.FullHouse },
-				{ (5, CompType.FlushStraight), PokerCardCompRank.FiveCardFlushStraight },
-				{ (6, CompType.Flush), PokerCardCompRank.SixCardFlush },
-				{ (7, CompType.Flush), PokerCardCompRank.SevenCardFlush },
-				{ (8, CompType.Flush), PokerCardCompRank.EightCardFlush },
-				{ (6, CompType.Straight), PokerCardCompRank.SixCardStraight },
-				{ (7, CompType.Straight), PokerCardCompRank.SevenCardStraight },
-				{ (8, CompType.Straight), PokerCardCompRank.EightCardStraight },
-				{ (6, CompType.FlushStraight), PokerCardCompRank.SixCardFlushStraight },
-				{ (7, CompType.FlushStraight), PokerCardCompRank.SevenCardFlushStraight },
-				{ (8, CompType.FlushStraight), PokerCardCompRank.EightCardFlushStraight },
-				{ (13, CompType.Straight), PokerCardCompRank.ThirteenCardStraight },
-				{ (13, CompType.FlushStraight), PokerCardCompRank.ThirteenCardFlushStraight },
-				{ (14, CompType.Straight), PokerCardCompRank.FourteenCardStraight },
-			};
-
-		
-		
 		public static readonly Dictionary<(BaseCompType, BaseCompType), EightCardsBattleHandRank> EightCardsCompComboToBattleRankDict =
 			new()
 			{
@@ -774,7 +739,7 @@ namespace GenericPoker.EightCard
 			var kindGroupLists = GetNumberGroups(1, _noneJokerCards);
 			var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
 			ProcessPermuteStraight(cardCountInComp, kindGroupLists, straightableJokerCards, permutes);
-			allComps.AddRange(ListsToPokerComp(permutes, PokerCompNameDict[(cardCountInComp, CompType.Straight)]));
+			allComps.AddRange(ListsToPokerComp(permutes, PokerConst.PokerCompNameDict[(cardCountInComp, CompType.Straight)]));
 
 
 			//--- Finally, sort them out base on their CompPower order.
@@ -863,7 +828,7 @@ namespace GenericPoker.EightCard
 			}
 
 			// filter out flush straight as later, we will have dedicated method to collect flush straight?
-			allComps.AddRange(ListsToPokerComp(permutes, PokerCompNameDict[(cardCountInComp, CompType.Flush)]));
+			allComps.AddRange(ListsToPokerComp(permutes, PokerConst.PokerCompNameDict[(cardCountInComp, CompType.Flush)]));
 
 			//--- Finally sort them out base on their CompPower order.
 			//allComps = allComps.OrderByDescending(obj => obj.CompPower).ToList();
@@ -909,7 +874,7 @@ namespace GenericPoker.EightCard
 			}
 
 			allComps.AddRange(ListsToPokerComp(permutes,
-				PokerCompNameDict[(cardCountInComp, CompType.FlushStraight)]));
+				PokerConst.PokerCompNameDict[(cardCountInComp, CompType.FlushStraight)]));
 
 			//--- Finally sort them out base on their CompPower
 			//allComps = allComps.OrderByDescending(obj => obj.CompPower).ToList();

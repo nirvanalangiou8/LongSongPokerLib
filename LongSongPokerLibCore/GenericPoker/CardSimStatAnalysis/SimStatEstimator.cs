@@ -199,33 +199,33 @@ namespace GenericPoker.CardSimStatAnalysis
         private void RecursiveArrangeHands(List<BasePokerCard> remainingCards,
             SimPokerHandStructure currentHandCandidates, List<SimPokerHandStructure> results)
         {
-            var bFoundStructure = false;
+            var candidateProcessed = false;
             
             // make copy of input currentHandCandidates to prevent step one finding polute the other step initial clean currentHandCandidates.
             var accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
             
             //1. Sort the number in each suit, try to find suits first and find straight by the way to see if we have flush Straight.
             var flushGroups = _evaluateFlushGroups(_minFlushStraightCards, remainingCards);
-            bFoundStructure = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, accumHandStructures, results, bFoundStructure);
+            candidateProcessed = ArrangeFlushOrFlushStraight(flushGroups, remainingCards, accumHandStructures, results, candidateProcessed);
            
 			
             // 2. Continue to find Sort majorly for straight
             accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
             var numberGroupList = _getNumberGroups(1, remainingCards);
             var allStraightClusters = GetAllStraightCluster(_minStraightCards, numberGroupList);
-            bFoundStructure = ArrangeStraightComps(allStraightClusters, remainingCards, accumHandStructures,
-	            results, bFoundStructure);
+            candidateProcessed = ArrangeStraightComps(allStraightClusters, remainingCards, accumHandStructures,
+	            results, candidateProcessed);
             
             // 3. Continue to find kinds. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
             accumHandStructures = new SimPokerHandStructure(currentHandCandidates);
             var allKindGroups = GetKindGroups(2, remainingCards);
-            bFoundStructure = ArrangeKindComps(allKindGroups, remainingCards, accumHandStructures, results, bFoundStructure);
+            candidateProcessed = ArrangeKindComps(allKindGroups, remainingCards, accumHandStructures, results, candidateProcessed);
           
 			
             // When code comes here, it means there are nothing else worthy to record, so that put all current into Results.
             // If bFoundStructure is true, it means those process function has already handled those RecursiveXXX for remaning.
             // Only process if bFoundStructure is false, means notthing else to record, so formally process currentHandCandidates.
-            if (!bFoundStructure && accumHandStructures.Components.Count > 0)
+            if (!candidateProcessed && accumHandStructures.Components.Count > 0)
             {
                 var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
                 newCandidateComps.SetRemainingCards(remainingCards);
@@ -233,7 +233,7 @@ namespace GenericPoker.CardSimStatAnalysis
             }
             
             // Process if all remaining cards are not touched (meaning = _allPokerCards.count), so it's nothing. 
-            if (!bFoundStructure && remainingCards.Count == _allPokerCards.Count)
+            if (!candidateProcessed && remainingCards.Count == _allPokerCards.Count)
             {
 	            var newCandidateComps = new SimPokerHandStructure(accumHandStructures);
 	            var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
@@ -259,10 +259,10 @@ namespace GenericPoker.CardSimStatAnalysis
         /// <param name="remainingCards">Available cards.</param>
         /// <param name="accumHandStructures">Current state of hand composition.</param>
         /// <param name="results">Output list of complete hand structures.</param>
-        /// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+        /// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
         /// <returns>True if a hand component was successfully added.</returns>
         private bool ArrangeKindComps(List<List<BasePokerCard>> allKindGroups, List<BasePokerCard> remainingCards,
-            SimPokerHandStructure accumHandStructures, List<SimPokerHandStructure> results, bool hasRank)
+            SimPokerHandStructure accumHandStructures, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
 	        // Do filter out any kindGroup count < 2, so we have at least pair in the group. such as pair, threeofkind, fourofkind
 	        var allQualifiedGroups = allKindGroups.Where(x => x.Count >= 2).ToList();
@@ -286,7 +286,7 @@ namespace GenericPoker.CardSimStatAnalysis
 	        }
 	        else
 	        {
-		        return hasRank;    
+		        return candidateProcessed;    
 	        }
 
         }
@@ -300,10 +300,10 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="remainingCards">Available cards.</param>
 		/// <param name="accumHandStructures">Current state of hand composition.</param>
 		/// <param name="results">Output list of complete hand structures.</param>
-		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeFlushOrFlushStraight(List<List<BasePokerCard>> flushGroups, List<BasePokerCard> remainingCards,
-            SimPokerHandStructure accumHandStructures, List<SimPokerHandStructure> results, bool hasRank)
+            SimPokerHandStructure accumHandStructures, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
 	        
 			foreach (var flushGroup in flushGroups)
@@ -356,7 +356,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						accumHandStructures.RemoveLast();
 					}
 					
-					hasRank = true;
+					candidateProcessed = true;
 				}
 				else if (flushGroup.Count >= _minFlushCards )
 				{
@@ -368,11 +368,11 @@ namespace GenericPoker.CardSimStatAnalysis
 						new PokerCardComparer());
 					RecursiveArrangeHands(newRemainCards, accumHandStructures, results);
 					accumHandStructures.RemoveLast();
-					hasRank = true;
+					candidateProcessed = true;
 				}
 				
 			}
-            return hasRank;
+            return candidateProcessed;
         }
 
 		
@@ -385,15 +385,15 @@ namespace GenericPoker.CardSimStatAnalysis
 		/// <param name="remainingCards">Available cards.</param>
 		/// <param name="accumHandStructures">Current state of hand composition.</param>
 		/// <param name="results">Output list of complete hand structures.</param>
-		/// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+		/// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
 		/// <returns>True if a hand component was successfully added.</returns>
 		private bool ArrangeStraightComps(List<List<List<BasePokerCard>>> allStraightClusters, List<BasePokerCard> remainingCards,
-            SimPokerHandStructure accumHandStructures, List<SimPokerHandStructure> results, bool hasRank)
+            SimPokerHandStructure accumHandStructures, List<SimPokerHandStructure> results, bool candidateProcessed)
         {
 	        
 	        if (allStraightClusters.Count == 0)
 	        {
-	            return hasRank;
+	            return candidateProcessed;
 	        }
 	        
 	        var accumAllRepresentedStraightCards = new List<BasePokerCard>();

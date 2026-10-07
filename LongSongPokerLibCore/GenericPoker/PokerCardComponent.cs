@@ -92,7 +92,7 @@ namespace GenericPoker
 		}
 
 		
-		// This key is for identify if two combos are identical, so that we can remove duplicated.
+		// This key is to identify if two combos are identical, so that we can remove duplicated.
 		// Usually used in filter out straight and flush for a flushstraight. If not filter out, we will have some duplicates.
 		// Ex: Ace-Spade, K-Spade, Q-Spade, can be a flushStraight, flush and straight
 		public string CompUniqueKey()

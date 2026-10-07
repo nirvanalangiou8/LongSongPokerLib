@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace GenericPoker
 {
 	/*
@@ -13,34 +15,6 @@ namespace GenericPoker
 		BitFiveOfKind = 0b_0100_0000
 	}*/
 
-	public enum EightCardsPokerRank
-	{
-		OnePair,
-		TwoPairs,
-		ThreeCardsFlush,
-		ThreeCardsStraight,
-		ThreeCardsFlushStraight,
-		ThreeOfKind,
-		PairThreeCardsFlush,
-		PairThreeCardsStraight,
-		PairThreeCardsFlushStraight,
-		FourCardsFlush,
-		FourCardsStraight,
-		FourCardsFlushStraight,
-		FiveCardsStraight,
-		FiveCardsFlush,
-		FullHouse,
-		FiveOfKind,
-		SixCardsStraight,
-		SixCardsFlush,
-		SixCardsFlushStraight,
-		SevenCardsStraight,
-		SevenCardsFlush,
-		SevenCardsFlushStraight,
-		EightCardsStraight,
-		EightCardsFlush,
-		EightCardsFlushStraight,
-	}
 
 	public enum BaseCompType
 	{
@@ -96,53 +70,7 @@ namespace GenericPoker
 		None,
 	}
 	
-	/*
-	public enum EightCardQualifiedExceptionalBackHand
-	{
-		Nothing,
-		EightCardsFourPairsInFlush,
-		EightCardsFlushStraight,
-		SevenOfKind,
-		EightCardsThreePairsInFlush,
-		SevenCardsFlushStraight,
-		EightCardsFlush,
-		SixOfKind,
-		EightCardsTwoPairsInFlush,
-		SevenCardsThreePairsInFlush,
-		EightCardsPairInFlush,
-		SixCardsThreePairsInFlush,
-		SixCardsFlushStraight,
-		SevenCardsTwoPairsInFlush,
-		SevenCardsFlush,
-		FiveOfKind,
-		EightCardsStraight,
-		SevenCardsPairInFlush,
-		FiveCardsFlushStraight,
-		SixCardsTwoPairsInFlush,
-		FiveCardsTwoPairsInFlush,
-		FourCardsTwoPairsInFlush,
-		SevenCardsStraight,
-		SixCardsPairInFlush,
-		SixCardsFlush,
-		FourCardsFlushStraight,
-		FourOfKind,
-		SixCardsStraight,
-		FiveCardsPairInFlush,
-		ThreeCardsFlushStraightAndPair,
-		FiveCardsFlush,
-		ThreeCardsFlushStraight,
-		ThreeOfKindAndPair,
-		FiveCardsStraight,
-		FourCardsPairInFlush,
-		ThreeCardsPairInFlushAndPair,
-		ThreeOfKind,
-		ThreeCardsPairInFlush,
-		FourCardsFlush,
-		FourCardStraight,
-		TwoPairs,
-		Pair,
-	}
-	*/
+		
 
 	public enum PokerRankTypes
 	{
@@ -172,6 +100,9 @@ namespace GenericPoker
 		FlushStraight,
 	}
 	
+	
+	
+	
 	public enum PokerOverAllHandRank
     {
         None,
@@ -200,64 +131,7 @@ namespace GenericPoker
         NineCardsFlush,
         NineCardsFlushStraight
     }
-
-    public enum PokerBattleHandRank
-    {
-        Nothing,
-        Pair,
-        TwoPairs,
-        ThreeCardsFlush,
-        ThreeCardsStraight,
-        ThreeCardsFlushStraight,
-        ThreeOfKind,
-        FourCardsFlush,
-        FourCardStraight,
-        FourCardsFlushStraight,
-        FiveCardsStraight,
-        FiveCardsFlush,
-        FiveCardsFlushStraight,
-        SixCardsStraight,
-        SixCardsFlush,
-        SixCardsFlushStraight,
-        SevenCardsStraight,
-        SevenCardsFlush,
-        SevenCardsFlushStraight,
-        EightCardsStraight,
-        EightCardsFlush,
-        EightCardsFlushStraight,
-        NineCardsStraight,
-        NineCardsFlush,
-        NineCardsFlushStraight,
-        TenCardsStraight,
-        TenCardsFlush,
-        TenCardsFlushStraight,
-        FourOfKind,
-        FiveOfKind,
-        SixOfKind,
-        SevenOfKind,
-        EightOfKind,
-        NineOfKind,
-        TenOfKind,
-        FullHouse,
-        TownHouse,
-        Mansion,
-        FourCardsTwoPairsInFlush,
-        FiveCardsTwoPairsInFlush,
-        SixCardsTwoPairsInFlush,
-        SevenCardsTwoPairsInFlush,
-        EightCardsTwoPairsInFlush,
-        SixCardsThreePairsInFlush,
-        SevenCardsThreePairsInFlush,
-        EightCardsThreePairsInFlush,
-        EightCardsFourPairsInFlush,
-        ThreeCardsPairInFlush,
-        FourCardsPairInFlush,
-        FiveCardsPairInFlush,
-        SixCardsPairInFlush,
-        SevenCardsPairInFlush,
-        EightCardsPairInFlush,
-    }
-
+	
 	public enum PokerCardCompRank
 	{
 		ThreeCardFlush,
@@ -274,7 +148,7 @@ namespace GenericPoker
 		FiveCardFlushStraight,
 		FiveOfKind,
 
-		// Following, the associated hasn't precisely calculated, and just use temporarily values  
+		// Following, the associated hasn't precisely calculated and just use temporary values  
 		SixCardStraight,
 		SixCardFlush,
 		SixCardFlushStraight,
@@ -304,6 +178,93 @@ namespace GenericPoker
 		ThirteenCardFlushStraight,
 		FourteenCardStraight,
 	}
+
+		
+	public enum PokerSuit
+	{
+		NoSuit = 0, // Some joker can not be replaced as suit, but straight, so set this extra options.
+		Club = 1,
+		Diamond = 2,
+		Heart = 4,
+		Spade = 8, 
+		Star = 15,
+		Wild = 31,
+	}
+	//🂿 ♣ ♠️♠️♣️ ❤️, 🃏⭐ ♠️, 🔶 ♣️ ✖️
+	
+	public static partial class PokerConst
+	{
+		public const int MaxTotalCountInSameSuit = 13;
+		public const int TotalRegularSuitCount = 4;
+		public const int TotalRegularPokerCardsWithoutJokers = MaxTotalCountInSameSuit * TotalRegularSuitCount;
+		public const int AceBigNumber = PokerConst.MaxTotalCountInSameSuit + 1;
+		
+		public static readonly Dictionary<int, string> PokerNumberNameDict = new Dictionary<int, string> {
+			{ 1, "A" }, { 2, "2" }, { 3, "3" }, { 4, "4" }, { 5, "5" }, { 6, "6" },
+			{ 7, "7" }, { 8, "8" }, { 9, "9" }, { 10, "10" }, { 11, "J" }, { 12, "Q" }, { 13, "K" }, {14, "A"}, {15, "Joker"}, {16, "Joker"}, {17, "Joker"}, {18, "Joker"},};
+    
+		public static readonly Dictionary<string, int> PokerStringToNumberDict = new Dictionary<string, int> {
+			{"A", 14 }, {"2", 2}, {"3", 3}, {"4", 4}, {"5", 5}, {"6", 6 }, {"7", 7}, {"8", 8}, {"9", 9}, 
+			{"10", 10}, {"J", 11}, {"Q", 12}, {"K", 13}, {"Joker", 15}};
+		
+		public static readonly Dictionary<PokerSuit, string> PokerSuitToSymbol = new Dictionary<PokerSuit, string> {
+			{PokerSuit.NoSuit , "✖️" }, { PokerSuit.Club, "♣️" }, { PokerSuit.Diamond, "🔶" }, { PokerSuit.Heart, "❤️" }, 
+			{ PokerSuit.Spade, "♠️" }, { PokerSuit.Star, "⭐" }, { PokerSuit.Wild, "🃏" },
+		};
+		
+		public static readonly Dictionary<string, PokerSuit> SymbolToPokerSuit = new Dictionary<string, PokerSuit> {
+			{"✖️", PokerSuit.NoSuit}, {"♣️", PokerSuit.Club}, {"🔶", PokerSuit.Diamond }, {"❤️", PokerSuit.Heart}, 
+			{"♠️", PokerSuit.Spade}, {"⭐",  PokerSuit.Star}, {"🃏", PokerSuit.Wild},
+		};
+		
+		public enum PokerCardRangeGroup
+		{
+			Royal = 0b0100,
+			MiddleClass = 0b010,
+			LowerClass = 0b001,
+		}
+		
+		public static readonly Dictionary<PokerCardRangeGroup, (int, int)> MatchCardRangeNumberGroupDict = new Dictionary<PokerCardRangeGroup, (int, int)>
+		{
+			{ PokerCardRangeGroup.Royal, (10,14) },
+			{ PokerCardRangeGroup.MiddleClass, (6,9)},
+			{ PokerCardRangeGroup.LowerClass, (1,5) },
+		};
+		
+		public static readonly Dictionary<(int, CompType), PokerCardCompRank> PokerCompNameDict =
+			new Dictionary<(int, CompType), PokerCardCompRank>
+			{
+				{ (3, CompType.Kind), PokerCardCompRank.ThreeOfKind },
+				{ (3, CompType.Flush), PokerCardCompRank.ThreeCardFlush },
+				{ (3, CompType.Straight), PokerCardCompRank.ThreeCardStraight },
+				{ (3, CompType.FlushStraight), PokerCardCompRank.ThreeCardFlushStraight },
+				{ (4, CompType.Kind), PokerCardCompRank.FourOfKind },
+				{ (4, CompType.Flush), PokerCardCompRank.FourCardFlush },
+				{ (4, CompType.Straight), PokerCardCompRank.FourCardStraight },
+				{ (4, CompType.FlushStraight), PokerCardCompRank.FourCardFlushStraight },
+				{ (5, CompType.Kind), PokerCardCompRank.FiveOfKind },
+				{ (6, CompType.Kind), PokerCardCompRank.SixOfKind },
+				{ (7, CompType.Kind), PokerCardCompRank.SevenOfKind },
+				{ (8, CompType.Kind), PokerCardCompRank.EightOfKind },
+				{ (5, CompType.Flush), PokerCardCompRank.FiveCardFlush },
+				{ (5, CompType.Straight), PokerCardCompRank.FiveCardStraight },
+				{ (5, CompType.FullHouse), PokerCardCompRank.FullHouse },
+				{ (5, CompType.FlushStraight), PokerCardCompRank.FiveCardFlushStraight },
+				{ (6, CompType.Flush), PokerCardCompRank.SixCardFlush },
+				{ (7, CompType.Flush), PokerCardCompRank.SevenCardFlush },
+				{ (8, CompType.Flush), PokerCardCompRank.EightCardFlush },
+				{ (6, CompType.Straight), PokerCardCompRank.SixCardStraight },
+				{ (7, CompType.Straight), PokerCardCompRank.SevenCardStraight },
+				{ (8, CompType.Straight), PokerCardCompRank.EightCardStraight },
+				{ (6, CompType.FlushStraight), PokerCardCompRank.SixCardFlushStraight },
+				{ (7, CompType.FlushStraight), PokerCardCompRank.SevenCardFlushStraight },
+				{ (8, CompType.FlushStraight), PokerCardCompRank.EightCardFlushStraight },
+				{ (13, CompType.Straight), PokerCardCompRank.ThirteenCardStraight },
+				{ (13, CompType.FlushStraight), PokerCardCompRank.ThirteenCardFlushStraight },
+				{ (14, CompType.Straight), PokerCardCompRank.FourteenCardStraight },
+			};
+	}
+	
 		
 }
 
