@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
+    /*
     public class SimPokerHandStructure : IComparable<SimPokerHandStructure>
     {
         public readonly List<PokerCardComponent<BaseCompType, BasePokerCard>> Components;
@@ -106,5 +107,7 @@ namespace GenericPoker.CardSimStatAnalysis
         {
             return FinalCompsStr?.GetHashCode() ?? 0;
         }
+        
     }
+    */
 }

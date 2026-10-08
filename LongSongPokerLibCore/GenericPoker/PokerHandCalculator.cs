@@ -6,8 +6,9 @@ using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
 using GenericPoker;
+using GenericPoker.EightCard;
 
-namespace GenericPoker.EightCard
+namespace GenericPoker
 {
 	public class PokerHandCalculator
 	{
@@ -552,7 +553,7 @@ namespace GenericPoker.EightCard
 							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
 							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
 							candidateProcessed = true;
-							currentHandStructure.RemoveLastComp();
+							currentHandStructure.RemoveLast();
 						}
 					} else { // no we don't have straight in suit group which implies @@flush@@
 
@@ -574,7 +575,7 @@ namespace GenericPoker.EightCard
 							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
 							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
 							candidateProcessed = true;
-							currentHandStructure.RemoveLastComp();
+							currentHandStructure.RemoveLast();
 						}
 					}
 				}
@@ -619,7 +620,7 @@ namespace GenericPoker.EightCard
                             RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
                             // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
                             candidateProcessed = true;
-                            currentHandCandidates.RemoveLastComp();
+                            currentHandCandidates.RemoveLast();
                         }
                     }
                 }
@@ -654,7 +655,7 @@ namespace GenericPoker.EightCard
 						currentHandCandidates.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
 						RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
-						currentHandCandidates.RemoveLastComp();
+						currentHandCandidates.RemoveLast();
 						hasRank = true;
 					}
 				}

@@ -1,7 +1,4 @@
-﻿
-using GenericPoker.EightCard;
-
-namespace GenericPoker
+﻿namespace GenericPoker
 {
     public enum JokerType
     {

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using GenericPoker.EightCard;
 //using Unity.VisualScripting.FullSerializer;
 
-namespace GenericPoker.EightCard
+namespace GenericPoker
 {
 	
 	// This class is for analyzed poker structure, to breaking the hand down into small components, such as pair, three of kind, flush, straight, etc..
@@ -19,6 +20,54 @@ namespace GenericPoker.EightCard
 
 		private IBattleHandArrangeStrategy _strategy;
 		
+		// checked
+		private void Init()
+		{
+			remainingCards = new List<BasePokerCard>();
+		}
+		
+		// checked
+		public PokerHandStructure()
+		{
+			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+			Init();
+		}
+
+		// checked
+		public PokerHandStructure(PokerHandStructure other)
+		{
+			//Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+			//Components.AddRange(other.Components);
+			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>(other.Components);
+			Init();
+		}
+		
+		public PokerHandStructure(List<PokerCardComponent<BaseCompType, BasePokerCard>> components)
+		{
+			Components = components;
+			Init();
+		}
+		
+		// checked
+		public void Clear()
+		{
+			Components.Clear();
+			remainingCards.Clear();
+		}
+		// checked
+		public void AddComp(PokerCardComponent<BaseCompType, BasePokerCard> newComponent)
+		{
+			Components.Add(newComponent);
+		}
+		
+		// checked
+		public void RemoveLast(int count = 1)
+		{
+			Components.RemoveRange(Components.Count - count, count);
+		}
+
+		
+		// checked
 		public void SortCompsAndClassify()
 		{
 			Components.Sort((c1, c2) => c2.CompareTo(c1));
@@ -31,6 +80,64 @@ namespace GenericPoker.EightCard
 			// Generate the final string by joining the tuple elements with a comma
 			FinalCompsStr = string.Join("_", compTypeCountsList);
 		}
+		
+		// checked
+		public void SetRemainingCards(List<BasePokerCard> inputRemaining)
+		{
+			remainingCards.AddRange(inputRemaining);
+		}
+		
+		
+		// checked
+		[SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH")]
+		public int CompareTo(PokerHandStructure other)
+		{
+			foreach (var (comp1, comp2) in Components.Zip(other.Components, (a, b) => (a, b)))
+			{
+				var compareRes = comp1.CompareTo(comp2);
+				if (compareRes != 0) return compareRes;
+			}
+
+			// When comes here, they are all euqal, so compare their Comp counts
+			if (Components.Count > other.Components.Count)
+			{
+				return 1;
+			} else {
+				if (Components.Count < other.Components.Count)
+				{
+					return -1;
+				}
+
+				return 0;
+			}
+		}
+		
+		// checked
+		public override bool Equals(object obj)
+		{
+			if (obj is not PokerHandStructure other)
+				return false;
+			if (Components.Count != other.Components.Count)
+			{
+				return false;
+			}
+
+			foreach (var (comp1, comp2) in Components.Zip(other.Components, (a, b) => (a, b)))
+			{
+				bool equRes = comp1.Equals(comp2);
+				if (equRes == false)
+					return false;
+			}
+
+			return true;
+		}
+
+		public override int GetHashCode()
+		{
+			return FinalCompsStr?.GetHashCode() ?? 0;
+		}
+
+		
 
 		public static PokerOverAllHandRank ConvertCompRankToBattleRank(BaseCompType compType)
 		{
@@ -107,93 +214,7 @@ namespace GenericPoker.EightCard
 			
 			return new BaseBattleHands(firstBattleHand, secondBattleHand);
 		}
-		
-		private void Init()
-		{
-			remainingCards = new List<BasePokerCard>();
-			//_battleHands = new List<BaseSubBattleHand>();
-		}
-		public PokerHandStructure()
-		{
-			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
-			Init();
-		}
 
-		public PokerHandStructure(PokerHandStructure other)
-		{
-			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
-			Components.AddRange(other.Components);
-			Init();
-		}
-
-		public PokerHandStructure(List<PokerCardComponent<BaseCompType, BasePokerCard>> components)
-		{
-			Components = components;
-			Init();
-		}
-
-		public void AddComp(PokerCardComponent<BaseCompType, BasePokerCard> newComponent)
-		{
-			Components.Add(newComponent);
-		}
-
-		public void SetRemainingCards(List<BasePokerCard> inputRemaining)
-		{
-			remainingCards.AddRange(inputRemaining);
-		}
-
-		public void RemoveLastComp()
-		{
-			Components.RemoveAt(Components.Count - 1);
-		}
-
-
-		[SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH")]
-		public int CompareTo(PokerHandStructure other)
-		{
-			foreach (var (comp1, comp2) in Components.Zip(other.Components, (a, b) => (a, b)))
-			{
-				var compareRes = comp1.CompareTo(comp2);
-				if (compareRes != 0) return compareRes;
-			}
-
-			// When comes here, they are all euqal, so compare their Comp counts
-			if (Components.Count > other.Components.Count)
-			{
-				return 1;
-			} else {
-				if (Components.Count < other.Components.Count)
-				{
-					return -1;
-				}
-
-				return 0;
-			}
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj is not PokerHandStructure other)
-				return false;
-			if (Components.Count != other.Components.Count)
-			{
-				return false;
-			}
-
-			foreach (var (comp1, comp2) in Components.Zip(other.Components, (a, b) => (a, b)))
-			{
-				bool equRes = comp1.Equals(comp2);
-				if (equRes == false)
-					return false;
-			}
-
-			return true;
-		}
-
-		public override int GetHashCode()
-		{
-			return FinalCompsStr?.GetHashCode() ?? 0;
-		}
 		
 	}
 }

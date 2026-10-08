@@ -1,4 +1,4 @@
-﻿namespace GenericPoker.EightCard
+﻿namespace GenericPoker
 {
     public class BaseJokerCardMajor : BaseJokerCard, IJokerFlushable, IJokerStraightable
     {

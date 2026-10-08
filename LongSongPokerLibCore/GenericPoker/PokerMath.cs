@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 
-namespace GenericPoker.EightCard
+namespace GenericPoker
 {
     // 1. 定義區塊的數學特性
     public enum SpaceType

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GenericPoker;
-using GenericPoker.EightCard;
 using GenericPoker.CardSimStatAnalysis;
 
 namespace LongSongPokerLibCore

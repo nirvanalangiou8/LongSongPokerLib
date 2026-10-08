@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace GenericPoker.EightCard
 {
-	
-
 	public interface IBattleHandArrangeStrategy
 	{
 		float CalcHandWinRate(BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand)

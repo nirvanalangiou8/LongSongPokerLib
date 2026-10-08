@@ -6,9 +6,6 @@ using System.Globalization;
 
 namespace GenericPoker
 {
-
-	
-	
 	public class PokerCardComparer : IEqualityComparer<BasePokerCard>
 	{
 		public bool Equals(BasePokerCard x, BasePokerCard y)

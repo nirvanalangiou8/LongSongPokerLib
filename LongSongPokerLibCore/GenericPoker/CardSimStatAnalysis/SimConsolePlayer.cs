@@ -13,16 +13,16 @@ namespace GenericPoker.CardSimStatAnalysis
             _pokerHandCalculator = new SimStatEstimator();
         }
 
-        public List<SimPokerHandStructure> ProcessSimHands()
+        public List<PokerHandStructure> ProcessSimHands()
         {
             var simCards = _pokerCards.Select(c => c as BasePokerCard ?? BasePokerCard.CreateInstance(c.CardStr)).ToList();
             _pokerHandCalculator.SetupCards(simCards);
             return _pokerHandCalculator.TestSimCards();
         }
 
-        public override List<EightCard.PokerHandStructure> ProcessHands()
+        public override List<PokerHandStructure> ProcessHands()
         {
-            return new List<EightCard.PokerHandStructure>();
+            return new List<PokerHandStructure>();
         }
     }
 

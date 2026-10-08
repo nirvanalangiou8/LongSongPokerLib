@@ -1,7 +1,7 @@
 ﻿using System;
 using GenericPoker;
 
-namespace GenericPoker.EightCard
+namespace GenericPoker
 {
     public class BaseBattleHands : IComparable<BaseBattleHands>
     {
