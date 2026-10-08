@@ -3,7 +3,6 @@ from GenericPoker.ConsolePlayer import ConsolePlayer
 from GenericPoker.ICardRule import ICardRule
 from GenericPoker.EightCardRule import EightCardRule
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
-from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand
 from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
 from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 

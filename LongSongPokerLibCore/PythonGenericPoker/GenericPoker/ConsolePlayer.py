@@ -4,7 +4,7 @@ from GenericPoker.BasePokerCard import BasePokerCard
 from GenericPoker.ICardRule import ICardRule
 from GenericPoker.EightCardRule import EightCardRule
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
-from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
+from GenericPoker.BaseSubBattleHand import BaseSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
 from GenericPoker.EightCard.BattleHandArrangeStrategy import WinRateStrategy
 from GenericPoker.HandSplitResult import HandSplitResult
 from GenericPoker.PokerEnumAndDicts import BaseCompType
@@ -56,8 +56,8 @@ class ConsolePlayer:
         if len(cards) != 8:
             return None
 
-        best_front_hand: Optional[EightCardSubBattleHand] = None
-        best_back_hand: Optional[EightCardSubBattleHand] = None
+        best_front_hand: Optional[BaseSubBattleHand] = None
+        best_back_hand: Optional[BaseSubBattleHand] = None
         best_front: float = 0.0
         best_back: float = 0.0
         best_total: float = float('-inf')
@@ -90,7 +90,7 @@ class ConsolePlayer:
         return HandSplitResult(best_front_hand, best_back_hand, best_front, best_back, best_total)
 
     @classmethod
-    def evaluate_best_single_hand(cls, cards: List[EightCardPokerCard], which: BattleHandEnum) -> EightCardSubBattleHand:
+    def evaluate_best_single_hand(cls, cards: List[EightCardPokerCard], which: BattleHandEnum) -> BaseSubBattleHand:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 
@@ -123,7 +123,7 @@ class ConsolePlayer:
                 rank = PokerHandStructure.convert_comp_rank_to_battle_rank(comps[0].comp_rank)
                 used_comps.append(comps[0])
 
-            if (which, rank) not in EightCardSubBattleHand.EightCardsBattleHandPowerDict:
+            if (which, rank) not in BaseSubBattleHand.EightCardsBattleHandPowerDict:
                 continue
 
             used_set = set()
@@ -141,8 +141,8 @@ class ConsolePlayer:
     @classmethod
     def build_single_hand(cls, which: BattleHandEnum, rank: EightCardsBattleHandRank,
                            comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]],
-                           kickers: List[EightCardPokerCard]) -> EightCardSubBattleHand:
-        hand = EightCardSubBattleHand(which, rank, *comps)
+                           kickers: List[EightCardPokerCard]) -> BaseSubBattleHand:
+        hand = BaseSubBattleHand(which, rank, *comps)
         sorted_kickers = sorted(kickers, key=lambda c: c.poker_card_power, reverse=True)
         hand.add_minor_cards(sorted_kickers)
         return hand

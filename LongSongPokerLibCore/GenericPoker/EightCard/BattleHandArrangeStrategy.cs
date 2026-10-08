@@ -8,36 +8,36 @@ namespace GenericPoker.EightCard
 
 	public interface IBattleHandArrangeStrategy
 	{
-		float CalcHandWinRate(EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand)
+		float CalcHandWinRate(BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand)
 		{
 			return 0.5f;
 		}
 		
-		(EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
+		(BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps);
 	}
 
 	public class BalancedStrategy : IBattleHandArrangeStrategy
 	{
-		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
+		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps)
 		{
-			EightCardSubBattleHand firstEightCardSubBattleHand = null;
-			EightCardSubBattleHand secondEightCardSubBattleHand = null;
+			BaseSubBattleHand firstBattleHand = null;
+			BaseSubBattleHand secondBattleHand = null;
 
 			if (comps.Count == 3)
 			{
 				if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 					    (comps[1].CompRank, comps[2].CompRank), out PokerOverAllHandRank newBattleRank))
 				{
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand,
+					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand,
 						PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
-					secondEightCardSubBattleHand =
-						new EightCardSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, comps[1], comps[2]);
-					if (firstEightCardSubBattleHand > secondEightCardSubBattleHand)
+					secondBattleHand =
+						new BaseSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, comps[1], comps[2]);
+					if (firstBattleHand > secondBattleHand)
 					{
-						(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = (secondEightCardSubBattleHand,
-							firstEightCardSubBattleHand);
+						(firstBattleHand, secondBattleHand) = (secondBattleHand,
+							firstBattleHand);
 					}
 				}
 				else
@@ -47,24 +47,24 @@ namespace GenericPoker.EightCard
 			}
 			else if (comps.Count == 2)
 			{
-				firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand,
+				firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand,
 					PokerHandStructure.ConvertCompRankToBattleRank(comps[1].CompRank), comps[1]);
-				secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand,
+				secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand,
 					PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
 			}
 
-			return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+			return (firstBattleHand, secondBattleHand);
 		}
 	}
 	
 	public class RuleTableStrategy : IBattleHandArrangeStrategy
 	{
 
-		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
+		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps)
 		{
-			EightCardSubBattleHand firstEightCardSubBattleHand = null;
-			EightCardSubBattleHand secondEightCardSubBattleHand = null;
+			BaseSubBattleHand firstBattleHand = null;
+			BaseSubBattleHand secondBattleHand = null;
 
 			// 1. permutate the current comps starting to select two in comps
 			var twoCompPermutations = UtilFunc.GetPermutation(comps, 2);
@@ -78,7 +78,7 @@ namespace GenericPoker.EightCard
 				if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 					    (selectedComps[0].CompRank, selectedComps[1].CompRank), out var firstRank))
 				{
-					var firstHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, firstRank, selectedComps[0], selectedComps[1]);
+					var firstHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, firstRank, selectedComps[0], selectedComps[1]);
 					
 					// Process second hand
 					if (remainingComps.Count == 2)
@@ -86,17 +86,17 @@ namespace GenericPoker.EightCard
 						if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 							    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 						{
-							var secondHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
-							(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = FinalizeHands(firstHand, secondHand);
-							return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+							var secondHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
+							(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
+							return (firstBattleHand, secondBattleHand);
 						}
 					}
 					else if (remainingComps.Count == 1)
 					{
 						var secondRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-						var secondHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0]);
-						(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = FinalizeHands(firstHand, secondHand);
-						return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+						var secondHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0]);
+						(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
+						return (firstBattleHand, secondBattleHand);
 					}
 				}
 			}
@@ -112,7 +112,7 @@ namespace GenericPoker.EightCard
 				if (remainingComps.Count > 2) continue;
 
 				var firstRank = PokerHandStructure.ConvertCompRankToBattleRank(selectedComp.CompRank);
-				var firstHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, firstRank, selectedComp);
+				var firstHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, firstRank, selectedComp);
 
 				// Process second hand
 				if (remainingComps.Count == 2)
@@ -120,24 +120,24 @@ namespace GenericPoker.EightCard
 					if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 					{
-						var secondHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
-						(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = FinalizeHands(firstHand, secondHand);
-						return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+						var secondHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
+						(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
+						return (firstBattleHand, secondBattleHand);
 					}
 				}
 				else if (remainingComps.Count == 1)
 				{
 					var secondRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-					var secondHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0]);
-					(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = FinalizeHands(firstHand, secondHand);
-					return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+					var secondHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, secondRank, remainingComps[0]);
+					(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
+					return (firstBattleHand, secondBattleHand);
 				}
 			}
 
-			return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+			return (firstBattleHand, secondBattleHand);
 		}
 
-		private (EightCardSubBattleHand, EightCardSubBattleHand) FinalizeHands(EightCardSubBattleHand first, EightCardSubBattleHand second)
+		private (BaseSubBattleHand, BaseSubBattleHand) FinalizeHands(BaseSubBattleHand first, BaseSubBattleHand second)
 		{
 			if (first > second)
 			{
@@ -251,7 +251,7 @@ namespace GenericPoker.EightCard
 		/// 大一統勝率計算機 (long switch)：依牌型結構組出 PokerMath 的 schema / offsets，
 		/// 並在該牌型的 CDF 機率區間 (min, max) 內做相對排名內插。
 		/// </summary>
-		public static double GetSubHandWinRate(EightCardSubBattleHand hand)
+		public static double GetSubHandWinRate(BaseSubBattleHand hand)
 		{
 			if (hand == null) return 0.0;
 
@@ -370,19 +370,19 @@ namespace GenericPoker.EightCard
 		/// <summary>
 		/// 前墩 + 後墩 的綜合勝率 (加權指引用)。
 		/// </summary>
-		public float CalcHandWinRate(EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand)
+		public float CalcHandWinRate(BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand)
 		{
 			return (float)(GetSubHandWinRate(firstBattleHand) + GetSubHandWinRate(secondBattleHand));
 		}
 
-		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
+		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps)
 		{
-			EightCardSubBattleHand bestFirst = null;
-			EightCardSubBattleHand bestSecond = null;
+			BaseSubBattleHand bestFirst = null;
+			BaseSubBattleHand bestSecond = null;
 			double bestScore = double.NegativeInfinity;
 
-			void Consider(EightCardSubBattleHand a, EightCardSubBattleHand b)
+			void Consider(BaseSubBattleHand a, BaseSubBattleHand b)
 			{
 				if (a == null || b == null) return;
 				// 確保後墩 (SecondHand) 不弱於前墩 (FirstHand)。
@@ -407,26 +407,26 @@ namespace GenericPoker.EightCard
 					    (selectedComps[0].CompRank, selectedComps[1].CompRank), out var pairedRank))
 					continue;
 
-				var handA = new EightCardSubBattleHand(BattleHandEnum.SecondHand, pairedRank, selectedComps[0], selectedComps[1]);
+				var handA = new BaseSubBattleHand(BattleHandEnum.SecondHand, pairedRank, selectedComps[0], selectedComps[1]);
 
 				if (remainingComps.Count == 2)
 				{
 					if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var otherRank))
 					{
-						var handB = new EightCardSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0], remainingComps[1]);
+						var handB = new BaseSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0], remainingComps[1]);
 						Consider(handA, handB);
 					}
 				}
 				else if (remainingComps.Count == 1)
 				{
 					var otherRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-					var handB = new EightCardSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0]);
+					var handB = new BaseSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0]);
 					Consider(handA, handB);
 				}
 				else if (remainingComps.Count == 0)
 				{
-					var handB = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					var handB = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					Consider(handA, handB);
 				}
 			}
@@ -440,21 +440,21 @@ namespace GenericPoker.EightCard
 				if (remainingComps.Count > 2) continue;
 
 				var aRank = PokerHandStructure.ConvertCompRankToBattleRank(selectedComp.CompRank);
-				var handA = new EightCardSubBattleHand(BattleHandEnum.SecondHand, aRank, selectedComp);
+				var handA = new BaseSubBattleHand(BattleHandEnum.SecondHand, aRank, selectedComp);
 
 				if (remainingComps.Count == 2)
 				{
 					if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var otherRank))
 					{
-						var handB = new EightCardSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0], remainingComps[1]);
+						var handB = new BaseSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0], remainingComps[1]);
 						Consider(handA, handB);
 					}
 				}
 				else if (remainingComps.Count == 1)
 				{
 					var otherRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-					var handB = new EightCardSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0]);
+					var handB = new BaseSubBattleHand(BattleHandEnum.SecondHand, otherRank, remainingComps[0]);
 					Consider(handA, handB);
 				}
 			}
@@ -468,7 +468,7 @@ namespace GenericPoker.EightCard
 			if (PokerConst.EightCardsBattleHandPowerDict.ContainsKey(
 				    (BattleHandEnum.FirstHand, bestFirst.BattleHandRank)))
 			{
-				bestFirst = new EightCardSubBattleHand(
+				bestFirst = new BaseSubBattleHand(
 					BattleHandEnum.FirstHand, bestFirst.BattleHandRank, bestFirst.Components.ToArray());
 			}
 
@@ -479,25 +479,25 @@ namespace GenericPoker.EightCard
 	/*
 	public class RuleTableStrategy : IBattleHandArrangeStrategy
 	{
-		public (EightCardSubBattleHand firstBattleHand, EightCardSubBattleHand secondBattleHand) ArrangeComps(
+		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps)
 		{
-			EightCardSubBattleHand firstEightCardSubBattleHand = null;
-			EightCardSubBattleHand secondEightCardSubBattleHand = null;
+			BaseSubBattleHand firstBattleHand = null;
+			BaseSubBattleHand secondBattleHand = null;
 
 			if (comps.Count == 3)
 			{
 				if (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
 					    (comps[1].CompRank, comps[2].CompRank), out PokerOverAllHandRank newBattleRank))
 				{
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand,
+					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand,
 						PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
-					secondEightCardSubBattleHand =
-						new EightCardSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, comps[1], comps[2]);
-					if (firstEightCardSubBattleHand > secondEightCardSubBattleHand)
+					secondBattleHand =
+						new BaseSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, comps[1], comps[2]);
+					if (firstBattleHand > secondBattleHand)
 					{
-						(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = (secondEightCardSubBattleHand,
-							firstEightCardSubBattleHand);
+						(firstBattleHand, secondBattleHand) = (secondBattleHand,
+							firstBattleHand);
 					}
 				}
 				else
@@ -507,13 +507,13 @@ namespace GenericPoker.EightCard
 			}
 			else if (comps.Count == 2)
 			{
-				firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand,
+				firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand,
 					PokerHandStructure.ConvertCompRankToBattleRank(comps[1].CompRank), comps[1]);
-				secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand,
+				secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand,
 					PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
 			}
 
-			return (firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+			return (firstBattleHand, secondBattleHand);
 		}
 	}
 	*/

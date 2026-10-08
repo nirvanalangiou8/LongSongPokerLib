@@ -4,7 +4,7 @@ from GenericPoker.PokerEnumAndDicts import PokerSuit, CompType, BaseCompType, Po
 from GenericPoker.UtilFunc import UtilFunc
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
-from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
+from GenericPoker.BaseSubBattleHand import BattleHandEnum, EightCardsBattleHandRank
 from GenericPoker.EightCard.EightCardHands import EightCardHands
 from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 from GenericPoker.AcePokerCard import AcePokerCard

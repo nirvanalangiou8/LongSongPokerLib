@@ -5,15 +5,15 @@ namespace GenericPoker.EightCard
 {
     public class BaseBattleHands : IComparable<BaseBattleHands>
     {
-        private EightCardSubBattleHand _firstHand;
-        private EightCardSubBattleHand _secondHand;
+        private BaseSubBattleHand _firstHand;
+        private BaseSubBattleHand _secondHand;
         
         public int TotalPower => _firstHand.HandPower + _secondHand.HandPower;
         
-        public EightCardSubBattleHand FrontHand => _firstHand;
-        public EightCardSubBattleHand BackHand => _secondHand;
+        public BaseSubBattleHand FrontHand => _firstHand;
+        public BaseSubBattleHand BackHand => _secondHand;
 
-        public BaseBattleHands(EightCardSubBattleHand firstHand, EightCardSubBattleHand secondHand)
+        public BaseBattleHands(BaseSubBattleHand firstHand, BaseSubBattleHand secondHand)
         {
             _firstHand = firstHand;
             _secondHand = secondHand;

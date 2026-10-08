@@ -4,21 +4,21 @@ from GenericPoker.UtilFunc import UtilFunc
 from GenericPoker.PokerEnumAndDicts import BaseCompType
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
-from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
+from GenericPoker.BaseSubBattleHand import BaseSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
 from GenericPoker.EightCard.PokerMath import PokerMath, SpaceDef, SpaceType
 
 
 class IBattleHandArrangeStrategy(ABC):
-    def calc_hand_win_rate(self, first_battle_hand: EightCardSubBattleHand, second_battle_hand: EightCardSubBattleHand) -> float:
+    def calc_hand_win_rate(self, first_battle_hand: BaseSubBattleHand, second_battle_hand: BaseSubBattleHand) -> float:
         return 0.5
 
     @abstractmethod
-    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[BaseSubBattleHand, BaseSubBattleHand]:
         pass
 
 
 class BalancedStrategy(IBattleHandArrangeStrategy):
-    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[BaseSubBattleHand, BaseSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 
@@ -29,12 +29,12 @@ class BalancedStrategy(IBattleHandArrangeStrategy):
             key = (comps[1].comp_rank, comps[2].comp_rank)
             if key in PokerHandCalculator.EightCardsCompComboToBattleRankDict:
                 new_battle_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[key]
-                first_hand = EightCardSubBattleHand(
+                first_hand = BaseSubBattleHand(
                     BattleHandEnum.FirstHand,
                     PokerHandStructure.convert_comp_rank_to_battle_rank(comps[0].comp_rank),
                     comps[0]
                 )
-                second_hand = EightCardSubBattleHand(
+                second_hand = BaseSubBattleHand(
                     BattleHandEnum.SecondHand,
                     new_battle_rank,
                     comps[1], comps[2]
@@ -44,12 +44,12 @@ class BalancedStrategy(IBattleHandArrangeStrategy):
             else:
                 print("Fatal error in Battle Hand arrange of strategy (3 comps).")
         elif len(comps) == 2:
-            first_hand = EightCardSubBattleHand(
+            first_hand = BaseSubBattleHand(
                 BattleHandEnum.FirstHand,
                 PokerHandStructure.convert_comp_rank_to_battle_rank(comps[1].comp_rank),
                 comps[1]
             )
-            second_hand = EightCardSubBattleHand(
+            second_hand = BaseSubBattleHand(
                 BattleHandEnum.SecondHand,
                 PokerHandStructure.convert_comp_rank_to_battle_rank(comps[0].comp_rank),
                 comps[0]
@@ -59,7 +59,7 @@ class BalancedStrategy(IBattleHandArrangeStrategy):
 
 
 class RuleTableStrategy(IBattleHandArrangeStrategy):
-    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[BaseSubBattleHand, BaseSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 
@@ -72,17 +72,17 @@ class RuleTableStrategy(IBattleHandArrangeStrategy):
             key = (selected_comps[0].comp_rank, selected_comps[1].comp_rank)
             if key in PokerHandCalculator.EightCardsCompComboToBattleRankDict:
                 first_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[key]
-                first_hand = EightCardSubBattleHand(BattleHandEnum.FirstHand, first_rank, selected_comps[0], selected_comps[1])
+                first_hand = BaseSubBattleHand(BattleHandEnum.FirstHand, first_rank, selected_comps[0], selected_comps[1])
 
                 if len(remaining_comps) == 2:
                     rem_key = (remaining_comps[0].comp_rank, remaining_comps[1].comp_rank)
                     if rem_key in PokerHandCalculator.EightCardsCompComboToBattleRankDict:
                         second_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[rem_key]
-                        second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0], remaining_comps[1])
+                        second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0], remaining_comps[1])
                         return self._finalize_hands(first_hand, second_hand)
                 elif len(remaining_comps) == 1:
                     second_rank = PokerHandStructure.convert_comp_rank_to_battle_rank(remaining_comps[0].comp_rank)
-                    second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0])
+                    second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0])
                     return self._finalize_hands(first_hand, second_hand)
 
         one_comp_permutations = UtilFunc.get_permutation(comps, 1)
@@ -93,22 +93,22 @@ class RuleTableStrategy(IBattleHandArrangeStrategy):
                 continue
 
             first_rank = PokerHandStructure.convert_comp_rank_to_battle_rank(selected_comp.comp_rank)
-            first_hand = EightCardSubBattleHand(BattleHandEnum.FirstHand, first_rank, selected_comp)
+            first_hand = BaseSubBattleHand(BattleHandEnum.FirstHand, first_rank, selected_comp)
 
             if len(remaining_comps) == 2:
                 rem_key = (remaining_comps[0].comp_rank, remaining_comps[1].comp_rank)
                 if rem_key in PokerHandCalculator.EightCardsCompComboToBattleRankDict:
                     second_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[rem_key]
-                    second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0], remaining_comps[1])
+                    second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0], remaining_comps[1])
                     return self._finalize_hands(first_hand, second_hand)
             elif len(remaining_comps) == 1:
                 second_rank = PokerHandStructure.convert_comp_rank_to_battle_rank(remaining_comps[0].comp_rank)
-                second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0])
+                second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, second_rank, remaining_comps[0])
                 return self._finalize_hands(first_hand, second_hand)
 
         return None, None
 
-    def _finalize_hands(self, first: EightCardSubBattleHand, second: EightCardSubBattleHand) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def _finalize_hands(self, first: BaseSubBattleHand, second: BaseSubBattleHand) -> Tuple[BaseSubBattleHand, BaseSubBattleHand]:
         if first > second:
             return second, first
         return first, second
@@ -194,7 +194,7 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
         return best
 
     @classmethod
-    def get_sub_hand_win_rate(cls, hand: Optional[EightCardSubBattleHand]) -> float:
+    def get_sub_hand_win_rate(cls, hand: Optional[BaseSubBattleHand]) -> float:
         if hand is None:
             return 0.0
 
@@ -282,10 +282,10 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
         else:
             return (min_val + max_val) * 0.5
 
-    def calc_hand_win_rate(self, first_battle_hand: EightCardSubBattleHand, second_battle_hand: EightCardSubBattleHand) -> float:
+    def calc_hand_win_rate(self, first_battle_hand: BaseSubBattleHand, second_battle_hand: BaseSubBattleHand) -> float:
         return float(self.get_sub_hand_win_rate(first_battle_hand) + self.get_sub_hand_win_rate(second_battle_hand))
 
-    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[EightCardSubBattleHand, EightCardSubBattleHand]:
+    def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[BaseSubBattleHand, BaseSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
         from GenericPoker.EightCard.PokerHandStructure import PokerHandStructure
 
@@ -293,7 +293,7 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
         best_second = None
         best_score = float('-inf')
 
-        def consider(a: EightCardSubBattleHand, b: EightCardSubBattleHand):
+        def consider(a: BaseSubBattleHand, b: BaseSubBattleHand):
             nonlocal best_first, best_second, best_score
             if a is None or b is None:
                 return
@@ -316,20 +316,20 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
                 continue
 
             paired_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[key]
-            hand_a = EightCardSubBattleHand(BattleHandEnum.SecondHand, paired_rank, selected_comps[0], selected_comps[1])
+            hand_a = BaseSubBattleHand(BattleHandEnum.SecondHand, paired_rank, selected_comps[0], selected_comps[1])
 
             if len(remaining_comps) == 2:
                 rem_key = (remaining_comps[0].comp_rank, remaining_comps[1].comp_rank)
                 if rem_key in PokerHandCalculator.EightCardsCompComboToBattleRankDict:
                     other_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[rem_key]
-                    hand_b = EightCardSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0], remaining_comps[1])
+                    hand_b = BaseSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0], remaining_comps[1])
                     consider(hand_a, hand_b)
             elif len(remaining_comps) == 1:
                 other_rank = PokerHandStructure.convert_comp_rank_to_battle_rank(remaining_comps[0].comp_rank)
-                hand_b = EightCardSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0])
+                hand_b = BaseSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0])
                 consider(hand_a, hand_b)
             elif len(remaining_comps) == 0:
-                hand_b = EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
+                hand_b = BaseSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
                 consider(hand_a, hand_b)
 
         one_comp_permutations = UtilFunc.get_permutation(comps, 1)
@@ -340,20 +340,20 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
                 continue
 
             a_rank = PokerHandStructure.convert_comp_rank_to_battle_rank(selected_comp.comp_rank)
-            hand_a = EightCardSubBattleHand(BattleHandEnum.SecondHand, a_rank, selected_comp)
+            hand_a = BaseSubBattleHand(BattleHandEnum.SecondHand, a_rank, selected_comp)
 
             if len(remaining_comps) == 2:
                 rem_key = (remaining_comps[0].comp_rank, remaining_comps[1].comp_rank)
                 if rem_key in PokerHandCalculator.EightCardsCompComboToBattleRankDict:
                     other_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict[rem_key]
-                    hand_b = EightCardSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0], remaining_comps[1])
+                    hand_b = BaseSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0], remaining_comps[1])
                     consider(hand_a, hand_b)
             elif len(remaining_comps) == 1:
                 other_rank = PokerHandStructure.convert_comp_rank_to_battle_rank(remaining_comps[0].comp_rank)
-                hand_b = EightCardSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0])
+                hand_b = BaseSubBattleHand(BattleHandEnum.SecondHand, other_rank, remaining_comps[0])
                 consider(hand_a, hand_b)
             elif len(remaining_comps) == 0:
-                hand_b = EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
+                hand_b = BaseSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
                 consider(hand_a, hand_b)
 
         if best_first is not None and best_second is not None:

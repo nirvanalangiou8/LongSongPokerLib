@@ -62,7 +62,7 @@ namespace GenericPoker
                 return null;
             }
 
-            EightCardSubBattleHand bestFrontHand = null, bestBackHand = null;
+            BaseSubBattleHand bestFrontHand = null, bestBackHand = null;
             double bestFront = 0, bestBack = 0, bestTotal = double.NegativeInfinity;
 
             foreach (var frontIdx in Combinations(cards.Count, 3))
@@ -96,7 +96,7 @@ namespace GenericPoker
             return new HandSplitResult(bestFrontHand, bestBackHand, bestFront, bestBack, bestTotal);
         }
 
-        public static EightCardSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleHandEnum which)
+        public static BaseSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleHandEnum which)
         {
             var best = BuildSingleHand(which, PokerOverAllHandRank.Nothing,
                 new List<PokerCardComponent<BaseCompType, BasePokerCard>>(),
@@ -144,13 +144,13 @@ namespace GenericPoker
             return best;
         }
 
-        public static EightCardSubBattleHand BuildSingleHand(
+        public static BaseSubBattleHand BuildSingleHand(
             BattleHandEnum which,
             PokerOverAllHandRank rank,
             List<PokerCardComponent<BaseCompType, BasePokerCard>> comps,
             List<BasePokerCard> kickers)
         {
-            var hand = new EightCardSubBattleHand(which, rank, comps.ToArray());
+            var hand = new BaseSubBattleHand(which, rank, comps.ToArray());
             var sorted = kickers.OrderByDescending(c => c.PokerCardPower).ToList();
             hand.AddMinorCards(sorted);
             return hand;

@@ -46,8 +46,8 @@ namespace GenericPoker.EightCard
 			
 		public BaseBattleHands ArrangeHands(IBattleHandArrangeStrategy strategy)
 		{
-			EightCardSubBattleHand firstEightCardSubBattleHand;
-			EightCardSubBattleHand secondEightCardSubBattleHand;
+			BaseSubBattleHand firstBattleHand;
+			BaseSubBattleHand secondBattleHand;
 			
 			var sortedRemainingCards = remainingCards.OrderByDescending(item => item.PokerCardPower).ToList();
 			
@@ -59,36 +59,36 @@ namespace GenericPoker.EightCard
 					//var mergedCards = Components[1].Cards.Concat(Components[2].Cards).ToList();
 					var newBattleRank =
 						PokerHandCalculator.EightCardsCompComboToBattleRankDict[(BaseCompType.Pair, BaseCompType.Pair)];
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, newBattleRank, Components[1], Components[2]);
+					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, newBattleRank, Components[1], Components[2]);
 					
 					
 					// process BackHand two pairs
 					//mergedCards = Components[0].Cards.Concat(Components[3].Cards).ToList();
-					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, Components[0], Components[3]);
+					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, Components[0], Components[3]);
 
 					break;
 				case 3:
 				case 2:
-					(firstEightCardSubBattleHand, secondEightCardSubBattleHand) = strategy.ArrangeComps(Components);
+					(firstBattleHand, secondBattleHand) = strategy.ArrangeComps(Components);
 
 					break;
 				case 1:
 					// Add first hand
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					
 					// Add second Hand
-					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank), Components[0]);
+					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank), Components[0]);
 					break;
 				case 0: // Nothing for whole 8 cards
 					// Add first hand
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					// Add second Hand
-					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
+					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
 					break;
 				default:
-					firstEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
 					// Add second Hand
-					secondEightCardSubBattleHand = new EightCardSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
+					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
 					break;
 			}
 
@@ -96,22 +96,22 @@ namespace GenericPoker.EightCard
 			// The minor cards assigned is to place the largest card in secondHand first to ensure second is larger than first
 			// The fill the firsthand with minor cards until it reach the maximum card for first hand (regularly it's 3)
 			// If there are remaining, assign back to second hand.
-			var newRemainingCards = secondEightCardSubBattleHand.AddMinorCards(sortedRemainingCards, 1);
-			newRemainingCards = firstEightCardSubBattleHand.AddMinorCards(newRemainingCards);
-			newRemainingCards = secondEightCardSubBattleHand.AddMinorCards(newRemainingCards);
+			var newRemainingCards = secondBattleHand.AddMinorCards(sortedRemainingCards, 1);
+			newRemainingCards = firstBattleHand.AddMinorCards(newRemainingCards);
+			newRemainingCards = secondBattleHand.AddMinorCards(newRemainingCards);
 
 			if (newRemainingCards.Count > 0)
 			{
 				Console.WriteLine("Fatal errors");
 			}	
 			
-			return new BaseBattleHands(firstEightCardSubBattleHand, secondEightCardSubBattleHand);
+			return new BaseBattleHands(firstBattleHand, secondBattleHand);
 		}
 		
 		private void Init()
 		{
 			remainingCards = new List<BasePokerCard>();
-			//_battleHands = new List<EightCardSubBattleHand>();
+			//_battleHands = new List<BaseSubBattleHand>();
 		}
 		public PokerHandStructure()
 		{

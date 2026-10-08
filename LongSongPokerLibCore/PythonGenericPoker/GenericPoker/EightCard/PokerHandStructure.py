@@ -3,7 +3,7 @@ import functools
 from GenericPoker.PokerEnumAndDicts import BaseCompType
 from GenericPoker.PokerCardComponent import PokerCardComponent
 from GenericPoker.EightCard.EightCardPokerCard import EightCardPokerCard
-from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
+from GenericPoker.BaseSubBattleHand import BaseSubBattleHand, BattleHandEnum, EightCardsBattleHandRank
 from GenericPoker.EightCard.EightCardHands import EightCardHands
 
 
@@ -69,16 +69,16 @@ class PokerHandStructure:
             new_battle_rank = PokerHandCalculator.EightCardsCompComboToBattleRankDict.get(
                 (BaseCompType.Pair, BaseCompType.Pair), EightCardsBattleHandRank.TwoPairs
             )
-            first_hand = EightCardSubBattleHand(BattleHandEnum.FirstHand, new_battle_rank, self.components[1], self.components[2])
-            second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, new_battle_rank, self.components[0], self.components[3])
+            first_hand = BaseSubBattleHand(BattleHandEnum.FirstHand, new_battle_rank, self.components[1], self.components[2])
+            second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, new_battle_rank, self.components[0], self.components[3])
         elif len(self.components) in (2, 3):
             first_hand, second_hand = strategy.arrange_comps(self.components)
         elif len(self.components) == 1:
-            first_hand = EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
-            second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, self.convert_comp_rank_to_battle_rank(self.components[0].comp_rank), self.components[0])
+            first_hand = BaseSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
+            second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, self.convert_comp_rank_to_battle_rank(self.components[0].comp_rank), self.components[0])
         else:
-            first_hand = EightCardSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
-            second_hand = EightCardSubBattleHand(BattleHandEnum.SecondHand, EightCardsBattleHandRank.Nothing)
+            first_hand = BaseSubBattleHand(BattleHandEnum.FirstHand, EightCardsBattleHandRank.Nothing)
+            second_hand = BaseSubBattleHand(BattleHandEnum.SecondHand, EightCardsBattleHandRank.Nothing)
 
         new_remaining = second_hand.add_one_minor_card(sorted_remaining_cards)
         new_remaining = first_hand.add_minor_cards(new_remaining)

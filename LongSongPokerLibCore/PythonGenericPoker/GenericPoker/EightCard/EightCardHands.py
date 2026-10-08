@@ -1,9 +1,9 @@
 ﻿from typing import Optional, Any
-from GenericPoker.EightCard.EightCardSubBattleHand import EightCardSubBattleHand
+from GenericPoker.BaseSubBattleHand import BaseSubBattleHand
 
 
 class EightCardHands:
-    def __init__(self, first_hand: EightCardSubBattleHand, second_hand: EightCardSubBattleHand):
+    def __init__(self, first_hand: BaseSubBattleHand, second_hand: BaseSubBattleHand):
         self._firstHand = first_hand
         self._secondHand = second_hand
 
@@ -12,11 +12,11 @@ class EightCardHands:
         return self._firstHand.hand_power + self._secondHand.hand_power
 
     @property
-    def front_hand(self) -> EightCardSubBattleHand:
+    def front_hand(self) -> BaseSubBattleHand:
         return self._firstHand
 
     @property
-    def back_hand(self) -> EightCardSubBattleHand:
+    def back_hand(self) -> BaseSubBattleHand:
         return self._secondHand
 
     def compare_to(self, other: Optional['EightCardHands']) -> int:
