@@ -8,7 +8,7 @@ namespace GenericPoker.SevenCard
 {
     public class SevenCardSubBattleHand
     {
-        public BattleHandEnum BattleHandEnum;
+        public BattleSubHandOrder BattleSubHandOrder;
         public List<SevenCardPokerCard> Cards = new List<SevenCardPokerCard>();
         public PokerCardComponent<PokerCardCompRank, SevenCardPokerCard> Component;
 
@@ -21,9 +21,9 @@ namespace GenericPoker.SevenCard
             }
         }
 
-        public SevenCardSubBattleHand(BattleHandEnum battleHandEnum, PokerCardComponent<PokerCardCompRank, SevenCardPokerCard> component)
+        public SevenCardSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerCardComponent<PokerCardCompRank, SevenCardPokerCard> component)
         {
-            BattleHandEnum = battleHandEnum;
+            BattleSubHandOrder = battleSubHandOrder;
             Component = component;
             Cards.AddRange(component.Cards);
         }

@@ -115,60 +115,101 @@ class RuleTableStrategy(IBattleHandArrangeStrategy):
 
 
 class WinRateStrategy(IBattleHandArrangeStrategy):
-    StatProbLadder = [
-        (EightCardsBattleHandRank.Nothing,                0.171982),
-        (EightCardsBattleHandRank.Pair,                   0.138407),
-        (EightCardsBattleHandRank.TwoPairs,               0.256321),
-        (EightCardsBattleHandRank.ThreeCardsPairInFlush,  0.034262),
-        (EightCardsBattleHandRank.ThreeOfKind,            0.025718),
-        (EightCardsBattleHandRank.TownHouse,              0.001622),
-        (EightCardsBattleHandRank.FiveCardsStraight,      0.106110),
-        (EightCardsBattleHandRank.FullHouse,              0.038412),
-        (EightCardsBattleHandRank.ThreeCardsFlushStraight,0.024445),
-        (EightCardsBattleHandRank.FiveCardsFlush,         0.051904),
-        (EightCardsBattleHandRank.Mansion,                0.034262),
-        (EightCardsBattleHandRank.SixCardsStraight,       0.028945),
-        (EightCardsBattleHandRank.FourOfKind,             0.001126),
-        (EightCardsBattleHandRank.FourCardsFlushStraight, 0.003965),
-        (EightCardsBattleHandRank.SixCardsFlush,          0.005314),
-        (EightCardsBattleHandRank.SevenCardsStraight,     0.004747),
-        (EightCardsBattleHandRank.FiveCardsFlushStraight, 0.000421),
-        (EightCardsBattleHandRank.EightCardsStraight,     0.000367),
-        (EightCardsBattleHandRank.SevenCardsFlush,        0.000247),
-        (EightCardsBattleHandRank.SixCardsFlushStraight,  0.000029),
-        (EightCardsBattleHandRank.EightCardsFlush,        0.000004),
+    # REMARK: Old StatProbLadder is remarked and replaced by Front/Back count tables below.
+    # StatProbLadder = [
+    #     (EightCardsBattleHandRank.Nothing,                0.171982),
+    #     (EightCardsBattleHandRank.Pair,                   0.138407),
+    #     (EightCardsBattleHandRank.TwoPairs,               0.256321),
+    #     (EightCardsBattleHandRank.ThreeCardsPairInFlush,  0.034262),
+    #     (EightCardsBattleHandRank.ThreeOfKind,            0.025718),
+    #     (EightCardsBattleHandRank.TownHouse,              0.001622),
+    #     (EightCardsBattleHandRank.FiveCardsStraight,      0.106110),
+    #     (EightCardsBattleHandRank.FullHouse,              0.038412),
+    #     (EightCardsBattleHandRank.ThreeCardsFlushStraight,0.024445),
+    #     (EightCardsBattleHandRank.FiveCardsFlush,         0.051904),
+    #     (EightCardsBattleHandRank.Mansion,                0.034262),
+    #     (EightCardsBattleHandRank.SixCardsStraight,       0.028945),
+    #     (EightCardsBattleHandRank.FourOfKind,             0.001126),
+    #     (EightCardsBattleHandRank.FourCardsFlushStraight, 0.003965),
+    #     (EightCardsBattleHandRank.SixCardsFlush,          0.005314),
+    #     (EightCardsBattleHandRank.SevenCardsStraight,     0.004747),
+    #     (EightCardsBattleHandRank.FiveCardsFlushStraight, 0.000421),
+    #     (EightCardsBattleHandRank.EightCardsStraight,     0.000367),
+    #     (EightCardsBattleHandRank.SevenCardsFlush,        0.000247),
+    #     (EightCardsBattleHandRank.SixCardsFlushStraight,  0.000029),
+    #     (EightCardsBattleHandRank.EightCardsFlush,        0.000004),
+    # ]
+
+    FrontStatCountLadder = [
+        (EightCardsBattleHandRank.Nothing,                2626401484),
+        (EightCardsBattleHandRank.Pair,                   930370320),
+        (EightCardsBattleHandRank.TwoPairs,               21900282),
+        (EightCardsBattleHandRank.ThreeOfKind,            8647866),
+        (EightCardsBattleHandRank.ThreeCardsFlushStraight,6266009),
+        (EightCardsBattleHandRank.FourCardsFlushStraight, 4838),
+        (EightCardsBattleHandRank.FourOfKind,             377),
     ]
 
-    _CdfBandDict: Optional[Dict[EightCardsBattleHandRank, Tuple[float, float]]] = None
+    BackStatCountLadder = [
+        (EightCardsBattleHandRank.Nothing,                196902345),
+        (EightCardsBattleHandRank.Pair,                   1535935713),
+        (EightCardsBattleHandRank.TwoPairs,               648950476),
+        (EightCardsBattleHandRank.ThreeOfKind,            253128801),
+        (EightCardsBattleHandRank.ThreeCardsFlushStraight,226346673),
+        (EightCardsBattleHandRank.FiveCardsStraight,      224750900),
+        (EightCardsBattleHandRank.FiveCardsFlush,         196836536),
+        (EightCardsBattleHandRank.FullHouse,              91254774),
+        (EightCardsBattleHandRank.Mansion,                76893581),
+        (EightCardsBattleHandRank.SixCardsStraight,       65679045),
+        (EightCardsBattleHandRank.SixCardsFlush,          20753672),
+        (EightCardsBattleHandRank.SevenCardsStraight,     14354277),
+        (EightCardsBattleHandRank.FourCardsFlushStraight, 29661450),
+        (EightCardsBattleHandRank.FourOfKind,             6843389),
+        (EightCardsBattleHandRank.FiveCardsFlushStraight, 2312679),
+        (EightCardsBattleHandRank.EightCardsStraight,     1830960),
+        (EightCardsBattleHandRank.SevenCardsFlush,        1062546),
+        (EightCardsBattleHandRank.SixCardsFlushStraight,  69858),
+        (EightCardsBattleHandRank.EightCardsFlush,        20725),
+        (EightCardsBattleHandRank.SevenCardsFlushStraight,2757),
+        (EightCardsBattleHandRank.EightCardsFlushStraight,21),
+    ]
+
+    _FrontCdfBandDict: Optional[Dict[EightCardsBattleHandRank, Tuple[float, float]]] = None
+    _BackCdfBandDict: Optional[Dict[EightCardsBattleHandRank, Tuple[float, float]]] = None
 
     @classmethod
-    def _build_cdf_bands(cls) -> Dict[EightCardsBattleHandRank, Tuple[float, float]]:
-        if cls._CdfBandDict is not None:
-            return cls._CdfBandDict
-        total = sum(prob for _, prob in cls.StatProbLadder)
+    def _build_cdf_bands(cls, ladder: List[Tuple[EightCardsBattleHandRank, int]]) -> Dict[EightCardsBattleHandRank, Tuple[float, float]]:
+        total = sum(count for _, count in ladder)
         if total <= 0:
             total = 1.0
 
         bands: Dict[EightCardsBattleHandRank, Tuple[float, float]] = {}
         cum = 0.0
-        for rank, prob in cls.StatProbLadder:
+        for rank, count in ladder:
             min_val = cum / total
-            cum += prob
+            cum += count
             max_val = cum / total
             if rank in bands:
                 old_min, old_max = bands[rank]
                 bands[rank] = (min(old_min, min_val), max(old_max, max_val))
             else:
                 bands[rank] = (min_val, max_val)
-        cls._CdfBandDict = bands
         return bands
 
     @classmethod
-    def get_band(cls, rank: EightCardsBattleHandRank) -> Tuple[float, float]:
-        bands = cls._build_cdf_bands()
-        if rank in bands:
-            return bands[rank]
-        return (0.0, bands[EightCardsBattleHandRank.Nothing][1] if EightCardsBattleHandRank.Nothing in bands else 0.1)
+    def get_band(cls, rank: EightCardsBattleHandRank, order: BattleHandEnum = BattleHandEnum.SecondHand) -> Tuple[float, float]:
+        if cls._FrontCdfBandDict is None:
+            cls._FrontCdfBandDict = cls._build_cdf_bands(cls.FrontStatCountLadder)
+        if cls._BackCdfBandDict is None:
+            cls._BackCdfBandDict = cls._build_cdf_bands(cls.BackStatCountLadder)
+
+        target_dict = cls._FrontCdfBandDict if order == BattleHandEnum.FirstHand else cls._BackCdfBandDict
+        if rank in target_dict:
+            return target_dict[rank]
+        other_dict = cls._BackCdfBandDict if order == BattleHandEnum.FirstHand else cls._FrontCdfBandDict
+        if rank in other_dict:
+            return other_dict[rank]
+        return (0.0, target_dict[EightCardsBattleHandRank.Nothing][1] if EightCardsBattleHandRank.Nothing in target_dict else 0.1)
 
     @staticmethod
     def _safe_unified_win_rate(offsets: List[int], schema: List[SpaceDef], min_val: float, max_val: float) -> float:
@@ -194,11 +235,12 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
         return best
 
     @classmethod
-    def get_sub_hand_win_rate(cls, hand: Optional[BaseSubBattleHand]) -> float:
+    def get_sub_hand_win_rate(cls, hand: Optional[BaseSubBattleHand], order: Optional[BattleHandEnum] = None) -> float:
         if hand is None:
             return 0.0
 
-        min_val, max_val = cls.get_band(hand.battle_hand_rank)
+        actual_order = order if order is not None else hand.battle_sub_hand_order
+        min_val, max_val = cls.get_band(hand.battle_hand_rank, actual_order)
         comps = hand.components
 
         if hand.battle_hand_rank == EightCardsBattleHandRank.Nothing:
@@ -283,7 +325,8 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
             return (min_val + max_val) * 0.5
 
     def calc_hand_win_rate(self, first_battle_hand: BaseSubBattleHand, second_battle_hand: BaseSubBattleHand) -> float:
-        return float(self.get_sub_hand_win_rate(first_battle_hand) + self.get_sub_hand_win_rate(second_battle_hand))
+        return float(self.get_sub_hand_win_rate(first_battle_hand, BattleHandEnum.FirstHand) + 
+                     self.get_sub_hand_win_rate(second_battle_hand, BattleHandEnum.SecondHand))
 
     def arrange_comps(self, comps: List[PokerCardComponent[BaseCompType, EightCardPokerCard]]) -> Tuple[BaseSubBattleHand, BaseSubBattleHand]:
         from GenericPoker.EightCard.PokerHandCalculator import PokerHandCalculator
@@ -299,7 +342,7 @@ class WinRateStrategy(IBattleHandArrangeStrategy):
                 return
             if a > b:
                 a, b = b, a
-            score = self.get_sub_hand_win_rate(a) + self.get_sub_hand_win_rate(b)
+            score = self.get_sub_hand_win_rate(a, BattleHandEnum.FirstHand) + self.get_sub_hand_win_rate(b, BattleHandEnum.SecondHand)
             if score > best_score:
                 best_score = score
                 best_first = a

@@ -18,7 +18,7 @@ namespace GenericPoker
 		public string FinalCompsStr = "";
 
 
-		private IBattleHandArrangeStrategy _strategy;
+		private IBaseHandArrangeStrategy _strategy;
 		
 		// checked
 		private void Init()
@@ -138,7 +138,6 @@ namespace GenericPoker
 		}
 
 		
-
 		public static PokerOverAllHandRank ConvertCompRankToBattleRank(BaseCompType compType)
 		{
 			var enumName = compType.ToString(); // Get the name of the enum item as a string
@@ -150,8 +149,34 @@ namespace GenericPoker
 			}
 			return PokerOverAllHandRank.Nothing;
 		}
+		
+		public BaseBattleHands ArrangeHands_old(IBaseHandArrangeStrategy strategy)
+		{
+			BaseSubBattleHand firstBattleHand;
+			BaseSubBattleHand secondBattleHand;
 			
-		public BaseBattleHands ArrangeHands(IBattleHandArrangeStrategy strategy)
+			var sortedRemainingCards = remainingCards.OrderByDescending(item => item.PokerCardPower).ToList();
+			
+			(firstBattleHand, secondBattleHand) = strategy.ArrangeComps(Components);
+
+			//var firstCardList = remainingCards.Take(1).ToList();
+			// The minor cards assigned is to place the largest card in secondHand first to ensure second is larger than first
+			// The fill the firsthand with minor cards until it reach the maximum card for first hand (regularly it's 3)
+			// If there are remaining, assign back to second hand.
+			var newRemainingCards = secondBattleHand.AddMinorCards(sortedRemainingCards, 1);
+			newRemainingCards = firstBattleHand.AddMinorCards(newRemainingCards);
+			newRemainingCards = secondBattleHand.AddMinorCards(newRemainingCards);
+
+			if (newRemainingCards.Count > 0)
+			{
+				Console.WriteLine("Fatal errors");
+			}	
+			
+			return new BaseBattleHands(firstBattleHand, secondBattleHand);
+		}
+		
+			
+		public BaseBattleHands ArrangeHands(IBaseHandArrangeStrategy strategy)
 		{
 			BaseSubBattleHand firstBattleHand;
 			BaseSubBattleHand secondBattleHand;
@@ -165,13 +190,13 @@ namespace GenericPoker
 					// Process FrontHand two pairs
 					//var mergedCards = Components[1].Cards.Concat(Components[2].Cards).ToList();
 					var newBattleRank =
-						PokerHandCalculator.EightCardsCompComboToBattleRankDict[(BaseCompType.Pair, BaseCompType.Pair)];
-					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, newBattleRank, Components[1], Components[2]);
+						PokerConst.EightCardsCompComboToBattleRankDict[(BaseCompType.Pair, BaseCompType.Pair)];
+					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, newBattleRank, Components[1], Components[2]);
 					
 					
 					// process BackHand two pairs
 					//mergedCards = Components[0].Cards.Concat(Components[3].Cards).ToList();
-					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, newBattleRank, Components[0], Components[3]);
+					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, newBattleRank, Components[0], Components[3]);
 
 					break;
 				case 3:
@@ -181,21 +206,21 @@ namespace GenericPoker
 					break;
 				case 1:
 					// Add first hand
-					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
 					
 					// Add second Hand
-					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank), Components[0]);
+					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank), Components[0]);
 					break;
 				case 0: // Nothing for whole 8 cards
 					// Add first hand
-					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
 					// Add second Hand
-					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
+					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
 					break;
 				default:
-					firstBattleHand = new BaseSubBattleHand(BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing);
+					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
 					// Add second Hand
-					secondBattleHand = new BaseSubBattleHand(BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing);
+					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
 					break;
 			}
 

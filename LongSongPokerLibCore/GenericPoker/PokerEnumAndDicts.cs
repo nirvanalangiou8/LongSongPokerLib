@@ -100,7 +100,7 @@ namespace GenericPoker
 		FlushStraight,
 	}
 	
-	public enum BattleHandEnum
+	public enum BattleSubHandOrder
 	{
 		FirstHand = 3,
 		SecondHand = 5,
@@ -269,38 +269,97 @@ namespace GenericPoker
 				{ (14, CompType.Straight), PokerCardCompRank.FourteenCardStraight },
 			};
 
-        public static readonly Dictionary<(BattleHandEnum, PokerOverAllHandRank), int> EightCardsBattleHandPowerDict =
+        public static readonly Dictionary<(BattleSubHandOrder, PokerOverAllHandRank), int> EightCardsBattleHandPowerDict =
         new()
         {
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.Nothing ), 0},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.Pair ), 1},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.TwoPairs ), 2},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.ThreeCardsFlushStraight ), 24},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.ThreeOfKind ), 15},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.FourOfKind ), 32},
-            { (BattleHandEnum.FirstHand, PokerOverAllHandRank.FourCardsFlushStraight ), 40},
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Nothing), 0 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Pair), 1 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.TwoPairs), 2 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.ThreeOfKind), 10 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsStraight), 24 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FullHouse), 28 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.ThreeCardsFlushStraight), 32 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsFlush), 40 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.Mansion), 48 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsStraight), 62 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FourOfKind), 80 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FourCardsFlushStraight), 100 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsFlush), 120 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsStraight), 200 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.FiveCardsFlushStraight), 360 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsStraight), 500 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsFlush), 800 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SixCardsFlushStraight), 1000 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsFlush), 20000 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.SevenCardsFlushStraight), 40000 },
-            { (BattleHandEnum.SecondHand, PokerOverAllHandRank.EightCardsFlushStraight), 400000 },
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing ), 0},
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Pair ), 1},
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.TwoPairs ), 2},
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.ThreeCardsFlushStraight ), 24},
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.ThreeOfKind ), 15},
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.FourOfKind ), 32},
+            { (BattleSubHandOrder.FirstHand, PokerOverAllHandRank.FourCardsFlushStraight ), 40},
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing), 0 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Pair), 1 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.TwoPairs), 2 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.ThreeOfKind), 10 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.FiveCardsStraight), 24 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.FullHouse), 28 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.ThreeCardsFlushStraight), 32 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.FiveCardsFlush), 40 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Mansion), 48 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.SixCardsStraight), 62 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.FourOfKind), 80 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.FourCardsFlushStraight), 100 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.SixCardsFlush), 120 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.SevenCardsStraight), 200 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.FiveCardsFlushStraight), 360 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.EightCardsStraight), 500 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.SevenCardsFlush), 800 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.SixCardsFlushStraight), 1000 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.EightCardsFlush), 20000 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.SevenCardsFlushStraight), 40000 },
+            { (BattleSubHandOrder.SecondHand, PokerOverAllHandRank.EightCardsFlushStraight), 400000 },
         };
+        
+        public static readonly Dictionary<(BaseCompType, BaseCompType), PokerOverAllHandRank> EightCardsCompComboToBattleRankDict =
+			new()
+			{
+				{ (BaseCompType.Pair, BaseCompType.Pair ), PokerOverAllHandRank.TwoPairs},
+				{ (BaseCompType.ThreeOfKind, BaseCompType.Pair ), PokerOverAllHandRank.FullHouse},
+				{ (BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair ), PokerOverAllHandRank.Mansion},
+			};
+		
+		
+        public static readonly Dictionary<string, BaseCompType> BaseCardsCompTypeDict = new()
+			{
+				{ "2_Kind", BaseCompType.Pair },
+				{ "3_Kind", BaseCompType.ThreeOfKind },
+				{ "4_Kind", BaseCompType.FourOfKind },
+				{ "5_Kind", BaseCompType.FiveOfKind },
+				{ "6_Kind", BaseCompType.SixOfKind },
+				{ "7_Kind", BaseCompType.SevenOfKind },
+				{ "8_Kind", BaseCompType.EightOfKind },
+				//{ "3_Flush", BaseCompType.ThreeCardsFlush },
+				//{ "3_Straight", BaseCompType.ThreeCardsStraight },
+				//{ "3_PairInFlush", BaseCompType.ThreeCardsPairInFlush},
+				{ "3_FlushStraight", BaseCompType.ThreeCardsFlushStraight },
+				//{ "4_Flush", BaseCompType.FourCardsFlush },
+				//{ "4_PairInFlush", BaseCompType.FourCardsPairInFlush},
+				//{ "4_TwoPairsInFlush", BaseCompType.FourCardsTwoPairsInFlush},
+				//{ "4_Straight", BaseCompType.FourCardStraight },
+				{ "4_FlushStraight", BaseCompType.FourCardsFlushStraight },
+				{ "5_Flush", BaseCompType.FiveCardsFlush },
+				//{ "5_PairInFlush", BaseCompType.FiveCardsPairInFlush},
+				//{ "5_TwoPairsInFlush", BaseCompType.FiveCardsTwoPairsInFlush},
+				{ "5_Straight", BaseCompType.FiveCardsStraight },
+				{ "5_FlushStraight", BaseCompType.FiveCardsFlushStraight },
+				{ "6_Flush", BaseCompType.SixCardsFlush },
+				{ "6_PairInFlush", BaseCompType.SixCardsPairInFlush},
+				{ "6_TwoPairsInFlush", BaseCompType.SixCardsTwoPairsInFlush},
+				{ "6_ThreePairsInFlush", BaseCompType.SixCardsThreePairsInFlush},
+				{ "7_Flush", BaseCompType.SevenCardsFlush },
+				{ "7_PairInFlush", BaseCompType.SevenCardsPairInFlush},
+				{ "7_TwoPairsInFlush", BaseCompType.SevenCardsTwoPairsInFlush},
+				{ "7_ThreePairsInFlush", BaseCompType.SevenCardsThreePairsInFlush},
+				{ "8_Flush", BaseCompType.EightCardsFlush },
+				{ "8_PairInFlush", BaseCompType.EightCardsPairInFlush},
+				{ "8_TwoPairsInFlush", BaseCompType.EightCardsTwoPairsInFlush},
+				{ "8_ThreePairsInFlush", BaseCompType.EightCardsThreePairsInFlush},
+				{ "8_FourPairsInFlush", BaseCompType.EightCardsFourPairsInFlush},
+				{ "6_Straight", BaseCompType.SixCardsStraight },
+				{ "7_Straight", BaseCompType.SevenCardsStraight },
+				{ "8_Straight", BaseCompType.EightCardsStraight },
+				{ "6_FlushStraight", BaseCompType.SixCardsFlushStraight },
+				{ "7_FlushStraight", BaseCompType.SevenCardsFlushStraight },
+				{ "8_FlushStraight", BaseCompType.EightCardsFlushStraight },
+				{ "9_Flush", BaseCompType.NineCardsFlush },
+				{ "10_Flush", BaseCompType.TenCardsFlush },
+				{ "9_Straight", BaseCompType.NineCardsStraight },
+				{ "10_Straight", BaseCompType.TenCardsStraight },
+				{ "9_FlushStraight", BaseCompType.NineCardsFlushStraight },
+				{ "10_FlushStraight", BaseCompType.TenCardsFlushStraight }
+			};
         
 		
 	}

@@ -9,11 +9,11 @@ namespace GenericPoker
         protected List<BasePokerCard> _cards;
         public List<BasePokerCard> Cards => _cards;
 
-        protected BattleHandEnum _battleHandEnum;
-        public BattleHandEnum BattleHandEnum
+        protected BattleSubHandOrder _battleSubHandOrder;
+        public BattleSubHandOrder BattleSubHandOrder
         {
-            get => _battleHandEnum;
-            set => _battleHandEnum = value;
+            get => _battleSubHandOrder;
+            set => _battleSubHandOrder = value;
         }
 
         protected PokerOverAllHandRank _battleHandRank;
@@ -44,7 +44,7 @@ namespace GenericPoker
             _components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
         }
 
-        public BaseSubBattleHand(BattleHandEnum battleHandEnum, PokerOverAllHandRank inputRank, 
+        public BaseSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerOverAllHandRank inputRank, 
             params PokerCardComponent<BaseCompType, BasePokerCard>[] inputCombos)
         {
             _cards = new List<BasePokerCard>();
@@ -61,8 +61,8 @@ namespace GenericPoker
                 }
             }
             _battleHandRank = inputRank;
-            _battleHandEnum = battleHandEnum;
-            if (PokerConst.EightCardsBattleHandPowerDict.TryGetValue((_battleHandEnum, BattleHandRank), out var power))
+            _battleSubHandOrder = battleSubHandOrder;
+            if (PokerConst.EightCardsBattleHandPowerDict.TryGetValue((_battleSubHandOrder, BattleHandRank), out var power))
             {
                 _handPower = power;
             }
@@ -82,7 +82,7 @@ namespace GenericPoker
             if (remainingCards == null) return new List<BasePokerCard>();
             var retCards = new List<BasePokerCard>(remainingCards);
             int added = 0;
-            int maxCards = (int)_battleHandEnum > 0 ? (int)_battleHandEnum : int.MaxValue;
+            int maxCards = (int)_battleSubHandOrder > 0 ? (int)_battleSubHandOrder : int.MaxValue;
             while (retCards.Count > 0 && Cards.Count < maxCards && added < count)
             {
                 Cards.Add(retCards[0]);
@@ -98,8 +98,8 @@ namespace GenericPoker
 
             if (BattleHandRank != other.BattleHandRank)
             {
-                int myPower = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((_battleHandEnum, BattleHandRank), out var p1) ? p1 : HandPower;
-                int otherPower = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((other._battleHandEnum, other.BattleHandRank), out var p2) ? p2 : other.HandPower;
+                int myPower = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((_battleSubHandOrder, BattleHandRank), out var p1) ? p1 : HandPower;
+                int otherPower = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((other._battleSubHandOrder, other.BattleHandRank), out var p2) ? p2 : other.HandPower;
                 if (myPower != otherPower) return myPower.CompareTo(otherPower);
                 return BattleHandRank.CompareTo(other.BattleHandRank);
             }

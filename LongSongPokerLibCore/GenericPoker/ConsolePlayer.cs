@@ -73,13 +73,13 @@ namespace GenericPoker
                     .Select(i => cards[i])
                     .ToList();
 
-                var frontHand = EvaluateBestSingleHand(frontCards, BattleHandEnum.FirstHand);
-                var backHand = EvaluateBestSingleHand(backCards, BattleHandEnum.SecondHand);
+                var frontHand = EvaluateBestSingleHand(frontCards, BattleSubHandOrder.FirstHand);
+                var backHand = EvaluateBestSingleHand(backCards, BattleSubHandOrder.SecondHand);
 
                 if (backHand.CompareTo(frontHand) < 0) continue;
 
-                double front = WinRateStrategy.GetSubHandWinRate(frontHand);
-                double back = WinRateStrategy.GetSubHandWinRate(backHand);
+                double front = IWinRateHandArrangeStrategy.GetSubHandWinRate(frontHand);
+                double back = IWinRateHandArrangeStrategy.GetSubHandWinRate(backHand);
                 double total = front + back;
 
                 if (total > bestTotal)
@@ -96,7 +96,7 @@ namespace GenericPoker
             return new HandSplitResult(bestFrontHand, bestBackHand, bestFront, bestBack, bestTotal);
         }
 
-        public static BaseSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleHandEnum which)
+        public static BaseSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleSubHandOrder which)
         {
             var best = BuildSingleHand(which, PokerOverAllHandRank.Nothing,
                 new List<PokerCardComponent<BaseCompType, BasePokerCard>>(),
@@ -117,9 +117,9 @@ namespace GenericPoker
                 var usedComps = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
 
                 if (comps.Count >= 2 &&
-                    (PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
+                    (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
                          (comps[0].CompRank, comps[1].CompRank), out rank) ||
-                     PokerHandCalculator.EightCardsCompComboToBattleRankDict.TryGetValue(
+                     PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
                          (comps[1].CompRank, comps[0].CompRank), out rank)))
                 {
                     usedComps.Add(comps[0]);
@@ -145,7 +145,7 @@ namespace GenericPoker
         }
 
         public static BaseSubBattleHand BuildSingleHand(
-            BattleHandEnum which,
+            BattleSubHandOrder which,
             PokerOverAllHandRank rank,
             List<PokerCardComponent<BaseCompType, BasePokerCard>> comps,
             List<BasePokerCard> kickers)

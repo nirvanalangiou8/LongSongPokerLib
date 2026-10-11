@@ -12,16 +12,15 @@ namespace GenericPoker
 {
 	public class PokerHandCalculator
 	{
-		//public List<PokerCard> rankSortedCards;
-		//public PokerRankTypes BestRank => _bestRank;
-		//private HandProcessData _tempEvaluateData;
-
 		private readonly List<BasePokerCard> _allPokerCards;
 		private readonly List<BasePokerCard> _noneJokerCards;
 		private readonly List<BasePokerCard> _jokerCards;
 		private PokerRankTypes _bestRank;
 		private ICardRule _rule;
-
+		
+	public List<BasePokerCard> AllPokerCards => _allPokerCards;
+		
+		
 		public ICardRule Rule
 		{
 			get => _rule;
@@ -52,65 +51,7 @@ namespace GenericPoker
 		}
 
 		
-		public static readonly Dictionary<(BaseCompType, BaseCompType), PokerOverAllHandRank> EightCardsCompComboToBattleRankDict =
-			new()
-			{
-				{ (BaseCompType.Pair, BaseCompType.Pair ), PokerOverAllHandRank.TwoPairs},
-				{ (BaseCompType.ThreeOfKind, BaseCompType.Pair ), PokerOverAllHandRank.FullHouse},
-				{ (BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair ), PokerOverAllHandRank.Mansion},
-			};
 		
-		
-		private static readonly Dictionary<string, BaseCompType> BaseCardsCompTypeDict = new()
-			{
-				{ "2_Kind", BaseCompType.Pair },
-				{ "3_Kind", BaseCompType.ThreeOfKind },
-				{ "4_Kind", BaseCompType.FourOfKind },
-				{ "5_Kind", BaseCompType.FiveOfKind },
-				{ "6_Kind", BaseCompType.SixOfKind },
-				{ "7_Kind", BaseCompType.SevenOfKind },
-				{ "8_Kind", BaseCompType.EightOfKind },
-				//{ "3_Flush", BaseCompType.ThreeCardsFlush },
-				//{ "3_Straight", BaseCompType.ThreeCardsStraight },
-				//{ "3_PairInFlush", BaseCompType.ThreeCardsPairInFlush},
-				{ "3_FlushStraight", BaseCompType.ThreeCardsFlushStraight },
-				//{ "4_Flush", BaseCompType.FourCardsFlush },
-				//{ "4_PairInFlush", BaseCompType.FourCardsPairInFlush},
-				//{ "4_TwoPairsInFlush", BaseCompType.FourCardsTwoPairsInFlush},
-				//{ "4_Straight", BaseCompType.FourCardStraight },
-				{ "4_FlushStraight", BaseCompType.FourCardsFlushStraight },
-				{ "5_Flush", BaseCompType.FiveCardsFlush },
-				//{ "5_PairInFlush", BaseCompType.FiveCardsPairInFlush},
-				//{ "5_TwoPairsInFlush", BaseCompType.FiveCardsTwoPairsInFlush},
-				{ "5_Straight", BaseCompType.FiveCardsStraight },
-				{ "5_FlushStraight", BaseCompType.FiveCardsFlushStraight },
-				{ "6_Flush", BaseCompType.SixCardsFlush },
-				{ "6_PairInFlush", BaseCompType.SixCardsPairInFlush},
-				{ "6_TwoPairsInFlush", BaseCompType.SixCardsTwoPairsInFlush},
-				{ "6_ThreePairsInFlush", BaseCompType.SixCardsThreePairsInFlush},
-				{ "7_Flush", BaseCompType.SevenCardsFlush },
-				{ "7_PairInFlush", BaseCompType.SevenCardsPairInFlush},
-				{ "7_TwoPairsInFlush", BaseCompType.SevenCardsTwoPairsInFlush},
-				{ "7_ThreePairsInFlush", BaseCompType.SevenCardsThreePairsInFlush},
-				{ "8_Flush", BaseCompType.EightCardsFlush },
-				{ "8_PairInFlush", BaseCompType.EightCardsPairInFlush},
-				{ "8_TwoPairsInFlush", BaseCompType.EightCardsTwoPairsInFlush},
-				{ "8_ThreePairsInFlush", BaseCompType.EightCardsThreePairsInFlush},
-				{ "8_FourPairsInFlush", BaseCompType.EightCardsFourPairsInFlush},
-				{ "6_Straight", BaseCompType.SixCardsStraight },
-				{ "7_Straight", BaseCompType.SevenCardsStraight },
-				{ "8_Straight", BaseCompType.EightCardsStraight },
-				{ "6_FlushStraight", BaseCompType.SixCardsFlushStraight },
-				{ "7_FlushStraight", BaseCompType.SevenCardsFlushStraight },
-				{ "8_FlushStraight", BaseCompType.EightCardsFlushStraight },
-				{ "9_Flush", BaseCompType.NineCardsFlush },
-				{ "10_Flush", BaseCompType.TenCardsFlush },
-				{ "9_Straight", BaseCompType.NineCardsStraight },
-				{ "10_Straight", BaseCompType.TenCardsStraight },
-				{ "9_FlushStraight", BaseCompType.NineCardsFlushStraight },
-				{ "10_FlushStraight", BaseCompType.TenCardsFlushStraight }
-			};
-
 		public PokerHandCalculator(ICardRule? rule = null)
 		{
 			_rule = rule ?? EightCardRule.Default;
@@ -138,43 +79,18 @@ namespace GenericPoker
 			}
 		}
 		
-		
 		public static PokerHandCalculator CreateInstance(string wholeCardStr, ICardRule? rule = null)
 		{
-			var inputCardStrs = wholeCardStr.Split(',');
-			var newCardList = new List<BasePokerCard>();
-			
-			foreach (var str in inputCardStrs) {
-				var splitDeckStrs = str.Split('@');
-				int deckNumber = 1;
-				
-				if (splitDeckStrs.Length == 2)
-				{   
-					deckNumber =  int.Parse(splitDeckStrs[1]);
-				}
-				// The TryParse not only parse enum string but if also it's potential number. 
-				// If the input string is a number like "222", the first check, (TryParse) always be valid, and return 222 as JokerType.
-				// So we need the second check to ensure it's real enum string matched.
-				if (Enum.TryParse<JokerType>(splitDeckStrs[0], out var jokerType) && Enum.IsDefined(typeof(JokerType), jokerType))
-				{
-					newCardList.Add(BaseJokerCard.CreateInstance(jokerType, deckID: deckNumber));
-				} else {
-					newCardList.Add(BasePokerCard.CreateInstance(splitDeckStrs[0], deckID :deckNumber));
-				}
-			}
-
 			var data = new PokerHandCalculator(rule);
-			data.SetupCards(newCardList);
+			data.SetupCards(PokerUtilFunc.ConvertStrToPokerCards(wholeCardStr));
 			return data;
 		}
-		
-		
 
 		public List<PokerHandStructure> Test8Cards()
 		{
 			var allCandidateComps = new List<PokerHandStructure>();
 			//RecursiveEvaluateCards(_allPokerCards, new PokerHandStructure(), allCandidateComps);
-			RecursiveArrangeHands(_allPokerCards, new PokerHandStructure(), allCandidateComps);
+			RecursiveExploreHandStructures(_allPokerCards, new PokerHandStructure(), allCandidateComps);
 			foreach (var res in allCandidateComps)
 			{
 				res.SortCompsAndClassify();
@@ -190,13 +106,14 @@ namespace GenericPoker
 		{
 			var allCandidateComps = new List<PokerHandStructure>();
 			
-			RecursiveArrangeHands(_allPokerCards, new PokerHandStructure(), allCandidateComps);
+			RecursiveExploreHandStructures(_allPokerCards, new PokerHandStructure(), allCandidateComps);
 			
 			foreach (var res in allCandidateComps) res.SortCompsAndClassify();
 			
 			allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
 			var uniqueCandidates = allCandidateComps.Distinct().ToList();
-			var arrangeStrategy = new BalancedStrategy();
+			//var arrangeStrategy = new BalancedStrategy();
+			var arrangeStrategy = new IWinRateHandArrangeStrategy();
 			
 			
 			var allPokerHands = new List<BaseBattleHands>();
@@ -207,6 +124,22 @@ namespace GenericPoker
 			
 			return allPokerHands[0];
 		}
+		
+		public List<PokerHandStructure> GetAllHandStructureCandidates()
+		{
+			var allCandidateComps = new List<PokerHandStructure>();
+			
+			RecursiveExploreHandStructures(_allPokerCards, new PokerHandStructure(), allCandidateComps);
+			
+			foreach (var res in allCandidateComps) res.SortCompsAndClassify();
+			
+			allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
+			var uniqueCandidates = allCandidateComps.Distinct().ToList();
+
+			return uniqueCandidates;
+			
+		}
+		
 		
 		/// <summary>
 		/// Processes and generates all valid straight permutations from given card groups and jokers.
@@ -499,7 +432,7 @@ namespace GenericPoker
 				$"{numCards}_{localDict[pairsInFlush]}{CompType.ToString()}";*/
 
 			var keyStr = $"{numCards}_{CompType.ToString()}";
-			var retCompType = BaseCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
+			var retCompType = PokerConst.BaseCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
 			
 			return retCompType;
 		}
@@ -508,7 +441,7 @@ namespace GenericPoker
 		private BaseCompType DetermineCompType(int numCards, CompType compType)
 		{
 			var keyStr = $"{numCards}_{compType.ToString()}";
-			var retCompType = BaseCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
+			var retCompType = PokerConst.BaseCardsCompTypeDict.TryGetValue(keyStr, out var value) ? value : BaseCompType.None;
 			return retCompType;
 		}
 		/// <summary>
@@ -550,7 +483,7 @@ namespace GenericPoker
 							currentHandStructure.AddComp(newHandCandidateData);
 							var newRemainCards =
 								UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
+							RecursiveExploreHandStructures(newRemainCards, currentHandStructure, results);
 							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
 							candidateProcessed = true;
 							currentHandStructure.RemoveLast();
@@ -572,7 +505,7 @@ namespace GenericPoker
 							// TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
 							// when do hash set, two J-spade will become single one.
 							var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-							RecursiveArrangeHands(newRemainCards, currentHandStructure, results);
+							RecursiveExploreHandStructures(newRemainCards, currentHandStructure, results);
 							// Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
 							candidateProcessed = true;
 							currentHandStructure.RemoveLast();
@@ -617,7 +550,7 @@ namespace GenericPoker
                             var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
                             currentHandCandidates.AddComp(newHandCandidateData);
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                            RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
+                            RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
                             // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
                             candidateProcessed = true;
                             currentHandCandidates.RemoveLast();
@@ -654,7 +587,7 @@ namespace GenericPoker
 						var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard> { CompRank = handType, Cards = permute };
 						currentHandCandidates.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-						RecursiveArrangeHands(newRemainCards, currentHandCandidates, results);
+						RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
 						currentHandCandidates.RemoveLast();
 						hasRank = true;
 					}
@@ -670,7 +603,7 @@ namespace GenericPoker
 		/// <param name="remainingCards">The list of cards remaining to be partitioned.</param>
 		/// <param name="currentHandCandidates">The current hand structure being built.</param>
 		/// <param name="results">The list of all valid complete hand structures found.</param>
-		private void RecursiveArrangeHands(List<BasePokerCard> remainingCards,
+		public void RecursiveExploreHandStructures(List<BasePokerCard> remainingCards,
 			PokerHandStructure currentHandCandidates, List<PokerHandStructure> results)
 		{
 			var candidateProcessed = false;

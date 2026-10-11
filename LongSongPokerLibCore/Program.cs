@@ -15,7 +15,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "run_stat"; 
+            var runOption = "split"; 
 
             if (args.Length > 0 && args[0] != "hand")
             {
@@ -199,13 +199,13 @@ namespace LongSongPokerLibCore
         {
             Console.WriteLine("Hello World!");
             
-            //var inputCardStr = "J♣️,J🔶,3♣️,5��️,6♣️,A♣️,A❤️,A♠️";
+            //var inputCardStr = "J♣️,J🔶,3♣️,5🔶,6♣️,A♣️,A❤️,A♠️";
             //var inputCardStr = "J♣️,J🔶,3♣️,6♣️,6❤️,A♣️,A❤️,A♠️";
             //var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3♣️,2♣️,A♣️";
-            var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♣️,2♣️"; // test for four pairs.
+            //var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♣️,2♣️"; // test for four pairs.
+            //var inputCardStr = "8❤️,7❤️,6♣️,6❤️,J❤️,K♣️,2♣️,A♣️";
+            var inputCardStr = "8❤️,7❤️,6♣️,6🔶,J❤️,K♣️,2♣️,A♣️";
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            
-            //var handRes = pokerHand.Test8Cards();
             
             pokerHand.MinFlushStraightCards = 3;
             var resHand = pokerHand.Test8CardsTwoHandsDeploy();
@@ -223,6 +223,9 @@ namespace LongSongPokerLibCore
             Console.WriteLine(resHand.BackHand.GetHandString());
 
             Console.WriteLine("\nSuccessfully created poker hand and deployed.");
+            
+            //  6❤️_6🔶_4❤️_4♣️,8❤️_8🔶_2♣️_2♣️
+            
         }
     }
 }

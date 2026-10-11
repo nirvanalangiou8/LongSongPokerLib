@@ -1,5 +1,6 @@
 ﻿using System;
 using GenericPoker;
+using GenericPoker.EightCard;
 
 namespace GenericPoker
 {
@@ -12,12 +13,46 @@ namespace GenericPoker
         
         public BaseSubBattleHand FrontHand => _firstHand;
         public BaseSubBattleHand BackHand => _secondHand;
+        
+        private readonly List<BasePokerCard> _allPokerCards;
+        
+        private PokerHandCalculator _pokerHandCalculator;
 
         public BaseBattleHands(BaseSubBattleHand firstHand, BaseSubBattleHand secondHand)
         {
             _firstHand = firstHand;
             _secondHand = secondHand;
         }
+        
+        public BaseBattleHands(string wholeCardStr)
+        {
+            _pokerHandCalculator = PokerHandCalculator.CreateInstance(wholeCardStr);
+            _allPokerCards = _pokerHandCalculator.AllPokerCards;
+        }
+        
+        
+        public BaseBattleHands GetArrangedHands()
+        {
+            var allCandidateComps = new List<PokerHandStructure>();
+			
+            _pokerHandCalculator.RecursiveExploreHandStructures(_pokerHandCalculator.AllPokerCards, new PokerHandStructure(), allCandidateComps);
+			
+            foreach (var res in allCandidateComps) res.SortCompsAndClassify();
+			
+            allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
+            var uniqueCandidates = allCandidateComps.Distinct().ToList();
+            //var arrangeStrategy = new BalancedStrategy();
+            var arrangeStrategy = new IWinRateHandArrangeStrategy();
+			
+            var allPokerHands = new List<BaseBattleHands>();
+            foreach (var pokerStructure in uniqueCandidates)
+                allPokerHands.Add(pokerStructure.ArrangeHands(arrangeStrategy));
+			
+            allPokerHands.Sort((c1, c2) => c2.CompareTo(c1));
+			
+            return allPokerHands[0];
+        }
+        
         
         public int CompareTo(BaseBattleHands other)
         {
