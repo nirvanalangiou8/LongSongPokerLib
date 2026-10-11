@@ -200,11 +200,26 @@ namespace LongSongPokerLibCore
             Console.WriteLine("Hello World!");
             
             //var inputCardStr = "J♣️,J🔶,3♣️,5🔶,6♣️,A♣️,A❤️,A♠️";
+            // Expected results: "J🔶,J♣️,6♣️#A♠️,A❤️,A♣️,5🔶,3♣️";
+            
             //var inputCardStr = "J♣️,J🔶,3♣️,6♣️,6❤️,A♣️,A❤️,A♠️";
+            //Expected results: "J🔶,J♣️,3♣️#A♠️,A❤️,A♣️,6❤️,6♣️";
+            
             //var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3♣️,2♣️,A♣️";
-            //var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♣️,2♣️"; // test for four pairs.
+            //Expected results: "3♣️,2♣️,A♣️#8❤️,7❤️,6❤️,5❤️,4❤️";
+            
+            //var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♠️,2♣️";
+            //Expected results: "6❤️,6🔶,4❤️,4♣️#8❤️,8🔶,2♠️,2♣️";
+            
             //var inputCardStr = "8❤️,7❤️,6♣️,6❤️,J❤️,K♣️,2♣️,A♣️";
+            //Expected results: "A♣️,K♣️,J❤️#8❤️,7❤️,6❤️6♣️,2♣️";
+            
+            //var inputCardStr = "8❤️,7❤️,6♣️,4🔶,J❤️,K♣️,2♣️,A♣️";
+            //Expected results: "K♣️,J❤️,8❤️#A♣️,7❤️,6♣️,4🔶,2♣️";
+            
             var inputCardStr = "8❤️,7❤️,6♣️,6🔶,J❤️,K♣️,2♣️,A♣️";
+            //Expected results: "A♣️,K♣️,J❤️#6🔶,6♣️,8❤️,7❤️,2♣️";
+            
             var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
             
             pokerHand.MinFlushStraightCards = 3;
@@ -224,7 +239,6 @@ namespace LongSongPokerLibCore
 
             Console.WriteLine("\nSuccessfully created poker hand and deployed.");
             
-            //  6❤️_6🔶_4❤️_4♣️,8❤️_8🔶_2♣️_2♣️
             
         }
     }
