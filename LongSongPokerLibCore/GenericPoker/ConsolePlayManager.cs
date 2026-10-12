@@ -87,6 +87,18 @@ namespace GenericPoker
             Dealer.ShuffleCards();
         }
 
+        public List<BasePokerCard> DealHand(int cardCount = 8)
+        {
+            CheckAndReshuffleIfNeeded(cardCount);
+            return Dealer.DealCards(cardCount);
+        }
+
+        public string DealHandString(int cardCount = 8)
+        {
+            var cards = DealHand(cardCount);
+            return string.Join(",", cards.Select(c => c.CardStr));
+        }
+
         public virtual void ProcessPlayersHands()
         {
             foreach (var player in Players)

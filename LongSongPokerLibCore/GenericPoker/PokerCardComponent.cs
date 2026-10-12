@@ -67,8 +67,8 @@ namespace GenericPoker
 			// if runs to here, it means all cards' number are equal, then check who has more nature way to form the combo.
 			foreach (var (cardA, cardB) in _cards.Zip(other.Cards, (A, B) => (A, B)))
 			{
-				bool isAJoker = cardA is IJoker;
-				bool isBJoker = cardB is IJoker;
+				var isAJoker = cardA is IJoker;
+				var isBJoker = cardB is IJoker;
 				
 				if (isAJoker && isBJoker)
 				{

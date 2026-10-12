@@ -108,5 +108,17 @@ namespace UnitTest
             Assert.That(gameManager.CurrentRound, Is.EqualTo(2));
             Assert.That(player.Cards.Count, Is.EqualTo(8));
         }
+
+        [Test]
+        public void TestConsolePlayManagerDealHand()
+        {
+            var gameManager = new ConsolePlayManager(EightCardRule.Default, cardsPerPlayer: 8);
+            var handCards = gameManager.DealHand(8);
+            Assert.That(handCards.Count, Is.EqualTo(8));
+
+            var handStr = gameManager.DealHandString(8);
+            var split = handStr.Split(',');
+            Assert.That(split.Length, Is.EqualTo(8));
+        }
     }
 }

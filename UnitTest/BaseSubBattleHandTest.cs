@@ -85,6 +85,19 @@ namespace UnitTest
             var hand = new BaseSubBattleHand(new List<BasePokerCard> { card1, card2 });
 
             Assert.That(hand.GetHandString(","), Is.EqualTo("A♠️,K♠️"));
+
+            // Test with components and kickers
+            var comp = new PokerCardComponent<BaseCompType, BasePokerCard>
+            {
+                CompRank = BaseCompType.Pair,
+                Cards = new List<BasePokerCard> { card1, card2 }
+            };
+            var kicker = BasePokerCard.CreateInstance("5🔶");
+            var handWithComp = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Pair, comp);
+            handWithComp.AddMinorCards(new List<BasePokerCard> { kicker });
+
+            Assert.That(handWithComp.GetHandString(","), Is.EqualTo("[A♠️,K♠️],5🔶"));
+            Assert.That(handWithComp.GetHandString(",", "(", ")"), Is.EqualTo("(A♠️,K♠️),5🔶"));
         }
     }
 }

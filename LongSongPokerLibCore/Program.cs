@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GenericPoker;
@@ -14,16 +15,19 @@ namespace LongSongPokerLibCore
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
-            // Available options: "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "split"; 
+            // Available options: "review_split", "analyze", "hand", "game", "split", "run_stat", "debug"
+            var runOption = "review_split"; 
 
-            if (args.Length > 0 && args[0] != "hand")
+            if (args.Length > 0)
             {
                 runOption = args[0];
             }
 
             switch (runOption)
             {
+                case "review_split":
+                    ReviewHandSplit();
+                    break;
                 case "analyze":
                     // Usage: Program.exe analyze [sourceDataPath] [outputPath] [cardCount: 8 or 9]
                     ICardRule selectedRule = EightCardRule.Default;
@@ -91,8 +95,77 @@ namespace LongSongPokerLibCore
                     break;
                 
                 default:
-                    Console.WriteLine("Unknown runOption. Available options: analyze, hand, game, split, test, debug");
+                    Console.WriteLine("Unknown runOption. Available options: review_split, analyze, hand, game, split, run_stat, debug");
                     break;
+            }
+        }
+
+        static void ReviewHandSplit()
+        {
+            Console.WriteLine("=== Review Hand Split ===");
+            Console.WriteLine("(Press [Space] for next hand, [D] to save debug/issue hand, [G] to save good case, [Q] or [Esc] to quit)\n");
+
+            XRandom.Init((ulong)DateTime.UtcNow.Ticks);
+            var gameManager = new ConsolePlayManager(EightCardRule.Default, cardsPerPlayer: 8);
+            string issueFilePath = "issue_hands.txt";
+            int roundCount = 0;
+
+            while (true)
+            {
+                roundCount++;
+                string inputCardStr = gameManager.DealHandString(8);
+
+                Console.WriteLine($"\n------ Round #{roundCount} ------");
+                Console.WriteLine($"Input Cards: {inputCardStr}");
+
+                var battleHands = new BaseBattleHands(inputCardStr);
+                var resHand = battleHands.GetArrangeHands();
+
+                // Display front hand result
+                Console.WriteLine("\n=== Front Hand ===");
+                Console.WriteLine($"Rank: {resHand.FrontHand.BattleHandRank}");
+                Console.Write("Cards: ");
+                Console.WriteLine(resHand.FrontHand.GetHandString());
+
+                // Display back hand result
+                Console.WriteLine("\n=== Back Hand ===");
+                Console.WriteLine($"Rank: {resHand.BackHand.BattleHandRank}");
+                Console.Write("Cards: ");
+                Console.WriteLine(resHand.BackHand.GetHandString());
+
+                string outputCardStr = $"{resHand.FrontHand.GetHandString(",")}#{resHand.BackHand.GetHandString(",")}";
+                Console.WriteLine($"\nSplit: {outputCardStr}");
+
+                Console.WriteLine("\n[Space] Next hand | [D] Save debug hand | [G] Save good hand | [Q/Esc] Quit");
+
+                bool nextRound = false;
+                while (!nextRound)
+                {
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Spacebar)
+                    {
+                        nextRound = true;
+                    }
+                    else if (key.Key == ConsoleKey.D)
+                    {
+                        string record = $"input card string:{inputCardStr} , output card string :{outputCardStr} , issue: Debug Case";
+                        File.AppendAllText(issueFilePath, record + Environment.NewLine);
+                        Console.WriteLine($"--> Hand saved to '{issueFilePath}': {record}");
+                        Console.WriteLine("[Space] Next hand | [Q/Esc] Quit");
+                    }
+                    else if (key.Key == ConsoleKey.G)
+                    {
+                        string record = $"input card string:{inputCardStr} , output card string :{outputCardStr} , issue: Good Case";
+                        File.AppendAllText(issueFilePath, record + Environment.NewLine);
+                        Console.WriteLine($"--> Hand saved to '{issueFilePath}': {record}");
+                        Console.WriteLine("[Space] Next hand | [Q/Esc] Quit");
+                    }
+                    else if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Escape)
+                    {
+                        Console.WriteLine("\nExiting Review Hand Split.");
+                        return;
+                    }
+                }
             }
         }
 
@@ -197,33 +270,11 @@ namespace LongSongPokerLibCore
 
         static void TestHandSplit()
         {
-            Console.WriteLine("Hello World!");
-            
-            //var inputCardStr = "J♣️,J🔶,3♣️,5🔶,6♣️,A♣️,A❤️,A♠️";
-            // Expected results: "J🔶,J♣️,6♣️#A♠️,A❤️,A♣️,5🔶,3♣️";
-            
-            //var inputCardStr = "J♣️,J🔶,3♣️,6♣️,6❤️,A♣️,A❤️,A♠️";
-            //Expected results: "J🔶,J♣️,3♣️#A♠️,A❤️,A♣️,6❤️,6♣️";
-            
-            //var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3♣️,2♣️,A♣️";
-            //Expected results: "3♣️,2♣️,A♣️#8❤️,7❤️,6❤️,5❤️,4❤️";
-            
-            //var inputCardStr = "8❤️,8🔶,6❤️,6🔶,4❤️,4♣️,2♠️,2♣️";
-            //Expected results: "6❤️,6🔶,4❤️,4♣️#8❤️,8🔶,2♠️,2♣️";
-            
-            //var inputCardStr = "8❤️,7❤️,6♣️,6❤️,J❤️,K♣️,2♣️,A♣️";
-            //Expected results: "A♣️,K♣️,J❤️#8❤️,7❤️,6❤️6♣️,2♣️";
-            
-            //var inputCardStr = "8❤️,7❤️,6♣️,4🔶,J❤️,K♣️,2♣️,A♣️";
-            //Expected results: "K♣️,J❤️,8❤️#A♣️,7❤️,6♣️,4🔶,2♣️";
-            
             var inputCardStr = "8❤️,7❤️,6♣️,6🔶,J❤️,K♣️,2♣️,A♣️";
             //Expected results: "A♣️,K♣️,J❤️#6🔶,6♣️,8❤️,7❤️,2♣️";
             
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            
-            pokerHand.MinFlushStraightCards = 3;
-            var resHand = pokerHand.Test8CardsTwoHandsDeploy();
+            var battleHands = new BaseBattleHands(inputCardStr);
+            var resHand = battleHands.GetArrangeHands();
 
             // Display front hand result
             Console.WriteLine("\n=== Front Hand ===");
@@ -238,8 +289,6 @@ namespace LongSongPokerLibCore
             Console.WriteLine(resHand.BackHand.GetHandString());
 
             Console.WriteLine("\nSuccessfully created poker hand and deployed.");
-            
-            
         }
     }
 }

@@ -72,8 +72,20 @@ namespace GenericPoker
             }
         }
 
-        public string GetHandString(string separator = "_")
+        public string GetHandString(string separator = ",", string leftBrace = "[", string rightBrace = "]")
         {
+            var compCards = _components?.SelectMany(c => c.Cards ?? Enumerable.Empty<BasePokerCard>()).ToList() ?? new List<BasePokerCard>();
+            if (compCards.Count > 0)
+            {
+                var compStr = $"{leftBrace}{string.Join(separator, compCards.Select(card => card.CardStr))}{rightBrace}";
+                var kickerCards = _cards.Skip(compCards.Count).ToList();
+                if (kickerCards.Count > 0)
+                {
+                    return $"{compStr}{separator}{string.Join(separator, kickerCards.Select(card => card.CardStr))}";
+                }
+                return compStr;
+            }
+
             return string.Join(separator, Cards.Select(card => card.CardStr));
         }
 
