@@ -33,25 +33,25 @@ namespace GenericPoker
         
         public BaseBattleHands GetArrangeHands()
         {
-            var allCandidateComps = new List<PokerHandStructure>();
-            _pokerHandCalculator.RecursiveExploreHandStructures(_pokerHandCalculator.AllPokerCards, new PokerHandStructure(), allCandidateComps);
+            var allCandidateStructures = new List<PokerHandStructure>();
+            _pokerHandCalculator.RecursiveExploreHandStructures(_pokerHandCalculator.AllPokerCards, new PokerHandStructure(), allCandidateStructures);
             
-            foreach (var res in allCandidateComps) res.SortCompsAndClassify();
-            allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
-            var uniqueCandidates = allCandidateComps.Distinct().ToList();
+            foreach (var res in allCandidateStructures) res.SortCompsAndClassify();
+            allCandidateStructures.Sort((c1, c2) => c2.CompareTo(c1));
+            var uniqueCandidateStructures = allCandidateStructures.Distinct().ToList();
 
             // If no components found (pure high card / Nothing), add empty structure with all cards as kickers
-            if (uniqueCandidates.Count == 0)
+            if (uniqueCandidateStructures.Count == 0)
             {
                 var nothingStruct = new PokerHandStructure();
                 nothingStruct.SetRemainingCards(_allPokerCards);
-                uniqueCandidates.Add(nothingStruct);
+                uniqueCandidateStructures.Add(nothingStruct);
             }
 
             var arrangeStrategy = new IWinRateHandArrangeStrategy();
             var allBattleHands = new List<BaseBattleHands>();
 
-            foreach (var pokerStructure in uniqueCandidates)
+            foreach (var pokerStructure in uniqueCandidateStructures)
             {
                 var battleHand = ArrangeSingleStructure(pokerStructure, arrangeStrategy);
                 if (battleHand != null)
@@ -71,10 +71,19 @@ namespace GenericPoker
             // Select the best battle hand based on win rate / total power
             allBattleHands.Sort((h1, h2) =>
             {
-                double score1 = IWinRateHandArrangeStrategy.GetSubHandWinRate(h1.FrontHand, BattleSubHandOrder.FirstHand) +
-                                IWinRateHandArrangeStrategy.GetSubHandWinRate(h1.BackHand, BattleSubHandOrder.SecondHand);
-                double score2 = IWinRateHandArrangeStrategy.GetSubHandWinRate(h2.FrontHand, BattleSubHandOrder.FirstHand) +
-                                IWinRateHandArrangeStrategy.GetSubHandWinRate(h2.BackHand, BattleSubHandOrder.SecondHand);
+                double score1_front = IWinRateHandArrangeStrategy.GetSubHandWinRate(h1.FrontHand, BattleSubHandOrder.FirstHand);
+                double score1_back = IWinRateHandArrangeStrategy.GetSubHandWinRate(h1.BackHand, BattleSubHandOrder.SecondHand);
+                double score1 = score1_front + score1_back;
+
+                double score2_front = IWinRateHandArrangeStrategy.GetSubHandWinRate(h2.FrontHand, BattleSubHandOrder.FirstHand); 
+                double score2_back = IWinRateHandArrangeStrategy.GetSubHandWinRate(h2.BackHand, BattleSubHandOrder.SecondHand);
+                double score2 = score2_front + score2_back;
+                
+                if (h1.BackHand.BattleHandRank == PokerOverAllHandRank.FourOfKind ||
+                    h2.BackHand.BattleHandRank == PokerOverAllHandRank.FourOfKind)
+                {
+                    Console.WriteLine("Four of a kind detected!");
+                }
                 int cmp = score2.CompareTo(score1);
                 if (cmp != 0) return cmp;
                 return h2.CompareTo(h1);
@@ -115,6 +124,29 @@ namespace GenericPoker
                 {
                     firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
                     secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
+                    /*
+                    if (comps[0].CompRank == BaseCompType.FourOfKind &&
+                        comps[0].Cards.Count == 4 &&
+                        (comps[0].Cards[0].Number == 1 || comps[0].Cards[0].Number == 14 || comps[0].Cards[0] is AcePokerCard))
+                    {
+                        var frontPair = new PokerCardComponent<BaseCompType, BasePokerCard>
+                        {
+                            CompRank = BaseCompType.Pair,
+                            Cards = comps[0].Cards.Skip(2).Take(2).ToList()
+                        };
+                        var backPair = new PokerCardComponent<BaseCompType, BasePokerCard>
+                        {
+                            CompRank = BaseCompType.Pair,
+                            Cards = comps[0].Cards.Take(2).ToList()
+                        };
+                        firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Pair, frontPair);
+                        secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Pair, backPair);
+                    }
+                    else
+                    {
+                        firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
+                        secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
+                    }*/
                     break;
                 }
                 case 0:
@@ -138,12 +170,15 @@ namespace GenericPoker
 
             var kickers = new List<BasePokerCard>(sortedKickers);
 
-            // Check if back hand already has a stronger component rank than front hand
-            if (secondHand.BattleHandRank > firstHand.BattleHandRank)
+            // Check if back hand is already strictly stronger than front hand (by rank or by components)
+            // For a special case that Four of Kind of Ace, we split front ace pair and back ace pair, in such case,
+            // this algorithm still be valid as the below condition won't fullfill, just like nothing to nothing, then fill backhand first, thenfront hand.
+            if (secondHand > firstHand)
             {
-                // Back hand already strictly stronger by rank (e.g., Back has Pair/Trips/Flush/Straight, Front is Nothing).
-                // Place sub-leading/top kickers into front hand up to its capacity (3 cards max),
-                // and the rest into back hand (5 cards max).
+                // Backhand already strictly stronger (e.g., Back has Pair/Trips/Flush/Straight while Front is Nothing,
+                // or both have Pairs but Back has a higher pair like the 10s vs 9s).
+                // Place sub-leading/top kickers into a front hand up to its capacity (3 cards max),
+                // and the rest into the backhand (5 cards max).
                 while (kickers.Count > 0 && firstHand.Cards.Count < 3)
                 {
                     firstHand.Cards.Add(kickers[0]);
@@ -158,7 +193,7 @@ namespace GenericPoker
             }
             else
             {
-                // Both hands have the same rank (e.g. Nothing vs Nothing, or same rank).
+                // Both hands have the same rank and equal components (e.g. Nothing vs Nothing).
                 // Leading kicker (highest) must stay in back hand so back hand > front hand.
                 if (secondHand.Cards.Count < 5 && kickers.Count > 0)
                 {

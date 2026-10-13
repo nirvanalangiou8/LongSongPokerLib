@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LongSongPokerLibCore")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0492906cef557d80660b60d212ff4a2b3a80df94")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+08606c417fdb8f89de3c3ce5889069e04df34bb6")]
 [assembly: System.Reflection.AssemblyProductAttribute("LongSongPokerLibCore")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LongSongPokerLibCore")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
