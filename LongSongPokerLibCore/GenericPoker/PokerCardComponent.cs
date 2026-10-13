@@ -5,18 +5,15 @@ using System.Numerics;
 
 namespace GenericPoker
 {
-	
-    public struct PokerCardComponent<TEnum, TCard> : IComparable<PokerCardComponent<TEnum, TCard>> 
-        where TEnum : Enum
-        where TCard : BasePokerCard
+    public struct PokerCardComponent : IComparable<PokerCardComponent>
 	{
-		public TEnum CompRank;
-		private List<TCard> _cards;
+		public BaseCompType CompRank;
+		private List<BasePokerCard> _cards;
 
-		public int CardCount => _cards.Count;
-		public string CompString => string.Join("#", _cards.Select(o => o.CardUnitTestStr));
+		public int CardCount => _cards?.Count ?? 0;
+		public string CompString => _cards != null ? string.Join("#", _cards.Select(o => o.CardUnitTestStr)) : string.Empty;
 		
-		public List<TCard> Cards
+		public List<BasePokerCard> Cards
 		{
 			get => _cards;
 			set
@@ -27,11 +24,14 @@ namespace GenericPoker
 		
 		public override bool Equals(object obj)
 		{
-			if (obj is not PokerCardComponent<TEnum, TCard> other)
+			if (obj is not PokerCardComponent other)
 				return false;
 			
-			bool rankEqualRes = ((IComparable)CompRank).Equals(other.CompRank);
+			bool rankEqualRes = CompRank.Equals(other.CompRank);
 			if (!rankEqualRes) return false;
+			if (Cards == null && other.Cards == null) return true;
+			if (Cards == null || other.Cards == null) return false;
+			if (Cards.Count != other.Cards.Count) return false;
 			foreach (var (card1, card2) in Cards.Zip(other.Cards, (card1, card2) => (card1, card2)))
 			{
 				rankEqualRes = card1.Equals(card2);
@@ -41,21 +41,24 @@ namespace GenericPoker
 		}
 
 /*
-		public int GetHashCode(PokerCardComponent<TEnum, TCard> obj)
+		public int GetHashCode(PokerCardComponent obj)
 		{
 			return 1;
 		}
 */
 		
-		
-		public int CompareTo(PokerCardComponent<TEnum, TCard> other)
+		public int CompareTo(PokerCardComponent other)
 		{
 			var compareRes = 0;
 			
-			compareRes = ((IComparable)CompRank).CompareTo(other.CompRank);
+			compareRes = CompRank.CompareTo(other.CompRank);
 			if (compareRes != 0) 
 				return compareRes;
 			
+			if (_cards == null && other._cards == null) return 0;
+			if (_cards == null) return -1;
+			if (other._cards == null) return 1;
+
 			// If ComboRank are sames, check their position card power side by side.
 			foreach (var (cardA, cardB) in _cards.Zip(other.Cards, (A, B) => (A, B)))
 			{
@@ -96,7 +99,7 @@ namespace GenericPoker
 		// Ex: Ace-Spade, K-Spade, Q-Spade, can be a flushStraight, flush and straight
 		public string CompUniqueKey()
 		{
-			return string.Join("_", Cards.Select(card => card.CardStr));
+			return Cards != null ? string.Join("_", Cards.Select(card => card.CardStr)) : string.Empty;
 		}
 	}
 }

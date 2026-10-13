@@ -15,12 +15,11 @@ namespace GenericPoker
         public virtual int MinKindCount { get; set; } = 2;
         public virtual int CardCount { get; set; } = 8;
 
-        public virtual PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components)
+        public virtual PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components)
         {
             if (components == null) return PokerOverAllHandRank.Nothing;
             var list = components
-                .Where(c => c != null && c.CompType != BaseCompType.Nothing && c.CompType != BaseCompType.None)
-                .Select(c => c.CompType)
+                .Where(c => c != BaseCompType.Nothing && c != BaseCompType.None)
                 .ToList();
             if (list.Count == 0) return PokerOverAllHandRank.Nothing;
 
@@ -51,6 +50,9 @@ namespace GenericPoker
 
             return PokerOverAllHandRank.None;
         }
+
+        public virtual PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components) => AssembleHandRank(components?.Select(c => c.CompType));
+        public virtual PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerCardComponent>? components) => AssembleHandRank(components?.Select(c => c.CompRank));
 
 
     }

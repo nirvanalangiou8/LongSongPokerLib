@@ -1,4 +1,9 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using GenericPoker;
+
 namespace GenericPoker.EightCard
 {
     
@@ -116,7 +121,7 @@ namespace GenericPoker.EightCard
 		}
 
 		// 取得某 component 的代表點位 (最大張的點數，2~14)。
-		private static int RepRank(PokerCardComponent<BaseCompType, BasePokerCard> comp)
+		private static int RepRank(PokerCardComponent comp)
 		{
 			int best = 2;
 			foreach (var card in comp.Cards)
@@ -254,102 +259,129 @@ namespace GenericPoker.EightCard
 			               GetSubHandWinRate(secondBattleHand, BattleSubHandOrder.SecondHand));
 		}
 
-		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps)
+		public static void DistributeKickers(BaseSubBattleHand firstHand, BaseSubBattleHand secondHand, List<BasePokerCard> sortedKickers)
 		{
+			if (firstHand == null || secondHand == null) return;
+			if (sortedKickers == null || sortedKickers.Count == 0) return;
+
+			var kickers = new List<BasePokerCard>(sortedKickers);
+
+			if (secondHand > firstHand)
+			{
+				while (kickers.Count > 0 && firstHand.Cards.Count < 3)
+				{
+					firstHand.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+
+				while (kickers.Count > 0 && secondHand.Cards.Count < 5)
+				{
+					secondHand.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+			}
+			else
+			{
+				if (secondHand.Cards.Count < 5 && kickers.Count > 0)
+				{
+					secondHand.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+
+				while (kickers.Count > 0 && firstHand.Cards.Count < 3)
+				{
+					firstHand.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+
+				while (kickers.Count > 0 && secondHand.Cards.Count < 5)
+				{
+					secondHand.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+			}
+		}
+
+		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
+			List<PokerCardComponent> comps,
+			List<BasePokerCard>? remainingCards = null,
+			ICardRule? rule = null)
+		{
+			var effectiveRule = rule ?? EightCardRule.Default;
+			var sortedRemainingCards = remainingCards != null
+				? remainingCards.OrderByDescending(c => c.PokerCardPower).ToList()
+				: new List<BasePokerCard>();
+
 			BaseSubBattleHand bestFirst = null;
 			BaseSubBattleHand bestSecond = null;
 			double bestScore = double.NegativeInfinity;
 
-			void Consider(BaseSubBattleHand a, BaseSubBattleHand b)
+			if (comps == null || comps.Count == 0)
 			{
-				if (a == null || b == null) return;
-				// 確保後墩 (SecondHand) 不弱於前墩 (FirstHand)。
-				if (a > b) (a, b) = (b, a);
-				double score = GetSubHandWinRate(a, BattleSubHandOrder.FirstHand) + 
-				               GetSubHandWinRate(b, BattleSubHandOrder.SecondHand);
-				if (score > bestScore)
-				{
-					bestScore = score;
-					bestFirst = a;
-					bestSecond = b;
-				}
+				var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
+				var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
+				DistributeKickers(firstHand, secondHand, sortedRemainingCards);
+				return (firstHand, secondHand);
 			}
 
-			// 1. 從 comps 中選 2 個組成一墩，其餘組成另一墩。
-			var twoCompPermutations = UtilFunc.GetPermutation(comps, 2);
-			foreach (var selectedComps in twoCompPermutations)
+			int maxFrontCount = comps.Count;
+			for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
 			{
-				var remainingComps = UtilFunc.GetExcludeList(comps, selectedComps);
-				if (remainingComps.Count > 2) continue;
-
-				if (!PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
-					    (selectedComps[0].CompRank, selectedComps[1].CompRank), out var pairedRank))
-					continue;
-
-				var handA = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, pairedRank, selectedComps[0], selectedComps[1]);
-
-				if (remainingComps.Count == 2)
+				var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(comps, selectCount);
+				foreach (var group in possibleGroups)
 				{
-					if (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
-						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var otherRank))
+					var frontGroup = group.Selected;
+					var backGroup = group.Remaining;
+
+					var frontRank = effectiveRule.AssembleHandRank(frontGroup);
+					var backRank = effectiveRule.AssembleHandRank(backGroup);
+
+					// If either rank is None, it is an invalid split; skip it.
+					if (frontRank == PokerOverAllHandRank.None || backRank == PokerOverAllHandRank.None)
+						continue;
+
+					// Check if ranks are supported in power dictionary
+					if (!PokerConst.EightCardsBattleHandPowerDict.ContainsKey((BattleSubHandOrder.FirstHand, frontRank)) ||
+					    !PokerConst.EightCardsBattleHandPowerDict.ContainsKey((BattleSubHandOrder.SecondHand, backRank)))
+						continue;
+
+					var handA = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, frontRank, frontGroup.ToArray());
+					var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, backRank, backGroup.ToArray());
+
+					DistributeKickers(handA, handB, sortedRemainingCards);
+
+					// Front hand cannot be stronger than back hand
+					if (handA > handB)
+						continue;
+
+					double score = GetSubHandWinRate(handA, BattleSubHandOrder.FirstHand) +
+					               GetSubHandWinRate(handB, BattleSubHandOrder.SecondHand);
+
+					if (score > bestScore)
 					{
-						var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, otherRank, remainingComps[0], remainingComps[1]);
-						Consider(handA, handB);
+						bestScore = score;
+						bestFirst = handA;
+						bestSecond = handB;
 					}
-				}
-				else if (remainingComps.Count == 1)
-				{
-					var otherRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-					var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, otherRank, remainingComps[0]);
-					Consider(handA, handB);
-				}
-				else if (remainingComps.Count == 0)
-				{
-					var handB = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
-					Consider(handA, handB);
-				}
-			}
-
-			// 2. 從 comps 中選 1 個組成一墩，其餘組成另一墩。
-			var oneCompPermutations = UtilFunc.GetPermutation(comps, 1);
-			foreach (var selectedComps in oneCompPermutations)
-			{
-				var selectedComp = selectedComps[0];
-				var remainingComps = UtilFunc.GetExcludeList(comps, selectedComps);
-				if (remainingComps.Count > 2) continue;
-
-				var aRank = PokerHandStructure.ConvertCompRankToBattleRank(selectedComp.CompRank);
-				var handA = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, aRank, selectedComp);
-
-				if (remainingComps.Count == 2)
-				{
-					if (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
-						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var otherRank))
+					else if (Math.Abs(score - bestScore) < 1e-9 && bestFirst != null && bestSecond != null)
 					{
-						var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, otherRank, remainingComps[0], remainingComps[1]);
-						Consider(handA, handB);
+						var currentBattle = new BaseBattleHands(handA, handB);
+						var bestBattle = new BaseBattleHands(bestFirst, bestSecond);
+						if (currentBattle > bestBattle)
+						{
+							bestScore = score;
+							bestFirst = handA;
+							bestSecond = handB;
+						}
 					}
-				}
-				else if (remainingComps.Count == 1)
-				{
-					var otherRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-					var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, otherRank, remainingComps[0]);
-					Consider(handA, handB);
 				}
 			}
 
 			if (bestFirst == null || bestSecond == null)
-				return (bestFirst, bestSecond);
-
-			// bestFirst 比較時是以 SecondHand 建立的，這裡重建為 FirstHand，
-			// 以便後續配發散牌時前墩容量正確 (前墩最多 3 張)。
-			// 僅在該牌型對前墩合法 (存在於 FirstHand 牌力表) 時才轉換。
-			if (PokerConst.EightCardsBattleHandPowerDict.ContainsKey(
-				    (BattleSubHandOrder.FirstHand, bestFirst.BattleHandRank)))
 			{
-				bestFirst = new BaseSubBattleHand(
-					BattleSubHandOrder.FirstHand, bestFirst.BattleHandRank, bestFirst.Components.ToArray());
+				bestFirst = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
+				bestSecond = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
+				DistributeKickers(bestFirst, bestSecond, sortedRemainingCards);
 			}
 
 			return (bestFirst, bestSecond);

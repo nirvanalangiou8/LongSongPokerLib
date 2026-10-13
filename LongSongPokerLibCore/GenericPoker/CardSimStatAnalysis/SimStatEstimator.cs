@@ -236,7 +236,7 @@ namespace GenericPoker.CardSimStatAnalysis
             if (!candidateProcessed && remainingCards.Count == _allPokerCards.Count)
             {
 	            var newCandidateComps = new PokerHandStructure(accumHandStructures);
-	            var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+	            var newHandCandidateData = new PokerCardComponent
 		            { CompRank = BaseCompType.Nothing, Cards = remainingCards };
 	            newCandidateComps.AddComp(newHandCandidateData);
 	            results.Add(newCandidateComps);
@@ -273,7 +273,7 @@ namespace GenericPoker.CardSimStatAnalysis
 		        foreach (var kindGroup in allQualifiedGroups)
 		        {
 			        var handType = DetermineCompType(kindGroup.Count, CompType.Kind);
-			        var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+			        var newHandCandidateData = new PokerCardComponent
 				        { CompRank = handType, Cards = kindGroup };
 			        accumHandStructures.AddComp(newHandCandidateData);
 		        }
@@ -326,7 +326,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						var straight = straightCluster.Select(subList => subList[0]).ToList();
 						//accumAllRepresentedStraightCards.AddRange(straight);
 						var handType = DetermineCompType(straight.Count, CompType.FlushStraight);
-						var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+						var newHandCandidateData = new PokerCardComponent
 							{ CompRank = handType, Cards = straight };
 						accumHandStructures.AddComp(newHandCandidateData);
 						//componentAddCount++;
@@ -347,7 +347,7 @@ namespace GenericPoker.CardSimStatAnalysis
 						// copy back the original hand structure before doing partial straight flush.
 						//accumHandStructures = new PokerHandStructure(accumHandStructuresCopy);
 						var handType = DetermineCompType(flushGroup.Count, CompType.Flush);
-						var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+						var newHandCandidateData = new PokerCardComponent
 							{ CompRank = handType, Cards = flushGroup };
 						accumHandStructures.AddComp(newHandCandidateData);
 						var newRemainCards = UtilFunc.GetExcludeList(remainingCards, flushGroup,
@@ -361,7 +361,7 @@ namespace GenericPoker.CardSimStatAnalysis
 				else if (flushGroup.Count >= _minFlushCards )
 				{
 					var handType = DetermineCompType(flushGroup.Count, CompType.Flush);
-					var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+					var newHandCandidateData = new PokerCardComponent
 						{ CompRank = handType, Cards = flushGroup };
 					accumHandStructures.AddComp(newHandCandidateData);
 					var newRemainCards = UtilFunc.GetExcludeList(remainingCards, flushGroup,
@@ -405,7 +405,7 @@ namespace GenericPoker.CardSimStatAnalysis
 				var isAllSameSuit = straight.All(card => card.Suit == straight[0].Suit);
 				var compType = isAllSameSuit ? CompType.FlushStraight : CompType.Straight;
 				var handType = DetermineCompType(straight.Count, compType);
-				var newHandCandidateData = new PokerCardComponent<BaseCompType, BasePokerCard>
+				var newHandCandidateData = new PokerCardComponent
 						{ CompRank = handType, Cards = straight };
 				accumHandStructures.AddComp(newHandCandidateData);
 				var newRemainCards = UtilFunc.GetExcludeList(remainingCards, accumAllRepresentedStraightCards, new PokerCardComparer());

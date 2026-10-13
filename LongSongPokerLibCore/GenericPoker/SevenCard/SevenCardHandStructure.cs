@@ -9,8 +9,8 @@ namespace GenericPoker.SevenCard
     public class SevenCardSubBattleHand
     {
         public BattleSubHandOrder BattleSubHandOrder;
-        public List<SevenCardPokerCard> Cards = new List<SevenCardPokerCard>();
-        public PokerCardComponent<PokerCardCompRank, SevenCardPokerCard> Component;
+        public List<BasePokerCard> Cards = new List<BasePokerCard>();
+        public PokerCardComponent Component;
 
         public int HandPower
         {
@@ -21,14 +21,18 @@ namespace GenericPoker.SevenCard
             }
         }
 
-        public SevenCardSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerCardComponent<PokerCardCompRank, SevenCardPokerCard> component)
+        public SevenCardSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerCardComponent component)
         {
             BattleSubHandOrder = battleSubHandOrder;
             Component = component;
-            Cards.AddRange(component.Cards);
+            if (component.Cards != null)
+            {
+                Cards.AddRange(component.Cards);
+            }
         }
     }
 
+    /*
     public class SevenCardHands : IComparable<SevenCardHands>
     {
         private SevenCardSubBattleHand _frontHand;
@@ -47,5 +51,5 @@ namespace GenericPoker.SevenCard
             if (other == null) return 1;
             return TotalPower.CompareTo(other.TotalPower);
         }
-    }
+    }*/
 }

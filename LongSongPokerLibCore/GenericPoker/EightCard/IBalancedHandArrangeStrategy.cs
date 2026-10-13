@@ -1,11 +1,17 @@
 ﻿
 
+using System;
+using System.Collections.Generic;
+using GenericPoker;
+
 namespace GenericPoker.EightCard
 {
     public class BalancedStrategy : IBaseHandArrangeStrategy
     {
         public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
-            List<PokerCardComponent<BaseCompType, BasePokerCard>> comps)
+            List<PokerCardComponent> comps,
+            List<BasePokerCard>? remainingCards = null,
+            ICardRule? rule = null)
         {
             BaseSubBattleHand firstBattleHand = null;
             BaseSubBattleHand secondBattleHand = null;

@@ -99,7 +99,7 @@ namespace GenericPoker
         public static BaseSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleSubHandOrder which)
         {
             var best = BuildSingleHand(which, PokerOverAllHandRank.Nothing,
-                new List<PokerCardComponent<BaseCompType, BasePokerCard>>(),
+                new List<PokerCardComponent>(),
                 cards);
 
             var calc = new PokerHandCalculator();
@@ -114,7 +114,7 @@ namespace GenericPoker
                 if (comps.Count == 0) continue;
 
                 PokerOverAllHandRank rank;
-                var usedComps = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+                var usedComps = new List<PokerCardComponent>();
 
                 if (comps.Count >= 2 &&
                     (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
@@ -147,7 +147,7 @@ namespace GenericPoker
         public static BaseSubBattleHand BuildSingleHand(
             BattleSubHandOrder which,
             PokerOverAllHandRank rank,
-            List<PokerCardComponent<BaseCompType, BasePokerCard>> comps,
+            List<PokerCardComponent> comps,
             List<BasePokerCard> kickers)
         {
             var hand = new BaseSubBattleHand(which, rank, comps.ToArray());

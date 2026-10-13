@@ -13,7 +13,7 @@ namespace UnitTest
         {
             var card1 = BasePokerCard.CreateInstance("10♠️");
             var card2 = BasePokerCard.CreateInstance("10❤️");
-            var comp = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }
@@ -63,7 +63,7 @@ namespace UnitTest
 
             var card1 = BasePokerCard.CreateInstance("10♠️");
             var card2 = BasePokerCard.CreateInstance("10❤️");
-            var comp1 = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp1 = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }
@@ -72,7 +72,7 @@ namespace UnitTest
             var card3 = BasePokerCard.CreateInstance("A♠️");
             var card4 = BasePokerCard.CreateInstance("A❤️");
             var card5 = BasePokerCard.CreateInstance("A♣️");
-            var comp2 = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp2 = new PokerCardComponent
             {
                 CompRank = BaseCompType.ThreeOfKind,
                 Cards = new List<BasePokerCard> { card3, card4, card5 }
@@ -95,7 +95,7 @@ namespace UnitTest
 
             var card1 = BasePokerCard.CreateInstance("10♠️");
             var card2 = BasePokerCard.CreateInstance("10❤️");
-            var comp1 = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp1 = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }
@@ -104,13 +104,13 @@ namespace UnitTest
             var card3 = BasePokerCard.CreateInstance("A♠️");
             var card4 = BasePokerCard.CreateInstance("A❤️");
             var card5 = BasePokerCard.CreateInstance("A♣️");
-            var comp2 = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp2 = new PokerCardComponent
             {
                 CompRank = BaseCompType.ThreeOfKind,
                 Cards = new List<BasePokerCard> { card3, card4, card5 }
             };
 
-            var (first, second) = strategy.ArrangeComps(new List<PokerCardComponent<BaseCompType, BasePokerCard>> { comp1, comp2 });
+            var (first, second) = strategy.ArrangeComps(new List<PokerCardComponent> { comp1, comp2 });
 
             Assert.That(first, Is.Not.Null);
             Assert.That(second, Is.Not.Null);

@@ -12,7 +12,7 @@ namespace GenericPoker
 	// That is this class constitutied the PokerCardCompoenents, and the remaining nothing cards. The atomic/smallest component is a pair.
 	public class PokerHandStructure : IComparable<PokerHandStructure>
 	{
-		public readonly List<PokerCardComponent<BaseCompType, BasePokerCard>> Components;
+		public readonly List<PokerCardComponent> Components;
 		public List<BasePokerCard> remainingCards;
 		
 		public string FinalCompsStr = "";
@@ -29,20 +29,20 @@ namespace GenericPoker
 		// checked
 		public PokerHandStructure()
 		{
-			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+			Components = new List<PokerCardComponent>();
 			Init();
 		}
 
 		// checked
 		public PokerHandStructure(PokerHandStructure other)
 		{
-			//Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+			//Components = new List<PokerCardComponent>();
 			//Components.AddRange(other.Components);
-			Components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>(other.Components);
+			Components = new List<PokerCardComponent>(other.Components);
 			Init();
 		}
 		
-		public PokerHandStructure(List<PokerCardComponent<BaseCompType, BasePokerCard>> components)
+		public PokerHandStructure(List<PokerCardComponent> components)
 		{
 			Components = components;
 			Init();
@@ -55,7 +55,7 @@ namespace GenericPoker
 			remainingCards.Clear();
 		}
 		// checked
-		public void AddComp(PokerCardComponent<BaseCompType, BasePokerCard> newComponent)
+		public void AddComp(PokerCardComponent newComponent)
 		{
 			Components.Add(newComponent);
 		}

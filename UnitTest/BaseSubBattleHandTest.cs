@@ -13,7 +13,7 @@ namespace UnitTest
         {
             var card1 = BasePokerCard.CreateInstance("10♠️");
             var card2 = BasePokerCard.CreateInstance("10❤️");
-            var comp = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }
@@ -35,7 +35,7 @@ namespace UnitTest
         {
             var card1 = BasePokerCard.CreateInstance("10♠️");
             var card2 = BasePokerCard.CreateInstance("10❤️");
-            var comp = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }
@@ -59,7 +59,7 @@ namespace UnitTest
         {
             var card1 = BasePokerCard.CreateInstance("10♠️");
             var card2 = BasePokerCard.CreateInstance("10❤️");
-            var comp1 = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp1 = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }
@@ -87,7 +87,7 @@ namespace UnitTest
             Assert.That(hand.GetHandString(","), Is.EqualTo("A♠️,K♠️"));
 
             // Test with components and kickers
-            var comp = new PokerCardComponent<BaseCompType, BasePokerCard>
+            var comp = new PokerCardComponent
             {
                 CompRank = BaseCompType.Pair,
                 Cards = new List<BasePokerCard> { card1, card2 }

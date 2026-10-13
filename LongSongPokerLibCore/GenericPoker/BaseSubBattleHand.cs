@@ -23,8 +23,8 @@ namespace GenericPoker
             set => _battleHandRank = value;
         }
 
-        protected List<PokerCardComponent<BaseCompType, BasePokerCard>> _components;
-        public List<PokerCardComponent<BaseCompType, BasePokerCard>> Components => _components;
+        protected List<PokerCardComponent> _components;
+        public List<PokerCardComponent> Components => _components;
 
         protected int _handPower;
         public virtual int HandPower => _handPower;
@@ -35,20 +35,20 @@ namespace GenericPoker
         public BaseSubBattleHand()
         {
             _cards = new List<BasePokerCard>();
-            _components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+            _components = new List<PokerCardComponent>();
         }
 
         public BaseSubBattleHand(List<BasePokerCard> cards)
         {
             _cards = cards != null ? new List<BasePokerCard>(cards) : new List<BasePokerCard>();
-            _components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+            _components = new List<PokerCardComponent>();
         }
 
         public BaseSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerOverAllHandRank inputRank, 
-            params PokerCardComponent<BaseCompType, BasePokerCard>[] inputCombos)
+            params PokerCardComponent[] inputCombos)
         {
             _cards = new List<BasePokerCard>();
-            _components = new List<PokerCardComponent<BaseCompType, BasePokerCard>>();
+            _components = new List<PokerCardComponent>();
             if (inputCombos != null)
             {
                 foreach (var comp in inputCombos)

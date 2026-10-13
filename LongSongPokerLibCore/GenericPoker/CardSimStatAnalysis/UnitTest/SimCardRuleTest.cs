@@ -41,6 +41,44 @@ namespace UnitTest
             Assert.That(rule.AssembleHandRank(new[] { new PokerComponents(BaseCompType.ThreeCardsFlushStraight), new PokerComponents(BaseCompType.Pair) }), Is.EqualTo(PokerOverAllHandRank.Mansion));
             Assert.That(rule.AssembleHandRank(new[] { new PokerComponents(BaseCompType.Pair), new PokerComponents(BaseCompType.Pair) }), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
         }
+
+        [Test]
+        public void TestBaseRuleAssembleHandRank_PokerCardComponent()
+        {
+            var rule = new EightCardRule();
+
+            var compPair1 = new PokerCardComponent { CompRank = BaseCompType.Pair };
+            var compPair2 = new PokerCardComponent { CompRank = BaseCompType.Pair };
+            var compTrips = new PokerCardComponent { CompRank = BaseCompType.ThreeOfKind };
+            var compFlushStraight = new PokerCardComponent { CompRank = BaseCompType.ThreeCardsFlushStraight };
+
+            // Test Single Component Direct Ranks
+            Assert.That(rule.AssembleHandRank(new[] { compPair1 }), Is.EqualTo(PokerOverAllHandRank.Pair));
+            Assert.That(rule.AssembleHandRank(new[] { compTrips }), Is.EqualTo(PokerOverAllHandRank.ThreeOfKind));
+
+            // Test Composite Ranks
+            Assert.That(rule.AssembleHandRank(new[] { compTrips, compPair1 }), Is.EqualTo(PokerOverAllHandRank.FullHouse));
+            Assert.That(rule.AssembleHandRank(new[] { compFlushStraight, compPair1 }), Is.EqualTo(PokerOverAllHandRank.Mansion));
+            Assert.That(rule.AssembleHandRank(new[] { compPair1, compPair2 }), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
+            Assert.That(rule.AssembleHandRank(System.Array.Empty<PokerCardComponent>()), Is.EqualTo(PokerOverAllHandRank.Nothing));
+        }
+
+        [Test]
+        public void TestBaseRuleAssembleHandRank_BaseCompType()
+        {
+            var rule = new EightCardRule();
+
+            // Test Single Component Direct Ranks
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.Pair));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind }), Is.EqualTo(PokerOverAllHandRank.ThreeOfKind));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }), Is.EqualTo(PokerOverAllHandRank.FiveCardsStraight));
+
+            // Test Composite Ranks
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.FullHouse));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.Mansion));
+            Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
+            Assert.That(rule.AssembleHandRank(System.Array.Empty<BaseCompType>()), Is.EqualTo(PokerOverAllHandRank.Nothing));
+        }
         
         
         [Test]

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using GenericPoker;
 
 namespace GenericPoker.EightCard
 {
@@ -12,7 +13,9 @@ namespace GenericPoker.EightCard
 		}
 		
 		(BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
-			List<PokerCardComponent<BaseCompType, BasePokerCard>> comps);
+			List<PokerCardComponent> comps,
+			List<BasePokerCard>? remainingCards = null,
+			ICardRule? rule = null);
 	}
 	
 }
