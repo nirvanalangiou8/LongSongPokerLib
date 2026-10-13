@@ -133,7 +133,7 @@ namespace LongSongPokerLibCore
                 Console.Write("Cards: ");
                 Console.WriteLine(resHand.BackHand.GetHandString());
 
-                string outputCardStr = $"{resHand.FrontHand.GetHandString(",")}#{resHand.BackHand.GetHandString(",")}";
+                string outputCardStr = $"{{{resHand.FrontHand.GetHandString(",")}}}#{{{resHand.BackHand.GetHandString(",")}}}";
                 Console.WriteLine($"\nSplit: {outputCardStr}");
 
                 Console.WriteLine("\n[Space] Next hand | [D] Save debug hand | [G] Save good hand | [Q/Esc] Quit");
@@ -271,7 +271,7 @@ namespace LongSongPokerLibCore
         static void TestHandSplit()
         {
             var inputCardStr = "8❤️,7❤️,6♣️,6🔶,J❤️,K♣️,2♣️,A♣️";
-            //Expected results: "A♣️,K♣️,J❤️#6🔶,6♣️,8❤️,7❤️,2♣️";
+            //Expected results: "{A♣️,K♣️,J❤️}#{[6🔶,6♣️],8❤️,7❤️,2♣️}";
             
             var battleHands = new BaseBattleHands(inputCardStr);
             var resHand = battleHands.GetArrangeHands();

@@ -102,6 +102,7 @@ namespace GenericPoker
 			return uniqueCandidates;
 		}
 
+		/*
 		public BaseBattleHands Test8CardsTwoHandsDeploy()
 		{
 			var allCandidateComps = new List<PokerHandStructure>();
@@ -123,7 +124,7 @@ namespace GenericPoker
 			allPokerHands.Sort((c1, c2) => c2.CompareTo(c1));
 			
 			return allPokerHands[0];
-		}
+		}*/
 		
 		public List<PokerHandStructure> GetAllHandStructureCandidates()
 		{

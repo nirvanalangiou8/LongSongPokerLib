@@ -175,7 +175,7 @@ namespace GenericPoker
 			return new BaseBattleHands(firstBattleHand, secondBattleHand);
 		}
 		
-			
+		/*	
 		public BaseBattleHands ArrangeHands(IBaseHandArrangeStrategy strategy)
 		{
 			BaseSubBattleHand firstBattleHand;
@@ -239,7 +239,7 @@ namespace GenericPoker
 			
 			return new BaseBattleHands(firstBattleHand, secondBattleHand);
 		}
-
+		*/
 		
 	}
 }
