@@ -101,46 +101,6 @@ namespace GenericPoker
 			
 			return uniqueCandidates;
 		}
-
-		/*
-		public BaseBattleHands Test8CardsTwoHandsDeploy()
-		{
-			var allCandidateComps = new List<PokerHandStructure>();
-			
-			RecursiveExploreHandStructures(_allPokerCards, new PokerHandStructure(), allCandidateComps);
-			
-			foreach (var res in allCandidateComps) res.SortCompsAndClassify();
-			
-			allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
-			var uniqueCandidates = allCandidateComps.Distinct().ToList();
-			//var arrangeStrategy = new BalancedStrategy();
-			var arrangeStrategy = new IWinRateHandArrangeStrategy();
-			
-			
-			var allPokerHands = new List<BaseBattleHands>();
-			foreach (var pokerStructure in uniqueCandidates)
-				allPokerHands.Add(pokerStructure.ArrangeHands(arrangeStrategy));
-			
-			allPokerHands.Sort((c1, c2) => c2.CompareTo(c1));
-			
-			return allPokerHands[0];
-		}*/
-		
-		public List<PokerHandStructure> GetAllHandStructureCandidates()
-		{
-			var allCandidateComps = new List<PokerHandStructure>();
-			
-			RecursiveExploreHandStructures(_allPokerCards, new PokerHandStructure(), allCandidateComps);
-			
-			foreach (var res in allCandidateComps) res.SortCompsAndClassify();
-			
-			allCandidateComps.Sort((c1, c2) => c2.CompareTo(c1));
-			var uniqueCandidates = allCandidateComps.Distinct().ToList();
-
-			return uniqueCandidates;
-			
-		}
-		
 		
 		/// <summary>
 		/// Processes and generates all valid straight permutations from given card groups and jokers.
