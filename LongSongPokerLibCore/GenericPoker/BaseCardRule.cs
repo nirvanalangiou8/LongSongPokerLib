@@ -9,11 +9,15 @@ namespace GenericPoker
     {
         public static ICardRule Default { get; } = EightCardRule.Default;
 
-        public IReadOnlyList<int> SubHandsCardCount { get; protected set; } = new[] { 3, 5 };
+        public Dictionary<BattleSubHandOrder, int> SubHandsCardCount { get; set; } = new()
+        {
+            { BattleSubHandOrder.FirstHand, 3 },
+            { BattleSubHandOrder.SecondHand, 5 }
+        };
         
         public int CardCount
         {
-            get => SubHandsCardCount.Sum();
+            get => SubHandsCardCount.Values.Sum();
         }
         
         public int MinStraightCount { get;  set; } = 5;

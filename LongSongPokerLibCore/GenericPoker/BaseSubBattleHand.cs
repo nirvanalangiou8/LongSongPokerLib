@@ -11,8 +11,12 @@ namespace GenericPoker
 
         protected BattleSubHandOrder _battleSubHandOrder;
         
-        // TODO : need to fix below temopairly solution, by pass the IRule to know the subhand count count rather than hard coded here.
-        public int DesignatedCardCount { get => _battleSubHandOrder == BattleSubHandOrder.FirstHand ? 3 : 5; }
+        protected int _designatedCardCount;
+        public int DesignatedCardCount
+        {
+            get => _designatedCardCount > 0 ? _designatedCardCount : (_battleSubHandOrder == BattleSubHandOrder.FirstHand ? 3 : 5);
+            set => _designatedCardCount = value;
+        }
         
         // help me create a varaible called KickerWeighter as    
         public int KickerWeighter { get; set; }
@@ -45,15 +49,30 @@ namespace GenericPoker
             _components = new List<PokerCardComponent>();
         }
 
-        public BaseSubBattleHand(List<BasePokerCard> cards)
+        public BaseSubBattleHand(List<BasePokerCard> cards, int designatedCardCount = 0)
         {
+            _designatedCardCount = designatedCardCount;
             _cards = cards != null ? new List<BasePokerCard>(cards) : new List<BasePokerCard>();
             _components = new List<PokerCardComponent>();
         }
 
-        public BaseSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerOverAllHandRank inputRank, 
-            params PokerCardComponent[] inputCombos)
+        public BaseSubBattleHand(BattleSubHandOrder battleSubHandOrder, int designatedCardCount = 0)
         {
+            _designatedCardCount = designatedCardCount;
+            _battleSubHandOrder = battleSubHandOrder;
+            _cards = new List<BasePokerCard>();
+            _components = new List<PokerCardComponent>();
+        }
+
+        public BaseSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerOverAllHandRank inputRank, 
+            params PokerCardComponent[] inputCombos) : this(battleSubHandOrder, inputRank, 0, inputCombos)
+        {
+        }
+
+        public BaseSubBattleHand(BattleSubHandOrder battleSubHandOrder, PokerOverAllHandRank inputRank,
+            int designatedCardCount, params PokerCardComponent[] inputCombos)
+        {
+            _designatedCardCount = designatedCardCount;
             _cards = new List<BasePokerCard>();
             _components = new List<PokerCardComponent>();
             if (inputCombos != null)

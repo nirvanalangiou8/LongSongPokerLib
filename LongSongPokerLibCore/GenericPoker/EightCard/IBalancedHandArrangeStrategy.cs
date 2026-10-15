@@ -13,6 +13,12 @@ namespace GenericPoker.EightCard
             List<BasePokerCard>? remainingCards = null,
             ICardRule? rule = null)
         {
+            var effectiveRule = rule ?? EightCardRule.Default;
+            int firstCount = effectiveRule?.SubHandsCardCount != null &&
+                             effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.FirstHand, out var fc) ? fc : 3;
+            int secondCount = effectiveRule?.SubHandsCardCount != null &&
+                              effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.SecondHand, out var sc) ? sc : 5;
+
             BaseSubBattleHand firstBattleHand = null;
             BaseSubBattleHand secondBattleHand = null;
 
@@ -22,9 +28,9 @@ namespace GenericPoker.EightCard
                         (comps[1].CompRank, comps[2].CompRank), out PokerOverAllHandRank newBattleRank))
                 {
                     firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand,
-                        PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
+                        PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), firstCount, comps[0]);
                     secondBattleHand =
-                        new BaseSubBattleHand(BattleSubHandOrder.SecondHand, newBattleRank, comps[1], comps[2]);
+                        new BaseSubBattleHand(BattleSubHandOrder.SecondHand, newBattleRank, secondCount, comps[1], comps[2]);
                     if (firstBattleHand > secondBattleHand)
                     {
                         (firstBattleHand, secondBattleHand) = (secondBattleHand,
@@ -39,9 +45,9 @@ namespace GenericPoker.EightCard
             else if (comps.Count == 2)
             {
                 firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand,
-                    PokerHandStructure.ConvertCompRankToBattleRank(comps[1].CompRank), comps[1]);
+                    PokerHandStructure.ConvertCompRankToBattleRank(comps[1].CompRank), firstCount, comps[1]);
                 secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand,
-                    PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), comps[0]);
+                    PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), secondCount, comps[0]);
             }
 
             return (firstBattleHand, secondBattleHand);

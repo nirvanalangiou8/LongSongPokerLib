@@ -13,7 +13,7 @@ namespace GenericPoker
         
         int CardCount { get;}
         
-        
+        Dictionary<BattleSubHandOrder, int> SubHandsCardCount { get; }
 
         PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components);
         PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components) => AssembleHandRank(components?.Select(c => c.CompType));

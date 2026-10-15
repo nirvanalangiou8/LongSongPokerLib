@@ -56,16 +56,19 @@ namespace GenericPoker
 
         public static HandSplitResult? EvaluateBestSplitHand(IEnumerable<BasePokerCard> inputCards, ICardRule? rule = null)
         {
+            var effectiveRule = rule ?? EightCardRule.Default;
             var cards = inputCards.Select(c => c as BasePokerCard ?? BasePokerCard.CreateInstance(c.CardStr)).ToList();
-            if (cards.Count != 8)
+            if (cards.Count != effectiveRule.CardCount)
             {
                 return null;
             }
 
+            int frontCount = effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.FirstHand, out var fc) ? fc : 3;
+
             BaseSubBattleHand bestFrontHand = null, bestBackHand = null;
             double bestFront = 0, bestBack = 0, bestTotal = double.NegativeInfinity;
 
-            foreach (var frontIdx in Combinations(cards.Count, 3))
+            foreach (var frontIdx in Combinations(cards.Count, frontCount))
             {
                 var frontCards = frontIdx.Select(i => cards[i]).ToList();
                 var backCards = Enumerable.Range(0, cards.Count)
@@ -73,8 +76,8 @@ namespace GenericPoker
                     .Select(i => cards[i])
                     .ToList();
 
-                var frontHand = EvaluateBestSingleHand(frontCards, BattleSubHandOrder.FirstHand);
-                var backHand = EvaluateBestSingleHand(backCards, BattleSubHandOrder.SecondHand);
+                var frontHand = EvaluateBestSingleHand(frontCards, BattleSubHandOrder.FirstHand, effectiveRule);
+                var backHand = EvaluateBestSingleHand(backCards, BattleSubHandOrder.SecondHand, effectiveRule);
 
                 if (backHand.CompareTo(frontHand) < 0) continue;
 
@@ -96,15 +99,17 @@ namespace GenericPoker
             return new HandSplitResult(bestFrontHand, bestBackHand, bestFront, bestBack, bestTotal);
         }
 
-        public static BaseSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleSubHandOrder which)
+        public static BaseSubBattleHand EvaluateBestSingleHand(List<BasePokerCard> cards, BattleSubHandOrder which, ICardRule? rule = null)
         {
+            var effectiveRule = rule ?? EightCardRule.Default;
             var best = BuildSingleHand(which, PokerOverAllHandRank.Nothing,
                 new List<PokerCardComponent>(),
-                cards);
+                cards,
+                effectiveRule);
 
-            var calc = new PokerHandCalculator();
+            var calc = new PokerHandCalculator(effectiveRule);
             calc.SetupCards(cards);
-            calc.MinFlushStraightCards = 3;
+            calc.MinFlushStraightCards = effectiveRule.MinFlushStraightCount;
 
             var structures = calc.Test8Cards();
 
@@ -137,7 +142,7 @@ namespace GenericPoker
                 var usedSet = new HashSet<BasePokerCard>(usedComps.SelectMany(c => c.Cards));
                 var leftovers = cards.Where(c => !usedSet.Contains(c)).ToList();
 
-                var cand = BuildSingleHand(which, rank, usedComps, leftovers);
+                var cand = BuildSingleHand(which, rank, usedComps, leftovers, effectiveRule);
                 if (cand.CompareTo(best) > 0) best = cand;
             }
 
@@ -148,10 +153,14 @@ namespace GenericPoker
             BattleSubHandOrder which,
             PokerOverAllHandRank rank,
             List<PokerCardComponent> comps,
-            List<BasePokerCard> kickers)
+            List<BasePokerCard> kickers,
+            ICardRule? rule = null)
         {
-            var hand = new BaseSubBattleHand(which, rank, comps.ToArray());
-            var sorted = kickers.OrderByDescending(c => c.PokerCardPower).ToList();
+            var effectiveRule = rule ?? EightCardRule.Default;
+            int count = effectiveRule?.SubHandsCardCount != null &&
+                        effectiveRule.SubHandsCardCount.TryGetValue(which, out var c) ? c : (which == BattleSubHandOrder.FirstHand ? 3 : 5);
+            var hand = new BaseSubBattleHand(which, rank, count, comps.ToArray());
+            var sorted = kickers.OrderByDescending(k => k.PokerCardPower).ToList();
             hand.AddMinorCards(sorted);
             return hand;
         }

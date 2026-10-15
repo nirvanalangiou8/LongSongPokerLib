@@ -99,5 +99,62 @@ namespace UnitTest
             Assert.That(handWithComp.GetHandString(","), Is.EqualTo("[A♠️,K♠️],5🔶"));
             Assert.That(handWithComp.GetHandString(",", "(", ")"), Is.EqualTo("(A♠️,K♠️),5🔶"));
         }
+
+        [Test]
+        public void TestBaseSubBattleHand_DesignatedCardCount_DefaultRule()
+        {
+            var frontHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
+            var backHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
+
+            Assert.That(frontHand.DesignatedCardCount, Is.EqualTo(3));
+            Assert.That(backHand.DesignatedCardCount, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void TestBaseSubBattleHand_DesignatedCardCount_NineCardRule()
+        {
+            var rule = NineCardRule.Default;
+            int frontCount = rule.SubHandsCardCount[BattleSubHandOrder.FirstHand];
+            int backCount = rule.SubHandsCardCount[BattleSubHandOrder.SecondHand];
+            var frontHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing, frontCount);
+            var backHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing, backCount);
+
+            Assert.That(frontHand.DesignatedCardCount, Is.EqualTo(4));
+            Assert.That(backHand.DesignatedCardCount, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void TestBaseSubBattleHand_DesignatedCardCount_CustomRule()
+        {
+            var customRule = new EightCardRule
+            {
+                SubHandsCardCount = new Dictionary<BattleSubHandOrder, int>
+                {
+                    { BattleSubHandOrder.FirstHand, 2 },
+                    { BattleSubHandOrder.SecondHand, 6 },
+                    { BattleSubHandOrder.ThirdHand, 4 }
+                }
+            };
+
+            var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, customRule.SubHandsCardCount[BattleSubHandOrder.FirstHand]);
+            var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, customRule.SubHandsCardCount[BattleSubHandOrder.SecondHand]);
+            var thirdHand = new BaseSubBattleHand(BattleSubHandOrder.ThirdHand, customRule.SubHandsCardCount[BattleSubHandOrder.ThirdHand]);
+
+            Assert.That(firstHand.DesignatedCardCount, Is.EqualTo(2));
+            Assert.That(secondHand.DesignatedCardCount, Is.EqualTo(6));
+            Assert.That(thirdHand.DesignatedCardCount, Is.EqualTo(4));
+
+            var kickers = new List<BasePokerCard>
+            {
+                BasePokerCard.CreateInstance("A♠️"),
+                BasePokerCard.CreateInstance("K♠️"),
+                BasePokerCard.CreateInstance("Q♠️")
+            };
+
+            int added = firstHand.AddMinorCards(kickers);
+            Assert.That(added, Is.EqualTo(2));
+            Assert.That(firstHand.Cards.Count, Is.EqualTo(2));
+            Assert.That(kickers.Count, Is.EqualTo(1));
+        }
     }
 }

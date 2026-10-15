@@ -469,6 +469,10 @@ namespace GenericPoker.EightCard
 			ICardRule? rule = null)
 		{
 			var effectiveRule = rule ?? EightCardRule.Default;
+			int firstCount = effectiveRule?.SubHandsCardCount != null &&
+			                 effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.FirstHand, out var fc) ? fc : 3;
+			int secondCount = effectiveRule?.SubHandsCardCount != null &&
+			                  effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.SecondHand, out var sc) ? sc : 5;
 			var sortedRemainingCards = remainingCards != null
 				? remainingCards.OrderByDescending(c => c.PokerCardPower).ToList()
 				: new List<BasePokerCard>();
@@ -479,8 +483,8 @@ namespace GenericPoker.EightCard
 
 			if (comps == null || comps.Count == 0)
 			{
-				var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
-				var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
+				var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing, firstCount);
+				var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing, secondCount);
 				DistributeKickers(firstHand, secondHand, sortedRemainingCards);
 				return (firstHand, secondHand);
 			}
@@ -506,8 +510,8 @@ namespace GenericPoker.EightCard
 					    !PokerConst.EightCardsBattleHandPowerDict.ContainsKey((BattleSubHandOrder.SecondHand, backRank)))
 						continue;
 
-					var handA = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, frontRank, frontGroup.ToArray());
-					var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, backRank, backGroup.ToArray());
+					var handA = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, frontRank, firstCount, frontGroup.ToArray());
+					var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, backRank, secondCount, backGroup.ToArray());
 
 					DistributeKickers(handA, handB, sortedRemainingCards);
 
@@ -540,8 +544,8 @@ namespace GenericPoker.EightCard
 
 			if (bestFirst == null || bestSecond == null)
 			{
-				bestFirst = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
-				bestSecond = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
+				bestFirst = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing, firstCount);
+				bestSecond = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing, secondCount);
 				DistributeKickers(bestFirst, bestSecond, sortedRemainingCards);
 			}
 

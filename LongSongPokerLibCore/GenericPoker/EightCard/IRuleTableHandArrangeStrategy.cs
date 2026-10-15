@@ -13,6 +13,12 @@ namespace GenericPoker.EightCard
 			List<BasePokerCard>? remainingCards = null,
 			ICardRule? rule = null)
 		{
+			var effectiveRule = rule ?? EightCardRule.Default;
+			int firstCount = effectiveRule?.SubHandsCardCount != null &&
+			                 effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.FirstHand, out var fc) ? fc : 3;
+			int secondCount = effectiveRule?.SubHandsCardCount != null &&
+			                  effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.SecondHand, out var sc) ? sc : 5;
+
 			BaseSubBattleHand firstBattleHand = null;
 			BaseSubBattleHand secondBattleHand = null;
 
@@ -28,7 +34,7 @@ namespace GenericPoker.EightCard
 				if (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
 					    (selectedComps[0].CompRank, selectedComps[1].CompRank), out var firstRank))
 				{
-					var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, firstRank, selectedComps[0], selectedComps[1]);
+					var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, firstRank, firstCount, selectedComps[0], selectedComps[1]);
 					
 					// Process second hand
 					if (remainingComps.Count == 2)
@@ -36,7 +42,7 @@ namespace GenericPoker.EightCard
 						if (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
 							    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 						{
-							var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
+							var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0], remainingComps[1]);
 							(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
 							return (firstBattleHand, secondBattleHand);
 						}
@@ -44,7 +50,7 @@ namespace GenericPoker.EightCard
 					else if (remainingComps.Count == 1)
 					{
 						var secondRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-						var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, remainingComps[0]);
+						var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0]);
 						(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
 						return (firstBattleHand, secondBattleHand);
 					}
@@ -62,7 +68,7 @@ namespace GenericPoker.EightCard
 				if (remainingComps.Count > 2) continue;
 
 				var firstRank = PokerHandStructure.ConvertCompRankToBattleRank(selectedComp.CompRank);
-				var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, firstRank, selectedComp);
+				var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, firstRank, firstCount, selectedComp);
 
 				// Process second hand
 				if (remainingComps.Count == 2)
@@ -70,7 +76,7 @@ namespace GenericPoker.EightCard
 					if (PokerConst.EightCardsCompComboToBattleRankDict.TryGetValue(
 						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 					{
-						var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, remainingComps[0], remainingComps[1]);
+						var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0], remainingComps[1]);
 						(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
 						return (firstBattleHand, secondBattleHand);
 					}
@@ -78,7 +84,7 @@ namespace GenericPoker.EightCard
 				else if (remainingComps.Count == 1)
 				{
 					var secondRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
-					var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, remainingComps[0]);
+					var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0]);
 					(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
 					return (firstBattleHand, secondBattleHand);
 				}
