@@ -7,10 +7,13 @@ namespace GenericPoker
     public interface ICardRule
     {
         int MinStraightCount { get; set; }
-        int MinFlushCount { get; set; }
-        int MinFlushStraightCount { get; set; }
-        int MinKindCount { get; set; }
-        int CardCount { get; set; }
+        int MinFlushCount { get; set;}
+        int MinFlushStraightCount { get; set;}
+        int MinKindCount { get; set;}
+        
+        int CardCount { get;}
+        
+        
 
         PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components);
         PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components) => AssembleHandRank(components?.Select(c => c.CompType));

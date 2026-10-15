@@ -3,7 +3,7 @@ using GenericPoker.CardSimStatAnalysis;
 
 namespace GenericPoker
 {
-    public class NineCardRule : BaseCardRule
+    public sealed class NineCardRule : BaseCardRule
     {
         public static new NineCardRule Default { get; } = new();
 
@@ -13,7 +13,7 @@ namespace GenericPoker
             MinFlushCount = 5;
             MinFlushStraightCount = 3;
             MinKindCount = 2;
-            CardCount = 9;
+            SubHandsCardCount = new[] { 4, 5 };
         }
         /*
         public override PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components)

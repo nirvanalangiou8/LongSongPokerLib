@@ -20,20 +20,20 @@ namespace GenericPoker
 
 		private IBaseHandArrangeStrategy _strategy;
 		
-		// checked
+		
 		private void Init()
 		{
 			remainingCards = new List<BasePokerCard>();
 		}
 		
-		// checked
+		
 		public PokerHandStructure()
 		{
 			Components = new List<PokerCardComponent>();
 			Init();
 		}
 
-		// checked
+		
 		public PokerHandStructure(PokerHandStructure other)
 		{
 			//Components = new List<PokerCardComponent>();
@@ -48,26 +48,25 @@ namespace GenericPoker
 			Init();
 		}
 		
-		// checked
+		
 		public void Clear()
 		{
 			Components.Clear();
 			remainingCards.Clear();
 		}
-		// checked
+		
 		public void AddComp(PokerCardComponent newComponent)
 		{
 			Components.Add(newComponent);
 		}
 		
-		// checked
+		
 		public void RemoveLast(int count = 1)
 		{
 			Components.RemoveRange(Components.Count - count, count);
 		}
 
 		
-		// checked
 		public void SortCompsAndClassify()
 		{
 			Components.Sort((c1, c2) => c2.CompareTo(c1));
@@ -81,14 +80,13 @@ namespace GenericPoker
 			FinalCompsStr = string.Join("_", compTypeCountsList);
 		}
 		
-		// checked
+		
 		public void SetRemainingCards(List<BasePokerCard> inputRemaining)
 		{
 			remainingCards.AddRange(inputRemaining);
 		}
 		
 		
-		// checked
 		[SuppressMessage("ReSharper.DPA", "DPA0002: Excessive memory allocations in SOH")]
 		public int CompareTo(PokerHandStructure other)
 		{
@@ -112,7 +110,6 @@ namespace GenericPoker
 			}
 		}
 		
-		// checked
 		public override bool Equals(object obj)
 		{
 			if (obj is not PokerHandStructure other)
@@ -136,7 +133,6 @@ namespace GenericPoker
 		{
 			return FinalCompsStr?.GetHashCode() ?? 0;
 		}
-
 		
 		public static PokerOverAllHandRank ConvertCompRankToBattleRank(BaseCompType compType)
 		{
@@ -149,97 +145,6 @@ namespace GenericPoker
 			}
 			return PokerOverAllHandRank.Nothing;
 		}
-		
-		public BaseBattleHands ArrangeHands_old(IBaseHandArrangeStrategy strategy)
-		{
-			BaseSubBattleHand firstBattleHand;
-			BaseSubBattleHand secondBattleHand;
-			
-			var sortedRemainingCards = remainingCards.OrderByDescending(item => item.PokerCardPower).ToList();
-			
-			(firstBattleHand, secondBattleHand) = strategy.ArrangeComps(Components);
-
-			//var firstCardList = remainingCards.Take(1).ToList();
-			// The minor cards assigned is to place the largest card in secondHand first to ensure second is larger than first
-			// The fill the firsthand with minor cards until it reach the maximum card for first hand (regularly it's 3)
-			// If there are remaining, assign back to second hand.
-			var newRemainingCards = secondBattleHand.AddMinorCards(sortedRemainingCards, 1);
-			newRemainingCards = firstBattleHand.AddMinorCards(newRemainingCards);
-			newRemainingCards = secondBattleHand.AddMinorCards(newRemainingCards);
-
-			if (newRemainingCards.Count > 0)
-			{
-				Console.WriteLine("Fatal errors");
-			}	
-			
-			return new BaseBattleHands(firstBattleHand, secondBattleHand);
-		}
-		
-		/*	
-		public BaseBattleHands ArrangeHands(IBaseHandArrangeStrategy strategy)
-		{
-			BaseSubBattleHand firstBattleHand;
-			BaseSubBattleHand secondBattleHand;
-			
-			var sortedRemainingCards = remainingCards.OrderByDescending(item => item.PokerCardPower).ToList();
-			
-			switch (Components.Count)
-			{
-				case 4: // four pairs
-					// Always put first and last on second hand, and second and third on the first hand.
-					// Process FrontHand two pairs
-					//var mergedCards = Components[1].Cards.Concat(Components[2].Cards).ToList();
-					var newBattleRank =
-						PokerConst.EightCardsCompComboToBattleRankDict[(BaseCompType.Pair, BaseCompType.Pair)];
-					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, newBattleRank, Components[1], Components[2]);
-					
-					
-					// process BackHand two pairs
-					//mergedCards = Components[0].Cards.Concat(Components[3].Cards).ToList();
-					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, newBattleRank, Components[0], Components[3]);
-
-					break;
-				case 3:
-				case 2:
-					(firstBattleHand, secondBattleHand) = strategy.ArrangeComps(Components);
-
-					break;
-				case 1:
-					// Add first hand
-					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
-					
-					// Add second Hand
-					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, ConvertCompRankToBattleRank(Components[0].CompRank), Components[0]);
-					break;
-				case 0: // Nothing for whole 8 cards
-					// Add first hand
-					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
-					// Add second Hand
-					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
-					break;
-				default:
-					firstBattleHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing);
-					// Add second Hand
-					secondBattleHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing);
-					break;
-			}
-
-			//var firstCardList = remainingCards.Take(1).ToList();
-			// The minor cards assigned is to place the largest card in secondHand first to ensure second is larger than first
-			// The fill the firsthand with minor cards until it reach the maximum card for first hand (regularly it's 3)
-			// If there are remaining, assign back to second hand.
-			var newRemainingCards = secondBattleHand.AddMinorCards(sortedRemainingCards, 1);
-			newRemainingCards = firstBattleHand.AddMinorCards(newRemainingCards);
-			newRemainingCards = secondBattleHand.AddMinorCards(newRemainingCards);
-
-			if (newRemainingCards.Count > 0)
-			{
-				Console.WriteLine("Fatal errors");
-			}	
-			
-			return new BaseBattleHands(firstBattleHand, secondBattleHand);
-		}
-		*/
 		
 	}
 }

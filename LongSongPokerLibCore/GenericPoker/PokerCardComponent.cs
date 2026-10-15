@@ -34,7 +34,7 @@ namespace GenericPoker
 			if (Cards.Count != other.Cards.Count) return false;
 			foreach (var (card1, card2) in Cards.Zip(other.Cards, (card1, card2) => (card1, card2)))
 			{
-				rankEqualRes = card1.Equals(card2);
+				rankEqualRes = card1.Equivelent(card2);
 				if (!rankEqualRes) return rankEqualRes;
 			}
 			return true;

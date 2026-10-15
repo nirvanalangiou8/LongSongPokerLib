@@ -18,7 +18,7 @@ namespace GenericPoker
 		private PokerRankTypes _bestRank;
 		private ICardRule _rule;
 		
-	public List<BasePokerCard> AllPokerCards => _allPokerCards;
+		public List<BasePokerCard> AllPokerCards => _allPokerCards;
 		
 		
 		public ICardRule Rule

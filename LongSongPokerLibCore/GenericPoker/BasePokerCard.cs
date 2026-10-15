@@ -238,6 +238,20 @@ namespace GenericPoker
 			return (numberA == numberB) && (_suit == other._suit);
 		}
 		
+		public bool Equivelent(object obj)
+		{
+			if (obj is not BasePokerCard other)
+				return false;
+			//bool ret;
+			var numberA = Number;
+			var numberB = other.Number;
+			
+			if (this is AcePokerCard) numberA = PokerConst.AceBigNumber;
+			if (other is AcePokerCard) numberB = PokerConst.AceBigNumber;
+			
+			return numberA == numberB;
+		}
+		
 		public override int GetHashCode()
 		{
 

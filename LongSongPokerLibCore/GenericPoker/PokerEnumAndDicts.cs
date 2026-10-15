@@ -3,19 +3,6 @@ using System.Collections.Generic;
 
 namespace GenericPoker
 {
-	/*
-	public enum PokerBitTypes
-	{
-		BitPair = 0b_0000_0001,
-		BitTwoPair = 0b_0000_0010,
-		BitThreeOfKind = 0b_0000_0100,
-		BitStraight = 0b_0000_1000,
-		BitFlush = 0b_0001_0000,
-		BitFourOfKind = 0b_0010_0000,
-		BitFiveOfKind = 0b_0100_0000
-	}*/
-
-
 	public enum BaseCompType
 	{
 		Nothing,
@@ -100,12 +87,20 @@ namespace GenericPoker
 		FlushStraight,
 	}
 	
-	public enum BattleSubHandOrder
+	/*public enum BattleSubHandOrder
 	{
 		FirstHand = 3,
 		SecondHand = 5,
-	}
+	}*/
 
+	public enum BattleSubHandOrder
+	{
+		FirstHand,
+		SecondHand,
+		ThirdHand,
+		FourthHand
+	}
+	
 	
 	
 	public enum PokerOverAllHandRank
@@ -360,10 +355,19 @@ namespace GenericPoker
 				{ "9_FlushStraight", BaseCompType.NineCardsFlushStraight },
 				{ "10_FlushStraight", BaseCompType.TenCardsFlushStraight }
 			};
-        
-		
 	}
 	
-		
 }
+
+/*
+public enum PokerBitTypes
+{
+	BitPair = 0b_0000_0001,
+	BitTwoPair = 0b_0000_0010,
+	BitThreeOfKind = 0b_0000_0100,
+	BitStraight = 0b_0000_1000,
+	BitFlush = 0b_0001_0000,
+	BitFourOfKind = 0b_0010_0000,
+	BitFiveOfKind = 0b_0100_0000
+}*/
 

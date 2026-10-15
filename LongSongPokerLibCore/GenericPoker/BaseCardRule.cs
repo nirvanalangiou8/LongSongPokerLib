@@ -9,11 +9,18 @@ namespace GenericPoker
     {
         public static ICardRule Default { get; } = EightCardRule.Default;
 
-        public virtual int MinStraightCount { get; set; } = 5;
-        public virtual int MinFlushCount { get; set; } = 5;
-        public virtual int MinFlushStraightCount { get; set; } = 3;
-        public virtual int MinKindCount { get; set; } = 2;
-        public virtual int CardCount { get; set; } = 8;
+        public IReadOnlyList<int> SubHandsCardCount { get; protected set; } = new[] { 3, 5 };
+        
+        public int CardCount
+        {
+            get => SubHandsCardCount.Sum();
+        }
+        
+        public int MinStraightCount { get;  set; } = 5;
+        public int MinFlushCount { get;  set; } = 5;
+        public int MinFlushStraightCount { get;  set; } = 3;
+        public int MinKindCount { get;  set; } = 2;
+         
 
         public virtual PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components)
         {

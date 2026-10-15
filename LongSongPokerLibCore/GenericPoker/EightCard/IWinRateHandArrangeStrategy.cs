@@ -259,7 +259,167 @@ namespace GenericPoker.EightCard
 			               GetSubHandWinRate(secondBattleHand, BattleSubHandOrder.SecondHand));
 		}
 
+		
 		public static void DistributeKickers(BaseSubBattleHand firstHand, BaseSubBattleHand secondHand, List<BasePokerCard> sortedKickers)
+		{
+			if (firstHand == null || secondHand == null) return;
+			DistributeKickers(new[] { firstHand, secondHand }, sortedKickers);
+		}
+		
+
+		public static void DistributeKickers(IList<BaseSubBattleHand> subHands, List<BasePokerCard> sortedKickers)
+		{
+			if (subHands == null || subHands.Count == 0) return;
+			if (sortedKickers == null || sortedKickers.Count == 0) return;
+
+			var kickers = new List<BasePokerCard>(sortedKickers);
+
+			int currentFindIndex = 0;
+			int lastIndex = subHands.Count - 1;
+			while (currentFindIndex < lastIndex)
+			{
+				var current = subHands[currentFindIndex];
+				var next = subHands[currentFindIndex + 1];
+				
+
+				// 2. 條件 A：前後兩手皆為 Nothing（散牌狀況，大 kicker 必須往後給）
+				bool bothNothing = current.BattleHandRank == PokerOverAllHandRank.Nothing 
+				                   && next.BattleHandRank == PokerOverAllHandRank.Nothing;
+
+				// 3. 條件 B：前後兩手強度完全平手（使用 class comparator 比對）
+				// 若使用 CompareTo: current.CompareTo(next) == 0
+				bool areEqual = current == next; 
+
+				// 若滿足「皆為 Nothing」或「強度完全平手」，代表當前手無法承受 kicker，往下一手推進
+				if (bothNothing || areEqual)
+				{
+					currentFindIndex++;
+				}
+				else
+				{
+					// 後手已嚴格大於前手 (next > current)，當前手有保護傘，可安全作為起始墊牌點
+					break;
+				}
+			}
+
+			int startIndex = currentFindIndex;
+		
+			
+			
+			/*// 1. Search the starting point to distribute:
+			// Plan an array to store the weighting. The first hand adds 0 weight, the second hand adds 1 weight, the third hand adds 2 weight, etc.
+			// Then if the sub hand has rank >= pair, add one extra weight.
+			// Find the largest weight point slot (subhand) to start with.*/
+			
+			/*
+			int startIndex = Enumerable.Range(0, subHands.Count)
+				.MaxBy(i =>
+				{
+					
+					// 牌型 > Pair 歸零 (0)；其餘牌型賦予 1-based 位置權重 (i + 1)
+					int weight = subHands[i].BattleHandRank >= PokerOverAllHandRank.Pair ? -i : i ;
+
+					// 回傳 (Weight, Index)：確保相同權重時結果唯一（由較大的 index 勝出）
+					return (Weight: weight, Index: i);
+					
+				});*/
+			
+
+			int moveStep = -1;
+			bool firstTimeDistribute = true;
+			bool hitFirstHandDeadEnd = false;
+			int currentIndex = startIndex;
+			while (kickers.Count > 0)
+			{
+				if (hitFirstHandDeadEnd || currentIndex == 0)
+				{
+					int numAdd = subHands[currentIndex].AddMinorCards(kickers);
+					
+					// distributed as many as possible
+					if (currentIndex == 0)
+					{
+						hitFirstHandDeadEnd = true;
+						moveStep = 1;
+					}
+				}
+				else
+				{
+					int numAdd = subHands[currentIndex].AddMinorCards(kickers, 1);
+				}
+
+				currentIndex += moveStep;
+			}
+			
+			
+		}
+
+		/*public static void DistributeKickers_old(BaseSubBattleHand firstHand, BaseSubBattleHand secondHand, List<BasePokerCard> sortedKickers)
+		 
+		 int GetTargetCapacity(int idx)
+			{
+				var h = subHands[idx];
+				if (h == null) return 0;
+				if ((int)h.BattleSubHandOrder > 0) return (int)h.BattleSubHandOrder;
+				return idx == 0 ? 3 : 5;
+			}
+
+			void PlaceOneCard(int idx)
+			{
+				if (kickers.Count == 0) return;
+				var h = subHands[idx];
+				if (h == null) return;
+				int cap = GetTargetCapacity(idx);
+				if (h.Cards.Count < cap)
+				{
+					h.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+			}
+
+			void FillHandUntilFull(int idx)
+			{
+				var h = subHands[idx];
+				if (h == null) return;
+				int cap = GetTargetCapacity(idx);
+				while (kickers.Count > 0 && h.Cards.Count < cap)
+				{
+					h.Cards.Add(kickers[0]);
+					kickers.RemoveAt(0);
+				}
+			}
+
+			// 2. When choose start point, always place one card from distributed pool to the subhand,
+			// but if the subhand is the first hand, always fill the card until that subhand is full for designated hand count.
+			// 3. Then move to first hand direction, and if it hit the dead end of first hand, then bounce back and make the moving direction in opposite way.
+			// 4. If ever hit the deadend when travel to distributed, after that always fill/distributed hand until its full.
+			if (startIndex == 0)
+			{
+				FillHandUntilFull(0);
+				for (int i = 1; i < subHands.Count && kickers.Count > 0; i++)
+				{
+					FillHandUntilFull(i);
+				}
+			}
+			else
+			{
+				PlaceOneCard(startIndex);
+
+				for (int i = startIndex - 1; i > 0 && kickers.Count > 0; i--)
+				{
+					PlaceOneCard(i);
+				}
+
+				if (kickers.Count > 0)
+				{
+					FillHandUntilFull(0);
+				}
+
+				for (int i = 1; i < subHands.Count && kickers.Count > 0; i++)
+				{
+					FillHandUntilFull(i);
+				}
+			}
+		 
 		{
 			if (firstHand == null || secondHand == null) return;
 			if (sortedKickers == null || sortedKickers.Count == 0) return;
@@ -300,8 +460,9 @@ namespace GenericPoker.EightCard
 					kickers.RemoveAt(0);
 				}
 			}
-		}
-
+		}*/
+		
+		
 		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
 			List<PokerCardComponent> comps,
 			List<BasePokerCard>? remainingCards = null,

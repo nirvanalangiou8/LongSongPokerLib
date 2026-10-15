@@ -44,7 +44,7 @@ namespace EightCardsProbTest
             new object[]
             {
                 "8♠️,8♣️,8❤️,8🔶,9❤️,9🔶,5♣️,5🔶", 
-                "FourOfKind_Pair*2:1,ThreeOfKind_Pair*2:4,Pair*4:6"
+                "FourOfKind_Pair*2:1,ThreeOfKind_Pair*2:1,Pair*4:1"
             },
             new object[]
             {

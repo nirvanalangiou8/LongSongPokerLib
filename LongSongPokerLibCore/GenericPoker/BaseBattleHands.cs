@@ -97,12 +97,6 @@ namespace GenericPoker
             }
             return new BaseBattleHands(firstBattleHand, secondBattleHand);
         }
-
-        /*public BaseBattleHands GetArrangedHands()
-        {
-            return GetArrangeHands();
-        }*/
-        
         
         public int CompareTo(BaseBattleHands other)
         {

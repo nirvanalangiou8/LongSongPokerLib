@@ -10,6 +10,13 @@ namespace GenericPoker
         public List<BasePokerCard> Cards => _cards;
 
         protected BattleSubHandOrder _battleSubHandOrder;
+        
+        // TODO : need to fix below temopairly solution, by pass the IRule to know the subhand count count rather than hard coded here.
+        public int DesignatedCardCount { get => _battleSubHandOrder == BattleSubHandOrder.FirstHand ? 3 : 5; }
+        
+        // help me create a varaible called KickerWeighter as    
+        public int KickerWeighter { get; set; }
+        
         public BattleSubHandOrder BattleSubHandOrder
         {
             get => _battleSubHandOrder;
@@ -89,11 +96,42 @@ namespace GenericPoker
             return string.Join(separator, Cards.Select(card => card.CardStr));
         }
 
-        public virtual List<BasePokerCard> AddMinorCards(List<BasePokerCard> remainingCards, int count = int.MaxValue)
+        // add minor cards, and return the number of cards added. If count is not assigned, add as manay as there still has
+        // room and also the inputCards still have those amount of cars.
+        // If count is assigned, add those count but still make sure there still has room and also enough count in inputCards.
+        public virtual int AddMinorCards(List<BasePokerCard>? inputCards, int count = int.MaxValue)
         {
-            if (remainingCards == null) return new List<BasePokerCard>();
-            var retCards = new List<BasePokerCard>(remainingCards);
+            var actualTakeCount = 0;
+
+            if (inputCards == null || inputCards.Count == 0 || count <= 0)
+            {
+                return actualTakeCount;
+            }
+
+            int remainingCapacity = Math.Max(0, DesignatedCardCount - Cards.Count);
+            if (remainingCapacity == 0)
+            {
+                return actualTakeCount;
+            }
+
+            actualTakeCount = Math.Min(Math.Min(count, remainingCapacity), inputCards.Count);
+
+            if (actualTakeCount > 0)
+            {
+                Cards.AddRange(inputCards.GetRange(0, actualTakeCount));
+                inputCards.RemoveRange(0, actualTakeCount);
+            }
+
+            return actualTakeCount;
+        }
+        
+        /*
+        public virtual int AddMinorCards(List<BasePokerCard> inputCards, int count = int.MaxValue)
+        {
             int added = 0;
+            if (inputCards == null) return added;
+            var retCards = new List<BasePokerCard>(inputCards);
+
             int maxCards = (int)_battleSubHandOrder > 0 ? (int)_battleSubHandOrder : int.MaxValue;
             while (retCards.Count > 0 && Cards.Count < maxCards && added < count)
             {
@@ -101,8 +139,8 @@ namespace GenericPoker
                 retCards.RemoveAt(0);
                 added++;
             }
-            return retCards;
-        }
+            return added;
+        }*/
 
         public virtual int CompareTo(BaseSubBattleHand? other)
         {
@@ -155,17 +193,18 @@ namespace GenericPoker
         {
             if (obj is BaseSubBattleHand other)
             {
+                /*
                 if (BattleHandRank != other.BattleHandRank) return false;
                 if (_components.Count != other._components.Count) return false;
                 for (int i = 0; i < _components.Count; i++)
                 {
                     if (!_components[i].Equals(other._components[i])) return false;
-                }
+                }*/
 
                 if (Cards.Count != other.Cards.Count) return false;
                 for (int i = 0; i < Cards.Count; i++)
                 {
-                    if (!Cards[i].Equals(other.Cards[i])) return false;
+                    if (!Cards[i].Equivelent(other.Cards[i])) return false;
                 }
 
                 return true;

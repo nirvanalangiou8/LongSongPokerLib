@@ -13,7 +13,7 @@ namespace GenericPoker
             MinFlushCount = 5;
             MinFlushStraightCount = 3;
             MinKindCount = 2;
-            CardCount = 8;
+            SubHandsCardCount = new[] { 3, 5 };
         }
         /*
         public override PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components)
