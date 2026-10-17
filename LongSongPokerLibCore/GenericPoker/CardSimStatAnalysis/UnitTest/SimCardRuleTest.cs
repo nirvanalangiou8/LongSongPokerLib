@@ -18,7 +18,7 @@ namespace UnitTest
             Assert.That(eightCardRule.MinKindCount, Is.EqualTo(2));
             Assert.That(eightCardRule.CardCount, Is.EqualTo(8));
 
-            var nineCardRule = new NineCardTwoHandRule();
+            var nineCardRule = new NineCardTwoHandsRule();
             Assert.That(nineCardRule.MinStraightCount, Is.EqualTo(5));
             Assert.That(nineCardRule.MinFlushCount, Is.EqualTo(5));
             Assert.That(nineCardRule.MinFlushStraightCount, Is.EqualTo(3));
@@ -83,14 +83,14 @@ namespace UnitTest
         [Test]
         public void TestAssembleHandRankWithSubHandOrder()
         {
-            var nineCardRule = new NineCardTwoHandRule();
+            var nineCardRule = new NineCardTwoHandsRule();
             // First hand in NineCardRule cannot have > 1 component
             Assert.That(nineCardRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Pair));
             Assert.That(nineCardRule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
             // Second hand in NineCardRule allows 2 components (TwoPairs)
             Assert.That(nineCardRule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
 
-            var threeHandRule = new NineCardThreeHandRule();
+            var threeHandRule = new NineCardThreeHandsRule();
             // 1-card Front hand cannot have any multi-card components
             Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Pair));
             Assert.That(threeHandRule.AssembleHandRank(System.Array.Empty<BaseCompType>(), BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Nothing));

@@ -94,7 +94,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData9CardsPath), tempOutputPath, new NineCardTwoHandRule());
+                PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData9CardsPath), tempOutputPath, new NineCardTwoHandsRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
 
@@ -127,7 +127,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                var stats = PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData9CardsPath), tempOutputPath, new NineCardThreeHandRule());
+                var stats = PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData9CardsPath), tempOutputPath, new NineCardThreeHandsRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
                 Assert.That(stats.ContainsKey(BattleSubHandOrder.FirstHand), Is.True);

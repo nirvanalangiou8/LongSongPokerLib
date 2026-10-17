@@ -21,7 +21,7 @@ namespace GenericPoker.CardSimStatAnalysis
                 return new Dictionary<BattleSubHandOrder, Dictionary<PokerOverAllHandRank, double>>();
             }
 
-            var effectiveRule = rule ?? ((inputPath.Contains("9cards") || inputPath.Contains("9_cards") || inputPath.Contains("9card")) ? NineCardTwoHandRule.Default : EightCardRule.Default);
+            var effectiveRule = rule ?? ((inputPath.Contains("9cards") || inputPath.Contains("9_cards") || inputPath.Contains("9card")) ? NineCardTwoHandsRule.Default : EightCardRule.Default);
             var slots = effectiveRule.SubHandSlots;
             int slotCount = slots.Count;
 
@@ -341,7 +341,7 @@ namespace GenericPoker.CardSimStatAnalysis
                 {
                     var slot = slots[slotIdx];
                     string posName = slot.Order.ToString();
-                    //GetPositionName(slotIdx, slotCount, slot.Order);
+                    
                     var dict = handStats.TryGetValue(slot.Order, out var stats) ? stats : new Dictionary<PokerOverAllHandRank, double>();
 
                     var sorted = dict.OrderByDescending(e => (int)e.Key).ToList();

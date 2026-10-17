@@ -33,7 +33,7 @@ namespace UnitTest
         [Test]
         public void TestNineCardTwoHandRuleTopology()
         {
-            var rule = NineCardTwoHandRule.Default;
+            var rule = NineCardTwoHandsRule.Default;
             Assert.That(rule.CardCount, Is.EqualTo(9));
             Assert.That(rule.TotalCardCount, Is.EqualTo(9));
             Assert.That(rule.SubHandSlots.Count, Is.EqualTo(2));
@@ -50,7 +50,7 @@ namespace UnitTest
         [Test]
         public void TestNineCardThreeHandRuleTopology()
         {
-            var rule = NineCardThreeHandRule.Default;
+            var rule = NineCardThreeHandsRule.Default;
             Assert.That(rule.CardCount, Is.EqualTo(9));
             Assert.That(rule.TotalCardCount, Is.EqualTo(9));
             Assert.That(rule.SubHandSlots.Count, Is.EqualTo(3));

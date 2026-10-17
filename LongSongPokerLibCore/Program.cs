@@ -33,8 +33,8 @@ namespace LongSongPokerLibCore
                     {
                         ICardRule selectedRule = args[3] switch
                         {
-                            "3" or "three" or "9_3" or "nine_three" => NineCardThreeHandRule.Default,
-                            "9" or "9_2" or "nine_two" => NineCardTwoHandRule.Default,
+                            "3" or "three" or "9_3" or "nine_three" => NineCardThreeHandsRule.Default,
+                            "9" or "9_2" or "nine_two" => NineCardTwoHandsRule.Default,
                             _ => EightCardRule.Default
                         };
                         PostSimStatHandSplitProbAna.Run(args[1], args[2], selectedRule);
@@ -63,8 +63,8 @@ namespace LongSongPokerLibCore
                         string threehands9 = Path.Combine(dataDir, "threehands_prob_9cards.csv");
 
                         PostSimStatHandSplitProbAna.Run(stats8, twohands8, new EightCardRule());
-                        PostSimStatHandSplitProbAna.Run(stats9, twohands9, new NineCardTwoHandRule());
-                        PostSimStatHandSplitProbAna.Run(stats9, threehands9, new NineCardThreeHandRule());
+                        PostSimStatHandSplitProbAna.Run(stats9, twohands9, new NineCardTwoHandsRule());
+                        PostSimStatHandSplitProbAna.Run(stats9, threehands9, new NineCardThreeHandsRule());
                     }
                     break;
 
@@ -136,7 +136,7 @@ namespace LongSongPokerLibCore
                 }
                 else if (key.Key == ConsoleKey.D2 || key.Key == ConsoleKey.NumPad2 || key.KeyChar == '2')
                 {
-                    rule = NineCardThreeHandRule.Default;
+                    rule = NineCardThreeHandsRule.Default;
                     cardCount = 9;
                     modeName = "9card_3hands";
                     Console.WriteLine("2 (9card_3hands)");

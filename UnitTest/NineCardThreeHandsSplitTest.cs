@@ -104,7 +104,7 @@ namespace UnitTest
         [Test, TestCaseSource(nameof(NineCardThreeHandTestCases))]
         public void TestNineCardThreeHandCases(string inputCardStr, string expectedResult)
         {
-            var rule = NineCardThreeHandRule.Default;
+            var rule = NineCardThreeHandsRule.Default;
             var battleHands = new BaseBattleHands(inputCardStr, rule);
             var result = battleHands.GetArrangeHands();
 

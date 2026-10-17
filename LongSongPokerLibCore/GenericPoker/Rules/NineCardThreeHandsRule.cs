@@ -2,11 +2,11 @@
 
 namespace GenericPoker
 {
-    public class NineCardThreeHandRule : BaseCardRule
+    public class NineCardThreeHandsRule : BaseCardRule
     {
-        public static new NineCardThreeHandRule Default { get; } = new();
+        public static new NineCardThreeHandsRule Default { get; } = new();
 
-        public NineCardThreeHandRule()
+        public NineCardThreeHandsRule()
         {
             MinStraightCount = 5;
             MinFlushCount = 5;

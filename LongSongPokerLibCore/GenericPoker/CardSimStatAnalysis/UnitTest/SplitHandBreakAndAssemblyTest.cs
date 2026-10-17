@@ -192,7 +192,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("NineCardsFlushStraight", "[Nothing,NineCardsFlushStraight],[ThreeCardsFlushStraight,SixCardsFlushStraight],[FourCardsFlushStraight,FiveCardsFlushStraight]")]
         public void Test9CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            var actual = SplitHandToSolutionStrings(handName, new NineCardTwoHandRule());
+            var actual = SplitHandToSolutionStrings(handName, new NineCardTwoHandsRule());
             var expected = ParseExpectedSolutions(expectedSolutions);
             Assert.That(actual, Is.EquivalentTo(expected), $"Mismatch for 9-card hand: {handName}");
         }
@@ -213,7 +213,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("ThreeCardsFlushStraight_Pair", "[Nothing,Nothing,Mansion],[Nothing,Pair,ThreeCardsFlushStraight]")]
         public void Test9CardsThreeHandSplitBreakAndAssembly(string handName, string expectedSolutions)
         {
-            var actual = SplitHandToSolutionStrings(handName, new NineCardThreeHandRule());
+            var actual = SplitHandToSolutionStrings(handName, new NineCardThreeHandsRule());
             var expected = ParseExpectedSolutions(expectedSolutions);
             Assert.That(actual, Is.EquivalentTo(expected), $"Mismatch for 9-card 3-hand: {handName}");
         }
