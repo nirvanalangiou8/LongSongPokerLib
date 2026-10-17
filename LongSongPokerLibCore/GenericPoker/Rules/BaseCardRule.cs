@@ -7,6 +7,7 @@ namespace GenericPoker
 {
     public abstract class BaseCardRule : ICardRule
     {
+
         public static ICardRule Default { get; } = EightCardRule.Default;
 
         private List<SubHandSlotConfig> _subHandSlots = new()
@@ -52,6 +53,8 @@ namespace GenericPoker
         public int MinFlushCount { get;  set; } = 5;
         public int MinFlushStraightCount { get;  set; } = 3;
         public int MinKindCount { get;  set; } = 2;
+        
+        public string WinRateTableFile { get; set; }
          
 
         public virtual PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components, BattleSubHandOrder? subHandOrder = null)

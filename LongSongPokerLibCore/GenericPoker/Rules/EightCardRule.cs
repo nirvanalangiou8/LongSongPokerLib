@@ -13,6 +13,7 @@ namespace GenericPoker
             MinFlushCount = 5;
             MinFlushStraightCount = 3;
             MinKindCount = 2;
+            WinRateTableFile = "prob_8cards_twohands";
             SubHandSlots = new List<SubHandSlotConfig>
             {
                 new(BattleSubHandOrder.FirstHand, 3, "Front"),
