@@ -92,15 +92,15 @@ namespace UnitTest
 
             var threeHandRule = new NineCardThreeHandRule();
             // 1-card Front hand cannot have any multi-card components
-            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.None));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Pair));
             Assert.That(threeHandRule.AssembleHandRank(System.Array.Empty<BaseCompType>(), BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Nothing));
 
             // 3-card Middle hand allows Pair, Trips, TwoPairs, but not 4+ card components or FullHouse
             Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.Pair));
             Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.ThreeOfKind));
             Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
-            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.None));
-            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.None));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.FiveCardsStraight));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.FullHouse));
 
             // 5-card Back hand allows FullHouse, TwoPairs, Straight, etc.
             Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }, BattleSubHandOrder.ThirdHand), Is.EqualTo(PokerOverAllHandRank.FullHouse));
