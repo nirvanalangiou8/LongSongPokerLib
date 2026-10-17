@@ -10,23 +10,32 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
     [TestFixture]
     public class SplitHandBreakAndAssemblyTest
     {
-        private static string SplitHandToString(string handName, ICardRule? rule = null)
+        private static List<string> SplitHandToSolutionStrings(string handName, ICardRule? rule = null)
         {
-            List<(PokerOverAllHandRank Front, PokerOverAllHandRank Back)> solutions;
+            var effectiveRule = rule ?? EightCardRule.Default;
+            List<List<PokerOverAllHandRank>> solutions;
             if (handName == "Nothing")
             {
-                solutions = new List<(PokerOverAllHandRank, PokerOverAllHandRank)>
-                {
-                    (PokerOverAllHandRank.Nothing, PokerOverAllHandRank.Nothing)
-                };
+                var nothingList = new List<PokerOverAllHandRank>();
+                for (int i = 0; i < effectiveRule.SubHandSlots.Count; i++)
+                    nothingList.Add(PokerOverAllHandRank.Nothing);
+                solutions = new List<List<PokerOverAllHandRank>> { nothingList };
             }
             else
             {
-                var components = PostSimStatHandSplitProbAna.ParseHandName(handName, rule);
-                solutions = PostSimStatHandSplitProbAna.SplitHand(components, rule);
+                var components = PostSimStatHandSplitProbAna.ParseHandName(handName, effectiveRule);
+                solutions = PostSimStatHandSplitProbAna.SplitHand(components, effectiveRule);
             }
 
-            return string.Join(",", solutions.Select(s => $"[{s.Front},{s.Back}]"));
+            return solutions.Select(s => $"[{string.Join(",", s)}]").ToList();
+        }
+
+        private static List<string> ParseExpectedSolutions(string expected)
+        {
+            if (string.IsNullOrWhiteSpace(expected)) return new List<string>();
+            return expected.Split(new[] { "],[" }, StringSplitOptions.None)
+                .Select(s => s.StartsWith("[") ? (s.EndsWith("]") ? s : s + "]") : (s.EndsWith("]") ? "[" + s : "[" + s + "]"))
+                .ToList();
         }
 
         #region 8 Cards Test Cases
@@ -87,8 +96,9 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("EightCardsFlushStraight", "[Nothing,EightCardsFlushStraight],[ThreeCardsFlushStraight,FiveCardsFlushStraight],[FourCardsFlushStraight,FourCardsFlushStraight]")]
         public void Test8CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName, new EightCardRule());
-            Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 8-card hand: {handName}");
+            var actual = SplitHandToSolutionStrings(handName, new EightCardRule());
+            var expected = ParseExpectedSolutions(expectedSolutions);
+            Assert.That(actual, Is.EquivalentTo(expected), $"Mismatch for 8-card hand: {handName}");
         }
 
         #endregion
@@ -182,8 +192,30 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("NineCardsFlushStraight", "[Nothing,NineCardsFlushStraight],[ThreeCardsFlushStraight,SixCardsFlushStraight],[FourCardsFlushStraight,FiveCardsFlushStraight]")]
         public void Test9CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName, new NineCardTwoHandRule());
-            Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 9-card hand: {handName}");
+            var actual = SplitHandToSolutionStrings(handName, new NineCardTwoHandRule());
+            var expected = ParseExpectedSolutions(expectedSolutions);
+            Assert.That(actual, Is.EquivalentTo(expected), $"Mismatch for 9-card hand: {handName}");
+        }
+
+        #endregion
+
+        #region 9 Cards 3 Hands Test Cases
+
+        [TestCase("Nothing", "[Nothing,Nothing,Nothing]")]
+        [TestCase("Pair", "[Nothing,Nothing,Pair]")]
+        [TestCase("Pair*2", "[Nothing,Nothing,TwoPairs],[Nothing,Pair,Pair]")]
+        [TestCase("Pair*3", "[Nothing,Pair,TwoPairs],[Pair,Pair,Pair]")]
+        [TestCase("ThreeOfKind", "[Nothing,Nothing,ThreeOfKind]")]
+        [TestCase("ThreeOfKind_Pair", "[Nothing,Nothing,FullHouse],[Nothing,Pair,ThreeOfKind]")]
+        [TestCase("FiveCardsStraight", "[Nothing,Nothing,FiveCardsStraight]")]
+        [TestCase("FiveCardsFlush", "[Nothing,Nothing,FiveCardsFlush]")]
+        [TestCase("ThreeCardsFlushStraight", "[Nothing,Nothing,ThreeCardsFlushStraight]")]
+        [TestCase("ThreeCardsFlushStraight_Pair", "[Nothing,Nothing,Mansion],[Nothing,Pair,ThreeCardsFlushStraight]")]
+        public void Test9CardsThreeHandSplitBreakAndAssembly(string handName, string expectedSolutions)
+        {
+            var actual = SplitHandToSolutionStrings(handName, new NineCardThreeHandRule());
+            var expected = ParseExpectedSolutions(expectedSolutions);
+            Assert.That(actual, Is.EquivalentTo(expected), $"Mismatch for 9-card 3-hand: {handName}");
         }
 
         #endregion

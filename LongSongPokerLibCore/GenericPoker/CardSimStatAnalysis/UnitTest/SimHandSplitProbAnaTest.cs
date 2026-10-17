@@ -13,6 +13,39 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         private const string SourceData8CardsPath = "../Data/stats_result_8cards_for_unittest.csv";
         private const string SourceData9CardsPath = "../Data/stats_result_9cards_for_unittest.csv";
 
+        private static string ResolveInputPath(string inputPath)
+        {
+            if (File.Exists(inputPath)) return Path.GetFullPath(inputPath);
+
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            string candidate = Path.GetFullPath(Path.Combine(baseDir, inputPath));
+            if (File.Exists(candidate)) return candidate;
+
+            DirectoryInfo? currentDir = new DirectoryInfo(baseDir);
+            while (currentDir != null)
+            {
+                candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, inputPath));
+                if (File.Exists(candidate)) return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "GenericPoker", "CardSimStatAnalysis", inputPath));
+                if (File.Exists(candidate)) return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", inputPath));
+                if (File.Exists(candidate)) return candidate;
+
+                string fileName = Path.GetFileName(inputPath);
+                candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
+                if (File.Exists(candidate)) return candidate;
+
+                candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
+                if (File.Exists(candidate)) return candidate;
+
+                currentDir = currentDir.Parent;
+            }
+
+            return inputPath;
+        }
+
         private static string LoadCleanCsvResult(string filePath)
         {
             var lines = File.ReadAllLines(filePath)
@@ -28,7 +61,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                PostSimStatHandSplitProbAna.Run(SourceData8CardsPath, tempOutputPath, new EightCardRule());
+                PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData8CardsPath), tempOutputPath, new EightCardRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
 
@@ -61,7 +94,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                PostSimStatHandSplitProbAna.Run(SourceData9CardsPath, tempOutputPath, new NineCardTwoHandRule());
+                PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData9CardsPath), tempOutputPath, new NineCardTwoHandRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
 
@@ -76,6 +109,39 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
                 string normalizedExpected = Expected9CardsSplitStatsResult.Replace("\r\n", "\n").TrimEnd();
 
                 Assert.That(normalizedActual, Is.EqualTo(normalizedExpected));
+            }
+            finally
+            {
+                if (File.Exists(tempOutputPath))
+                {
+                    File.Delete(tempOutputPath);
+                }
+            }
+        }
+
+        [Test]
+        public void TestNineCardThreeHandSplitProbAna()
+        {
+            string projectDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string tempOutputPath = Path.Combine(projectDirectory, "temp_threehands_stats_9cards.csv");
+
+            try
+            {
+                var stats = PostSimStatHandSplitProbAna.Run(ResolveInputPath(SourceData9CardsPath), tempOutputPath, new NineCardThreeHandRule());
+
+                Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
+                Assert.That(stats.ContainsKey(BattleSubHandOrder.FirstHand), Is.True);
+                Assert.That(stats.ContainsKey(BattleSubHandOrder.SecondHand), Is.True);
+                Assert.That(stats.ContainsKey(BattleSubHandOrder.ThirdHand), Is.True);
+
+                string csvResult = LoadCleanCsvResult(tempOutputPath);
+                Console.WriteLine("=== ACTUAL 9-CARDS 3-HANDS RUN RESULT ===");
+                Console.WriteLine(csvResult);
+                Console.WriteLine("=========================================");
+
+                Assert.That(csvResult.Contains("FirstHand,"), Is.True);
+                Assert.That(csvResult.Contains("SecondHand,"), Is.True);
+                Assert.That(csvResult.Contains("ThirdHand,"), Is.True);
             }
             finally
             {

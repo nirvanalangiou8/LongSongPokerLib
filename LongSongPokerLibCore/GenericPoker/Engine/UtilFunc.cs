@@ -5,28 +5,7 @@ using System.Linq;
 
 namespace GenericPoker
 {
-/*
-    static class IListExtensions
-    {
-        public static void Swap<T>(
-            this IList<T> list,
-            int firstIndex,
-            int secondIndex
-        )
-        {
-            Contract.Requires(list != null);
-            Contract.Requires(firstIndex >= 0 && firstIndex < list.Count);
-            Contract.Requires(secondIndex >= 0 && secondIndex < list.Count);
-            if (firstIndex == secondIndex)
-            {
-                return;
-            }
-            T temp = list[firstIndex];
-            list[firstIndex] = list[secondIndex];
-            list[secondIndex] = temp;
-        }
-    }
-*/
+
 
     public class UtilFunc
     {
@@ -38,21 +17,6 @@ namespace GenericPoker
             return rng.Next(min, max+1);
         }
         
-/*
-        public static void Shuffle<T>(List<T> list)
-        {
-            // Iterate over the list from last to first
-            for (var i = list.Count - 1; i > 0; i--)
-            {
-                // Pick a random index from 0 to i
-                //int j = rng.Next(0, i + 1);
-                int j = GetRandomInt(0, i);
-
-                // Swap list[i] with the element at random index
-                (list[i], list[j]) = (list[j], list[i]);
-            }
-        }
-*/
         
         public static List<List<T>> GetPermutation<T>(List<T> inputList, int selectCount)
         {
@@ -128,5 +92,53 @@ namespace GenericPoker
                 currentSelected.RemoveAt(currentSelected.Count - 1);
             }
         }
+
+        public static List<List<List<T>>> GenerateSlotPartitions<T>(List<T> items, int slotCount)
+        {
+            var results = new List<List<List<T>>>();
+            var current = new List<List<T>>();
+            for (int i = 0; i < slotCount; i++)
+            {
+                current.Add(new List<T>());
+            }
+
+            void PartitionHelper(int itemIndex)
+            {
+                if (itemIndex == items.Count)
+                {
+                    var copy = current.Select(slot => new List<T>(slot)).ToList();
+                    results.Add(copy);
+                    return;
+                }
+
+                var item = items[itemIndex];
+                for (int slotIdx = 0; slotIdx < slotCount; slotIdx++)
+                {
+                    current[slotIdx].Add(item);
+                    PartitionHelper(itemIndex + 1);
+                    current[slotIdx].RemoveAt(current[slotIdx].Count - 1);
+                }
+            }
+
+            PartitionHelper(0);
+            return results;
+        }
     }
 }
+
+
+/*
+        public static void Shuffle<T>(List<T> list)
+        {
+            // Iterate over the list from last to first
+            for (var i = list.Count - 1; i > 0; i--)
+            {
+                // Pick a random index from 0 to i
+                //int j = rng.Next(0, i + 1);
+                int j = GetRandomInt(0, i);
+
+                // Swap list[i] with the element at random index
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+*/

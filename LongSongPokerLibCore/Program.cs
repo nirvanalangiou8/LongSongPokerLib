@@ -16,7 +16,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "review_split", "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "review_split"; 
+            var runOption = "analyze"; 
 
             if (args.Length > 0)
             {
@@ -29,31 +29,42 @@ namespace LongSongPokerLibCore
                     ReviewHandSplit();
                     break;
                 case "analyze":
-                    // Usage: Program.exe analyze [sourceDataPath] [outputPath] [cardCount: 8 or 9]
-                    ICardRule selectedRule = EightCardRule.Default;
-                    if (args.Length >= 4 && int.TryParse(args[3], out int cardCount))
+                    if (args.Length >= 4)
                     {
-                        selectedRule = cardCount == 9 ? NineCardTwoHandRule.Default : EightCardRule.Default;
-                    }
-                    else if (args.Length >= 2 && (args[1].Contains("9cards") || args[1].Contains("9_cards") || args[1].Contains("9card")))
-                    {
-                        selectedRule = NineCardTwoHandRule.Default;
-                    }
-
-                    if (args.Length >= 3)
-                    {
+                        ICardRule selectedRule = args[3] switch
+                        {
+                            "3" or "three" or "9_3" or "nine_three" => NineCardThreeHandRule.Default,
+                            "9" or "9_2" or "nine_two" => NineCardTwoHandRule.Default,
+                            _ => EightCardRule.Default
+                        };
                         PostSimStatHandSplitProbAna.Run(args[1], args[2], selectedRule);
-                    }
-                    else if (args.Length >= 2)
-                    {
-                        PostSimStatHandSplitProbAna.Run(args[1], rule: selectedRule);
                     }
                     else
                     {
-                        // Explicitly run with 8-card or 9-card rule
-                        PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "twohands_prob_8cards.csv", new EightCardRule());
-                        PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "twohands_prob_9cards.csv", new NineCardTwoHandRule());
-                        
+                        string dataDir = @"G:\My Drive\GameDev\RiderProjects\LongSongPokerLib\LongSongPokerLibCore\GenericPoker\CardSimStatAnalysis\Data";
+                        if (!Directory.Exists(dataDir))
+                        {
+                            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                            var dir = new DirectoryInfo(baseDir);
+                            while (dir != null)
+                            {
+                                string cand = Path.Combine(dir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data");
+                                if (Directory.Exists(cand)) { dataDir = cand; break; }
+                                cand = Path.Combine(dir.FullName, "GenericPoker", "CardSimStatAnalysis", "Data");
+                                if (Directory.Exists(cand)) { dataDir = cand; break; }
+                                dir = dir.Parent;
+                            }
+                        }
+
+                        string stats8 = Path.Combine(dataDir, "stats_result_8cards.csv");
+                        string stats9 = Path.Combine(dataDir, "stats_result_9cards.csv");
+                        string twohands8 = Path.Combine(dataDir, "twohands_prob_8cards.csv");
+                        string twohands9 = Path.Combine(dataDir, "twohands_prob_9cards.csv");
+                        string threehands9 = Path.Combine(dataDir, "threehands_prob_9cards.csv");
+
+                        PostSimStatHandSplitProbAna.Run(stats8, twohands8, new EightCardRule());
+                        PostSimStatHandSplitProbAna.Run(stats9, twohands9, new NineCardTwoHandRule());
+                        PostSimStatHandSplitProbAna.Run(stats9, threehands9, new NineCardThreeHandRule());
                     }
                     break;
 

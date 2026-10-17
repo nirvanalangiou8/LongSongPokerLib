@@ -3,136 +3,36 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using GenericPoker;
-using GenericPoker.EightCard;
 
 namespace GenericPoker.CardSimStatAnalysis
 {
     public class PostSimStatHandSplitProbAna
     {
-        public static (Dictionary<PokerOverAllHandRank, double> FrontStats, Dictionary<PokerOverAllHandRank, double> BackStats) Run(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
+        public static Dictionary<BattleSubHandOrder, Dictionary<PokerOverAllHandRank, double>> Run(string inputPath, string? outputPath = null, ICardRule? rule = null)
         {
             return Analyze(inputPath, outputPath, rule);
         }
 
-        public static string ResolveInputPath(string? inputPath)
+        public static Dictionary<BattleSubHandOrder, Dictionary<PokerOverAllHandRank, double>> Analyze(string inputPath, string? outputPath = null, ICardRule? rule = null)
         {
-            if (!string.IsNullOrEmpty(inputPath))
+            if (string.IsNullOrEmpty(inputPath) || !File.Exists(inputPath))
             {
-                if (File.Exists(inputPath))
-                    return Path.GetFullPath(inputPath);
-
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string candidate = Path.GetFullPath(Path.Combine(baseDir, inputPath));
-                if (File.Exists(candidate))
-                    return candidate;
-
-                // Check multiple ancestor directory depths (e.g. project root, solution root)
-                DirectoryInfo? currentDir = new DirectoryInfo(baseDir);
-                while (currentDir != null)
-                {
-                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, inputPath));
-                    if (File.Exists(candidate))
-                        return candidate;
-
-                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "GenericPoker", "CardSimStatAnalysis", inputPath));
-                    if (File.Exists(candidate))
-                        return candidate;
-
-                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", inputPath));
-                    if (File.Exists(candidate))
-                        return candidate;
-
-                    string fileName = Path.GetFileName(inputPath);
-                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
-                    if (File.Exists(candidate))
-                        return candidate;
-
-                    candidate = Path.GetFullPath(Path.Combine(currentDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", fileName));
-                    if (File.Exists(candidate))
-                        return candidate;
-
-                    currentDir = currentDir.Parent;
-                }
+                Console.WriteLine($"Input file not found: {inputPath}");
+                return new Dictionary<BattleSubHandOrder, Dictionary<PokerOverAllHandRank, double>>();
             }
 
-            // Default fallback
-            string defaultBaseDir = AppDomain.CurrentDomain.BaseDirectory;
-            DirectoryInfo? fallbackDir = new DirectoryInfo(defaultBaseDir);
-            while (fallbackDir != null)
+            var effectiveRule = rule ?? ((inputPath.Contains("9cards") || inputPath.Contains("9_cards") || inputPath.Contains("9card")) ? NineCardTwoHandRule.Default : EightCardRule.Default);
+            var slots = effectiveRule.SubHandSlots;
+            int slotCount = slots.Count;
+
+            var handStats = new Dictionary<BattleSubHandOrder, Dictionary<PokerOverAllHandRank, double>>();
+            for (int i = 0; i < slotCount; i++)
             {
-                string defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
-                if (File.Exists(defaultCandidate))
-                    return defaultCandidate;
-
-                defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis", "Data", "stats_result_8cards.csv"));
-                if (File.Exists(defaultCandidate))
-                    return defaultCandidate;
-
-                defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "LongSongPokerLibCore", "stats_result.csv"));
-                if (File.Exists(defaultCandidate))
-                    return defaultCandidate;
-
-                defaultCandidate = Path.GetFullPath(Path.Combine(fallbackDir.FullName, "stats_result.csv"));
-                if (File.Exists(defaultCandidate))
-                    return defaultCandidate;
-
-                fallbackDir = fallbackDir.Parent;
+                handStats[slots[i].Order] = new Dictionary<PokerOverAllHandRank, double>();
             }
 
-            return inputPath ?? "";
-        }
-
-        public static string ResolveOutputPath(string? outputPath, string? inputPath = null)
-        {
-            if (!string.IsNullOrEmpty(outputPath))
-            {
-                if (Path.IsPathRooted(outputPath))
-                    return Path.GetFullPath(outputPath);
-
-                string? inputToResolve = !string.IsNullOrEmpty(inputPath) ? inputPath : null;
-                string resolvedInput = ResolveInputPath(inputToResolve);
-                string? inputDir = Path.GetDirectoryName(resolvedInput);
-                if (!string.IsNullOrEmpty(inputDir))
-                {
-                    return Path.GetFullPath(Path.Combine(inputDir, outputPath));
-                }
-
-                string baseDir = AppDomain.CurrentDomain.BaseDirectory;
-                string projectRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", ".."));
-                string sourceFileDir = Directory.Exists(Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis"))
-                    ? Path.Combine(projectRoot, "GenericPoker", "CardSimStatAnalysis")
-                    : Path.Combine(projectRoot, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis");
-
-                return Path.GetFullPath(Path.Combine(sourceFileDir, outputPath));
-            }
-
-            string defaultBaseDir = AppDomain.CurrentDomain.BaseDirectory;
-            string root = Path.GetFullPath(Path.Combine(defaultBaseDir, "..", "..", ".."));
-            string sourceDir = Directory.Exists(Path.Combine(root, "GenericPoker", "CardSimStatAnalysis"))
-                ? Path.Combine(root, "GenericPoker", "CardSimStatAnalysis")
-                : Path.Combine(root, "LongSongPokerLibCore", "GenericPoker", "CardSimStatAnalysis");
-
-            return Path.Combine(sourceDir, "front_back_stats.csv");
-        }
-
-        public static (Dictionary<PokerOverAllHandRank, double> FrontStats, Dictionary<PokerOverAllHandRank, double> BackStats) Analyze(string? inputPath = null, string? outputPath = null, ICardRule? rule = null)
-        {
-            string resolvedInputPath = ResolveInputPath(inputPath);
-            string resolvedOutputPath = ResolveOutputPath(outputPath, resolvedInputPath);
-
-            var effectiveRule = rule ?? ((resolvedInputPath.Contains("9cards") || resolvedInputPath.Contains("9_cards") || resolvedInputPath.Contains("9card")) ? NineCardTwoHandRule.Default : EightCardRule.Default);
-
-            if (!File.Exists(resolvedInputPath))
-            {
-                Console.WriteLine($"Input file not found: {resolvedInputPath}");
-                return (new Dictionary<PokerOverAllHandRank, double>(), new Dictionary<PokerOverAllHandRank, double>());
-            }
-
-            var frontHandStats = new Dictionary<PokerOverAllHandRank, double>();
-            var backHandStats = new Dictionary<PokerOverAllHandRank, double>();
             long totalInputCount = 0;
-
-            var lines = File.ReadAllLines(resolvedInputPath);
+            var lines = File.ReadAllLines(inputPath);
             var headerNotes = new List<string>();
             foreach (var line in lines)
             {
@@ -158,8 +58,11 @@ namespace GenericPoker.CardSimStatAnalysis
 
                 if (handName == "Nothing")
                 {
-                    backHandStats[PokerOverAllHandRank.Nothing] = backHandStats.GetValueOrDefault(PokerOverAllHandRank.Nothing) + count;
-                    frontHandStats[PokerOverAllHandRank.Nothing] = frontHandStats.GetValueOrDefault(PokerOverAllHandRank.Nothing) + count;
+                    for (int i = 0; i < slotCount; i++)
+                    {
+                        var order = slots[i].Order;
+                        handStats[order][PokerOverAllHandRank.Nothing] = handStats[order].GetValueOrDefault(PokerOverAllHandRank.Nothing) + count;
+                    }
                     continue;
                 }
 
@@ -171,46 +74,64 @@ namespace GenericPoker.CardSimStatAnalysis
                     double perSolutionCount = (double)count / solutions.Count;
                     foreach (var sol in solutions)
                     {
-                        frontHandStats[sol.Item1] = frontHandStats.GetValueOrDefault(sol.Item1) + perSolutionCount;
-                        backHandStats[sol.Item2] = backHandStats.GetValueOrDefault(sol.Item2) + perSolutionCount;
+                        for (int i = 0; i < slotCount; i++)
+                        {
+                            var order = slots[i].Order;
+                            var rank = sol[i];
+                            handStats[order][rank] = handStats[order].GetValueOrDefault(rank) + perSolutionCount;
+                        }
                     }
                 }
                 else
                 {
                     // If no valid split found (should not happen with legal hands), fallback to None
                     // This is for sanity check
-                    frontHandStats[PokerOverAllHandRank.None] = frontHandStats.GetValueOrDefault(PokerOverAllHandRank.None) + count;
-                    backHandStats[PokerOverAllHandRank.None] = backHandStats.GetValueOrDefault(PokerOverAllHandRank.None) + count;
+                    for (int i = 0; i < slotCount; i++)
+                    {
+                        var order = slots[i].Order;
+                        handStats[order][PokerOverAllHandRank.None] = handStats[order].GetValueOrDefault(PokerOverAllHandRank.None) + count;
+                    }
                 }
             }
 
-            if (!string.IsNullOrEmpty(resolvedOutputPath))
+            if (!string.IsNullOrEmpty(outputPath))
             {
-                SaveStats(resolvedOutputPath, frontHandStats, backHandStats, resolvedInputPath, headerNotes);
-                Console.WriteLine($"Analysis completed. Results saved to {resolvedOutputPath}");
+                SaveStats(outputPath, handStats, effectiveRule, inputPath, headerNotes);
+                Console.WriteLine($"Analysis completed. Results saved to {outputPath}");
             }
 
-            double totalFront = frontHandStats.Values.Sum();
-            double totalBack = backHandStats.Values.Sum();
             Console.WriteLine($"Total Input Appearance Count: {totalInputCount}");
-            Console.WriteLine($"Total Front Stat Count: {totalFront:F2}");
-            Console.WriteLine($"Total Back Stat Count: {totalBack:F2}");
+            bool allMatched = true;
+            for (int i = 0; i < slotCount; i++)
+            {
+                var slot = slots[i];
+                string posName = slot.Order.ToString();
+                //GetPositionName(i, slotCount, slot.Order);
+                double totalSlot = handStats[slot.Order].Values.Sum();
+                Console.WriteLine($"Total {posName} Stat Count: {totalSlot:F2}");
+                if (Math.Abs(totalSlot - totalInputCount) >= 0.001)
+                {
+                    allMatched = false;
+                    Console.WriteLine($"ERROR: {posName} stat count ({totalSlot:F2}) does not match input count ({totalInputCount})!");
+                }
+            }
 
-            bool frontMatch = Math.Abs(totalFront - totalInputCount) < 0.001;
-            bool backMatch = Math.Abs(totalBack - totalInputCount) < 0.001;
-
-            if (frontMatch && backMatch)
+            if (allMatched)
             {
                 Console.WriteLine("input and stat count check sum correct.");
             }
-            else
-            {
-                if (!frontMatch) Console.WriteLine($"ERROR: Front stat count ({totalFront:F2}) does not match input count ({totalInputCount})!");
-                if (!backMatch) Console.WriteLine($"ERROR: Back stat count ({totalBack:F2}) does not match input count ({totalInputCount})!");
-            }
 
-            return (frontHandStats, backHandStats);
+            return handStats;
         }
+
+        /*public static string GetPositionName(int slotIndex, int totalSlots, BattleSubHandOrder order)
+        {
+            if (totalSlots <= 2)
+            {
+                return slotIndex == 0 ? "Front" : "Back";
+            }
+            return order.ToString();
+        }*/
 
         public static List<PokerComponents> ParseHandName(string handName, ICardRule? rule = null)
         {
@@ -237,28 +158,27 @@ namespace GenericPoker.CardSimStatAnalysis
             return comps.OrderByDescending(c => c.Power).ToList();
         }
 
-        /*
-        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
+        public static List<List<PokerOverAllHandRank>> SplitHand(
             List<PokerComponents> comps,
+            ICardRule? rule = null,
             int minFlushStraightCards = -1,
             int minFlushCards = -1,
             int minStraightCards = -1,
             int minKindCards = -1)
         {
-            return SplitHand(comps, null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
-        }*/
+            var effectiveRule = rule ?? comps?.FirstOrDefault(c => c.Rule != null)?.Rule ?? EightCardRule.Default;
+            var slots = effectiveRule.SubHandSlots;
+            int slotCount = slots.Count;
 
-        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
-            List<PokerComponents> comps,
-            ICardRule? rule,
-            int minFlushStraightCards = -1,
-            int minFlushCards = -1,
-            int minStraightCards = -1,
-            int minKindCards = -1)
-        {
-            if (comps == null || comps.Count == 0) return new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
-
-            var effectiveRule = rule ?? comps.FirstOrDefault(c => c.Rule != null)?.Rule ?? EightCardRule.Default;
+            if (comps == null || comps.Count == 0)
+            {
+                var nothingSolution = new List<PokerOverAllHandRank>();
+                for (int i = 0; i < slotCount; i++)
+                {
+                    nothingSolution.Add(PokerOverAllHandRank.Nothing);
+                }
+                return new List<List<PokerOverAllHandRank>> { nothingSolution };
+            }
 
             // 1. Break down each component into atomic sub-components based on card constraints.
             var breakdownSequences = comps
@@ -268,7 +188,7 @@ namespace GenericPoker.CardSimStatAnalysis
             // 2. Generate Cartesian Product of all candidate breakdowns across components.
             var candidateCombinations = PokerComponents.CartesianProduct(breakdownSequences);
 
-            var solutions = new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
+            var solutions = new List<List<PokerOverAllHandRank>>();
 
             foreach (var combination in candidateCombinations)
             {
@@ -278,57 +198,71 @@ namespace GenericPoker.CardSimStatAnalysis
                 // Sort atomic components by power descending
                 atomicComps.Sort((a, b) => b.Power.CompareTo(a.Power));
 
-                // Explore all possible split component groups (up to half total count for front hand)
-                int maxFrontCount = atomicComps.Count / 2;
+                var allPartitions = UtilFunc.GenerateSlotPartitions(atomicComps, slotCount);
 
-                for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
+                foreach (var partition in allPartitions)
                 {
-                    var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(atomicComps, selectCount);
-                    foreach (var group in possibleGroups)
+                    bool validRanks = true;
+                    var rankList = new List<PokerOverAllHandRank>();
+
+                    for (int i = 0; i < slotCount; i++)
                     {
-                        var frontGroup = group.Selected;
-                        var backGroup = group.Remaining;
+                        var slot = slots[i];
+                        var slotComps = partition[i];
 
-                        var frontRank = effectiveRule.AssembleHandRank(frontGroup);
-                        var backRank = effectiveRule.AssembleHandRank(backGroup);
-
-                        // If either rank is None, it is an invalid split; skip it.
-                        if (frontRank == PokerOverAllHandRank.None || backRank == PokerOverAllHandRank.None) continue;
-
-                        // Ensure back rank >= front rank (swap if necessary)
-                        if ((int)frontRank > (int)backRank)
+                        var rank = effectiveRule.AssembleHandRank(slotComps, slot.Order);
+                        if (rank == PokerOverAllHandRank.None)
                         {
-                            var swappedFrontRank = backRank;
-                            var swappedBackRank = frontRank;
-
-                            if ((int)swappedBackRank >= (int)swappedFrontRank)
-                            {
-                                solutions.Add((swappedFrontRank, swappedBackRank));
-                            }
+                            validRanks = false;
+                            break;
                         }
-                        else
+
+                        rankList.Add(rank);
+                    }
+
+                    if (!validRanks) continue;
+
+                    // Deployment ordering check: rankList[0] <= rankList[1] <= ... <= rankList[slotCount - 1]
+                    bool validDeployment = true;
+                    for (int i = 0; i < rankList.Count - 1; i++)
+                    {
+                        if ((int)rankList[i] > (int)rankList[i + 1])
                         {
-                            solutions.Add((frontRank, backRank));
+                            validDeployment = false;
+                            break;
                         }
                     }
+
+                    if (!validDeployment) continue;
+
+                    solutions.Add(rankList);
                 }
             }
 
-            var uniqueSolutions = solutions.Distinct().ToList();
-            return FilterDominatedSolutions(uniqueSolutions);
+            return FilterDominatedSolutions(solutions);
         }
 
         /// <summary>
         /// Filters out candidate solutions that are dominated (obviously loser solutions).
-        /// A solution (F2, B2) is dominated by (F1, B1) if F1 >= F2 and B1 >= B2, and at least one inequality is strict.
+        /// A solution S2 dominates S1 if S2 is >= S1 in all hand ranks, and strictly better in at least one rank.
         /// </summary>
-        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> FilterDominatedSolutions(
-            IEnumerable<(PokerOverAllHandRank Front, PokerOverAllHandRank Back)> solutions)
+        public static List<List<PokerOverAllHandRank>> FilterDominatedSolutions(
+            IEnumerable<List<PokerOverAllHandRank>> solutions)
         {
-            if (solutions == null) return new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
+            if (solutions == null) return new List<List<PokerOverAllHandRank>>();
 
-            var list = solutions.Distinct().ToList();
-            var filtered = new List<(PokerOverAllHandRank Front, PokerOverAllHandRank Back)>();
+            var list = new List<List<PokerOverAllHandRank>>();
+            var seen = new HashSet<string>();
+            foreach (var sol in solutions)
+            {
+                var key = string.Join(",", sol.Select(r => (int)r));
+                if (seen.Add(key))
+                {
+                    list.Add(sol);
+                }
+            }
+
+            var filtered = new List<List<PokerOverAllHandRank>>();
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -340,9 +274,25 @@ namespace GenericPoker.CardSimStatAnalysis
                     if (i == j) continue;
                     var s2 = list[j];
 
-                    // s2 dominates s1 if s2 is >= s1 in both front and back ranks, and strictly better in at least one rank
-                    if ((int)s2.Front >= (int)s1.Front && (int)s2.Back >= (int)s1.Back &&
-                        ((int)s2.Front > (int)s1.Front || (int)s2.Back > (int)s1.Back))
+                    if (s1.Count != s2.Count) continue;
+
+                    bool allGreaterOrEqual = true;
+                    bool atLeastOneStrictlyGreater = false;
+
+                    for (int k = 0; k < s1.Count; k++)
+                    {
+                        if ((int)s2[k] < (int)s1[k])
+                        {
+                            allGreaterOrEqual = false;
+                            break;
+                        }
+                        if ((int)s2[k] > (int)s1[k])
+                        {
+                            atLeastOneStrictlyGreater = true;
+                        }
+                    }
+
+                    if (allGreaterOrEqual && atLeastOneStrictlyGreater)
                     {
                         isDominated = true;
                         break;
@@ -358,29 +308,8 @@ namespace GenericPoker.CardSimStatAnalysis
             return filtered;
         }
 
-        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
-            List<BaseCompType> compTypes,
-            int minFlushStraightCards = -1,
-            int minFlushCards = -1,
-            int minStraightCards = -1,
-            int minKindCards = -1)
-        {
-            return SplitHand(compTypes, null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
-        }
-
-        public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
-            List<BaseCompType> compTypes,
-            ICardRule? rule,
-            int minFlushStraightCards = -1,
-            int minFlushCards = -1,
-            int minStraightCards = -1,
-            int minKindCards = -1)
-        {
-            if (compTypes == null) return new List<(PokerOverAllHandRank, PokerOverAllHandRank)>();
-            return SplitHand(compTypes.Select(t => new PokerComponents(t, rule)).ToList(), rule, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
-        }
-
-        public static void SaveStats(string path, Dictionary<PokerOverAllHandRank, double> front, Dictionary<PokerOverAllHandRank, double> back, string? inputPath = null, List<string>? headerNotes = null)
+        
+        public static void SaveStats(string path, Dictionary<BattleSubHandOrder, Dictionary<PokerOverAllHandRank, double>> handStats, ICardRule? rule = null, string? inputPath = null, List<string>? headerNotes = null)
         {
             string? dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
@@ -388,11 +317,9 @@ namespace GenericPoker.CardSimStatAnalysis
                 Directory.CreateDirectory(dir);
             }
 
-            var sortedFront = front.OrderByDescending(e => (int)e.Key).ToList();
-            long totalFrontCount = sortedFront.Sum(e => (long)Math.Round(e.Value, MidpointRounding.AwayFromZero));
-
-            var sortedBack = back.OrderByDescending(e => (int)e.Key).ToList();
-            long totalBackCount = sortedBack.Sum(e => (long)Math.Round(e.Value, MidpointRounding.AwayFromZero));
+            var effectiveRule = rule ?? EightCardRule.Default;
+            var slots = effectiveRule.SubHandSlots;
+            int slotCount = slots.Count;
 
             using (var writer = new StreamWriter(path))
             {
@@ -409,43 +336,47 @@ namespace GenericPoker.CardSimStatAnalysis
                 }
 
                 writer.WriteLine("Hand Position,Rank,Count,Accumulated Count,Probabilities,Win/NoLose Probabilities");
-                
-                // Front Hand
-                long cumulativeFrontCount = 0;
-                var frontLines = new List<string>();
-                
-                // Start from bottom (Nothing) to accumulate
-                for (int i = sortedFront.Count - 1; i >= 0; i--)
+
+                for (int slotIdx = 0; slotIdx < slotCount; slotIdx++)
                 {
-                    var entry = sortedFront[i];
-                    long count = (long)Math.Round(entry.Value, MidpointRounding.AwayFromZero);
-                    cumulativeFrontCount += count;
-                    double prob = totalFrontCount > 0 ? (double)count / totalFrontCount : 0;
-                    double winNoLoseProb = totalFrontCount > 0 ? (double)cumulativeFrontCount / totalFrontCount : 0;
-                    frontLines.Add($"Front,{entry.Key},{count},{cumulativeFrontCount},{prob:P16},{winNoLoseProb:P16}");
+                    var slot = slots[slotIdx];
+                    string posName = slot.Order.ToString();
+                    //GetPositionName(slotIdx, slotCount, slot.Order);
+                    var dict = handStats.TryGetValue(slot.Order, out var stats) ? stats : new Dictionary<PokerOverAllHandRank, double>();
+
+                    var sorted = dict.OrderByDescending(e => (int)e.Key).ToList();
+                    long totalCount = sorted.Sum(e => (long)Math.Round(e.Value, MidpointRounding.AwayFromZero));
+
+                    long cumulativeCount = 0;
+                    var posLines = new List<string>();
+
+                    for (int i = sorted.Count - 1; i >= 0; i--)
+                    {
+                        var entry = sorted[i];
+                        long count = (long)Math.Round(entry.Value, MidpointRounding.AwayFromZero);
+                        cumulativeCount += count;
+                        double prob = totalCount > 0 ? (double)count / totalCount : 0;
+                        double winNoLoseProb = totalCount > 0 ? (double)cumulativeCount / totalCount : 0;
+                        posLines.Add($"{posName},{entry.Key},{count},{cumulativeCount},{prob:P16},{winNoLoseProb:P16}");
+                    }
+
+                    posLines.Reverse();
+                    foreach (var line in posLines) writer.WriteLine(line);
                 }
-                
-                // Reverse to have strongest at top
-                frontLines.Reverse();
-                foreach (var line in frontLines) writer.WriteLine(line);
-
-                // Back Hand
-                long cumulativeBackCount = 0;
-                var backLines = new List<string>();
-
-                for (int i = sortedBack.Count - 1; i >= 0; i--)
-                {
-                    var entry = sortedBack[i];
-                    long count = (long)Math.Round(entry.Value, MidpointRounding.AwayFromZero);
-                    cumulativeBackCount += count;
-                    double prob = totalBackCount > 0 ? (double)count / totalBackCount : 0;
-                    double winNoLoseProb = totalBackCount > 0 ? (double)cumulativeBackCount / totalBackCount : 0;
-                    backLines.Add($"Back,{entry.Key},{count},{cumulativeBackCount},{prob:P16},{winNoLoseProb:P16}");
-                }
-
-                backLines.Reverse();
-                foreach (var line in backLines) writer.WriteLine(line);
             }
         }
     }
 }
+
+
+/*public static List<List<PokerOverAllHandRank>> SplitHand(
+            List<BaseCompType> compTypes,
+            ICardRule? rule = null,
+            int minFlushStraightCards = -1,
+            int minFlushCards = -1,
+            int minStraightCards = -1,
+            int minKindCards = -1)
+        {
+            if (compTypes == null) return new List<List<PokerOverAllHandRank>>();
+            return SplitHand(compTypes.Select(t => new PokerComponents(t, rule)).ToList(), rule, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
+        }*/

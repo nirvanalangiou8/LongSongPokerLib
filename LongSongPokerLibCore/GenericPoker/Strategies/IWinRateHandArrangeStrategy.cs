@@ -360,7 +360,7 @@ namespace GenericPoker.EightCard
 			List<BaseSubBattleHand>? bestSubHands = null;
 			double bestScore = double.NegativeInfinity;
 
-			var allPartitions = GenerateSlotPartitions(comps, slots.Count);
+			var allPartitions = UtilFunc.GenerateSlotPartitions(comps, slots.Count);
 
 			allPartitions = allPartitions.Where(partition =>
 			{
@@ -451,37 +451,6 @@ namespace GenericPoker.EightCard
 			}
 
 			return bestSubHands;
-		}
-
-		private static List<List<List<PokerCardComponent>>> GenerateSlotPartitions(List<PokerCardComponent> comps, int slotCount)
-		{
-			var results = new List<List<List<PokerCardComponent>>>();
-			var current = new List<List<PokerCardComponent>>();
-			for (int i = 0; i < slotCount; i++)
-			{
-				current.Add(new List<PokerCardComponent>());
-			}
-
-			void PartitionHelper(int compIndex)
-			{
-				if (compIndex == comps.Count)
-				{
-					var copy = current.Select(slot => new List<PokerCardComponent>(slot)).ToList();
-					results.Add(copy);
-					return;
-				}
-
-				var comp = comps[compIndex];
-				for (int slotIdx = 0; slotIdx < slotCount; slotIdx++)
-				{
-					current[slotIdx].Add(comp);
-					PartitionHelper(compIndex + 1);
-					current[slotIdx].RemoveAt(current[slotIdx].Count - 1);
-				}
-			}
-
-			PartitionHelper(0);
-			return results;
 		}
 	}
 }
