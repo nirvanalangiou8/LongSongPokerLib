@@ -18,6 +18,7 @@ namespace GenericPoker
                 new(BattleSubHandOrder.FirstHand, 4, "Front"),
                 new(BattleSubHandOrder.SecondHand, 5, "Back")
             };
+            LoadWinRateTable();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace GenericPoker
                 new(BattleSubHandOrder.FirstHand, 3, "Front"),
                 new(BattleSubHandOrder.SecondHand, 5, "Back")
             };
+            LoadWinRateTable();
         }
         /*
         public override PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components)

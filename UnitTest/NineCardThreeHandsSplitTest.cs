@@ -13,7 +13,7 @@ namespace UnitTest
             new object[]
             {
                 "8❤️,7❤️,6❤️,5❤️,4❤️,3❤️,2❤️,A❤️,9❤️",
-                "{A❤️}#{[5❤️,4❤️,3❤️,2❤️]}#{[9❤️,8❤️,7❤️,6❤️]}"
+                "{A❤️}#{[9❤️,8❤️,7❤️]}#{[6❤️,5❤️,4❤️,3❤️,2❤️]}"
             },
             // Case 2: One pair of 6s in middle hand, one pair of Ks in back hand, Ace high card in front hand
             new object[]
@@ -37,7 +37,7 @@ namespace UnitTest
             new object[]
             {
                 "Q♣️,J🔶,3♠️,3🔶,4♠️,9♣️,7❤️,K❤️,K🔶",
-                "{J🔶}#{Q♣️,9♣️,7❤️}#{[K❤️,K🔶,3♠️,3🔶],4♠️}"
+                "{Q♣️}#{[3♠️,3🔶],J🔶}#{[K❤️,K🔶],9♣️,7❤️,4♠️}"
             },
             // Case 6 (From issue_hands): High cards in front and middle, Two pairs (8s and 5s) in back hand
             new object[]
@@ -73,7 +73,7 @@ namespace UnitTest
             new object[]
             {
                 "10♣️,2❤️,10♠️,8♠️,7♠️,8♣️,2♠️,Q❤️,Q♠️",
-                "{[10♠️,10♣️]}#{[Q♠️,Q❤️],7♠️}#{[8♠️,8♣️,2♠️,2❤️]}"
+                "{[8♠️,8♣️]}#{[Q♠️,Q❤️],7♠️}#{[10♠️,10♣️,2♠️,2❤️]}"
             },
             // Case 12 (From issue_hands): Pair of 4s in middle hand, 5-card straight (9-8-7-6-5) in back hand, Queen high in front
             new object[]

@@ -17,6 +17,11 @@ namespace GenericPoker
         IReadOnlyList<SubHandSlotConfig> SubHandSlots { get; set; }
         Dictionary<BattleSubHandOrder, int> SubHandsCardCount { get; set; }
 
+        string WinRateTableFile { get; set; }
+        List<Dictionary<PokerOverAllHandRank, (double min, double max)>> WinRateCdfBands { get; set; }
+
+        void LoadWinRateTable(string? fileName = null);
+
         PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components, BattleSubHandOrder? subHandOrder = null);
         PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components, BattleSubHandOrder? subHandOrder = null) => AssembleHandRank(components?.Select(c => c.CompType), subHandOrder);
         PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerCardComponent>? components, BattleSubHandOrder? subHandOrder = null) => AssembleHandRank(components?.Select(c => c.CompRank), subHandOrder);

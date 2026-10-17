@@ -81,8 +81,8 @@ namespace GenericPoker
 
                 if (backHand.CompareTo(frontHand) < 0) continue;
 
-                double front = IWinRateHandArrangeStrategy.GetSubHandWinRate(frontHand);
-                double back = IWinRateHandArrangeStrategy.GetSubHandWinRate(backHand);
+                double front = IWinRateHandArrangeStrategy.GetSubHandWinRate(frontHand, BattleSubHandOrder.FirstHand, effectiveRule);
+                double back = IWinRateHandArrangeStrategy.GetSubHandWinRate(backHand, BattleSubHandOrder.SecondHand, effectiveRule);
                 double total = front + back;
 
                 if (total > bestTotal)

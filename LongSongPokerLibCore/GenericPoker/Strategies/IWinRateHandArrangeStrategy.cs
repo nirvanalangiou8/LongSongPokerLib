@@ -21,85 +21,29 @@ namespace GenericPoker.EightCard
 	/// </summary>
 	public class IWinRateHandArrangeStrategy : IBaseHandArrangeStrategy
 	{
-	
-		// twohands_prob_8cards.csv Front Hand count table (weakest to strongest)
-		private static readonly (PokerOverAllHandRank rank, long count)[] FrontStatCountLadder =
-		{
-			(PokerOverAllHandRank.Nothing,                2626401484L),
-			(PokerOverAllHandRank.Pair,                   930370320L),
-			(PokerOverAllHandRank.TwoPairs,               21900282L),
-			(PokerOverAllHandRank.ThreeOfKind,            8647866L),
-			(PokerOverAllHandRank.ThreeCardsFlushStraight,6266009L),
-			(PokerOverAllHandRank.FourCardsFlushStraight, 4838L),
-			(PokerOverAllHandRank.FourOfKind,             377L),
-		};
-
-		// twohands_prob_8cards.csv Back Hand count table (weakest to strongest)
-		private static readonly (PokerOverAllHandRank rank, long count)[] BackStatCountLadder =
-		{
-			(PokerOverAllHandRank.Nothing,                196902345L),
-			(PokerOverAllHandRank.Pair,                   1535935713L),
-			(PokerOverAllHandRank.TwoPairs,               648950476L),
-			(PokerOverAllHandRank.ThreeOfKind,            253128801L),
-			(PokerOverAllHandRank.ThreeCardsFlushStraight,226346673L),
-			(PokerOverAllHandRank.FiveCardsStraight,      224750900L),
-			(PokerOverAllHandRank.FiveCardsFlush,         196836536L),
-			(PokerOverAllHandRank.FullHouse,              91254774L),
-			(PokerOverAllHandRank.Mansion,                76893581L),
-			(PokerOverAllHandRank.SixCardsStraight,       65679045L),
-			(PokerOverAllHandRank.SixCardsFlush,          20753672L),
-			(PokerOverAllHandRank.SevenCardsStraight,     14354277L),
-			(PokerOverAllHandRank.FourCardsFlushStraight, 29661450L),
-			(PokerOverAllHandRank.FourOfKind,             6843389L),
-			(PokerOverAllHandRank.FiveCardsFlushStraight, 2312679L),
-			(PokerOverAllHandRank.EightCardsStraight,     1830960L),
-			(PokerOverAllHandRank.SevenCardsFlush,        1062546L),
-			(PokerOverAllHandRank.SixCardsFlushStraight,  69858L),
-			(PokerOverAllHandRank.EightCardsFlush,        20725L),
-			(PokerOverAllHandRank.SevenCardsFlushStraight,2757L),
-			(PokerOverAllHandRank.EightCardsFlushStraight,21L),
-		};
-
-		// 由上面的次數階梯建立每個牌型在 Front / Back 手牌的 CDF 機率區間 (min, max)。
-		private static readonly Dictionary<PokerOverAllHandRank, (double min, double max)> FrontCdfBandDict =
-			BuildCdfBands(FrontStatCountLadder);
-
-		private static readonly Dictionary<PokerOverAllHandRank, (double min, double max)> BackCdfBandDict =
-			BuildCdfBands(BackStatCountLadder);
-
-		private static Dictionary<PokerOverAllHandRank, (double min, double max)> BuildCdfBands(
-			(PokerOverAllHandRank rank, long count)[] ladder)
-		{
-			double total = 0;
-			foreach (var entry in ladder) total += entry.count;
-			if (total <= 0) total = 1;
-
-			var dict = new Dictionary<PokerOverAllHandRank, (double, double)>();
-			double cum = 0;
-			foreach (var entry in ladder)
-			{
-				double min = cum / total;
-				cum += entry.count;
-				double max = cum / total;
-				if (dict.TryGetValue(entry.rank, out var old))
-					dict[entry.rank] = (System.Math.Min(old.Item1, min), System.Math.Max(old.Item2, max));
-				else
-					dict[entry.rank] = (min, max);
-			}
-			return dict;
-		}
-
 		/// <summary>
-		/// 取得某牌型在 Front 或 Back 手牌 CDF 上的機率區間 (min, max)。查不到時退回對應的 Nothing 區間。
+		/// 取得某牌型在對應手牌 CDF 上的機率區間 (min, max)。查不到時退回對應的 Nothing 區間。
+		/// 支援依據傳入的 cardrule (1st, 2nd, 3rd 等墩位) 查表。
 		/// </summary>
-		// TODO : this is temoparly to let 2nd and 3rd use same table, will later provide correct formal 3rd hand table if our run is three hands.
-		private static (double min, double max) GetBand(PokerOverAllHandRank rank, BattleSubHandOrder order = BattleSubHandOrder.SecondHand)
+		private static (double min, double max) GetBand(ICardRule? rule, PokerOverAllHandRank rank, BattleSubHandOrder order = BattleSubHandOrder.SecondHand)
 		{
-			var dict = order == BattleSubHandOrder.FirstHand ? FrontCdfBandDict : BackCdfBandDict;
-			if (dict.TryGetValue(rank, out var band)) return band;
-			var otherDict = order == BattleSubHandOrder.FirstHand ? BackCdfBandDict : FrontCdfBandDict;
-			if (otherDict.TryGetValue(rank, out var otherBand)) return otherBand;
-			return (0.0, dict.TryGetValue(PokerOverAllHandRank.Nothing, out var n) ? n.max : 0.1);
+			var effectiveRule = rule ?? EightCardRule.Default;
+			var bands = effectiveRule.WinRateCdfBands;
+			int orderIdx = (int)order;
+
+			Dictionary<PokerOverAllHandRank, (double min, double max)>? targetDict = null;
+			if (bands != null && orderIdx >= 0 && orderIdx < bands.Count)
+			{
+				targetDict = bands[orderIdx];
+			}
+
+			if (targetDict != null && targetDict.TryGetValue(rank, out var band))
+			{
+				return band;
+			}
+
+
+			return (0.0, (targetDict != null && targetDict.TryGetValue(PokerOverAllHandRank.Nothing, out var n)) ? n.max : 0.1);
 		}
 
 		/// <summary>
@@ -134,12 +78,13 @@ namespace GenericPoker.EightCard
 		/// 大一統勝率計算機 (long switch)：依牌型結構組出 PokerMath 的 schema / offsets，
 		/// 並在該牌型的 CDF 機率區間 (min, max) 內做相對排名內插。
 		/// </summary>
-		public static double GetSubHandWinRate(BaseSubBattleHand hand, BattleSubHandOrder? order = null)
+		public static double GetSubHandWinRate(BaseSubBattleHand hand, BattleSubHandOrder? order = null, ICardRule? rule = null)
 		{
 			if (hand == null) return 0.0;
 
+			var effectiveRule = rule ?? EightCardRule.Default;
 			var actualOrder = order ?? hand.BattleSubHandOrder;
-			var (min, max) = GetBand(hand.BattleHandRank, actualOrder);
+			var (min, max) = GetBand(effectiveRule, hand.BattleHandRank, actualOrder);
 			var comps = hand.Components;
 
 			switch (hand.BattleHandRank)
@@ -424,7 +369,7 @@ namespace GenericPoker.EightCard
 				double score = 0;
 				for (int i = 0; i < subHandsCandidate.Count; i++)
 				{
-					score += GetSubHandWinRate(subHandsCandidate[i], subHandsCandidate[i].BattleSubHandOrder);
+					score += GetSubHandWinRate(subHandsCandidate[i], subHandsCandidate[i].BattleSubHandOrder, effectiveRule);
 				}
 
 				if (score > bestScore)

@@ -109,8 +109,9 @@ namespace GenericPoker
             // Select the best battle hand based on win rate / total power
             allBattleHands.Sort((h1, h2) =>
             {
-                double score1 = h1.SubHands.Sum(h => IWinRateHandArrangeStrategy.GetSubHandWinRate(h, h.BattleSubHandOrder));
-                double score2 = h2.SubHands.Sum(h => IWinRateHandArrangeStrategy.GetSubHandWinRate(h, h.BattleSubHandOrder));
+                var effectiveRule = _pokerHandCalculator?.Rule ?? EightCardRule.Default;
+                double score1 = h1.SubHands.Sum(h => IWinRateHandArrangeStrategy.GetSubHandWinRate(h, h.BattleSubHandOrder, effectiveRule));
+                double score2 = h2.SubHands.Sum(h => IWinRateHandArrangeStrategy.GetSubHandWinRate(h, h.BattleSubHandOrder, effectiveRule));
                 
                 int cmp = score2.CompareTo(score1);
                 if (cmp != 0) return cmp;

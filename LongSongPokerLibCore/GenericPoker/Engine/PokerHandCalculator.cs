@@ -292,6 +292,26 @@ namespace GenericPoker
 			}
 		}
 
+		
+		private bool _checkIfFlush(List<BasePokerCard> _inputCards)
+		{
+			if (_inputCards == null || _inputCards.Count == 0)
+			{
+				return false;
+			}
+
+			var firstSuit = _inputCards[0].Suit;
+			for (var i = 1; i < _inputCards.Count; i++)
+			{
+				if (_inputCards[i].Suit != firstSuit)
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		
 
 		/// <summary>
 		/// Groups all provided cards by their suit and filters those that meet the minimum count requirement.
@@ -336,6 +356,8 @@ namespace GenericPoker
 
 		}
 
+		
+		
 		
 
 		
@@ -508,6 +530,8 @@ namespace GenericPoker
                         RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster, new List<BasePokerCard>(), allPermutes);
                         foreach (var permute in allPermutes)
                         {
+	                        // if it's also flush, then skip it as the previous flushstraight already take care of such case.
+	                        if (_checkIfFlush(permute)) continue;
                             var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
                             currentHandCandidates.AddComp(newHandCandidateData);
                             var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
@@ -605,11 +629,11 @@ namespace GenericPoker
 			return BaseCompType.None;
 		}
 		
-		//===================================================================
-		//===================================================================
-		//======== The codes from below are For unit Test only ==============
-		//===================================================================
-		//===================================================================
+		//==================================================================================================================================
+		//==================================================================================================================================
+		//======== The codes from below are For unit Test only =============================================================================
+		//==================================================================================================================================
+		//==================================================================================================================================
 		private List<PokerCardComponent> ListsToPokerComp(List<List<BasePokerCard>> inputListInList,
 			BaseCompType pokerCardCompRank)
 		{
