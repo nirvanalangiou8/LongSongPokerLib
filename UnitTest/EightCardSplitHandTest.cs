@@ -87,8 +87,7 @@ namespace UnitTest
             {
                 "9❤️,10🔶,K❤️,J❤️,9🔶,3🔶,Q❤️,Q🔶",
                 "{[9❤️,9🔶],Q🔶}#{[K❤️,Q❤️,J❤️],10🔶,3🔶}"
-            }
-            
+            },
         };
 
         [Test, TestCaseSource(nameof(SevenTestCases))]

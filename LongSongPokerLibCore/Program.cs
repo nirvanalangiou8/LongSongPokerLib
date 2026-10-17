@@ -33,11 +33,11 @@ namespace LongSongPokerLibCore
                     ICardRule selectedRule = EightCardRule.Default;
                     if (args.Length >= 4 && int.TryParse(args[3], out int cardCount))
                     {
-                        selectedRule = cardCount == 9 ? NineCardRule.Default : EightCardRule.Default;
+                        selectedRule = cardCount == 9 ? NineCardTwoHandRule.Default : EightCardRule.Default;
                     }
                     else if (args.Length >= 2 && (args[1].Contains("9cards") || args[1].Contains("9_cards") || args[1].Contains("9card")))
                     {
-                        selectedRule = NineCardRule.Default;
+                        selectedRule = NineCardTwoHandRule.Default;
                     }
 
                     if (args.Length >= 3)
@@ -52,7 +52,7 @@ namespace LongSongPokerLibCore
                     {
                         // Explicitly run with 8-card or 9-card rule
                         PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_8cards.csv", "twohands_prob_8cards.csv", new EightCardRule());
-                        PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "twohands_prob_9cards.csv", new NineCardRule());
+                        PostSimStatHandSplitProbAna.Run("G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data\\stats_result_9cards.csv", "twohands_prob_9cards.csv", new NineCardTwoHandRule());
                         
                     }
                     break;
@@ -103,37 +103,77 @@ namespace LongSongPokerLibCore
         static void ReviewHandSplit()
         {
             Console.WriteLine("=== Review Hand Split ===");
+            Console.WriteLine("Select game mode:");
+            Console.WriteLine("1. 8card_2hands (8 cards, 2 hands)");
+            Console.WriteLine("2. 9card_3hands (9 cards, 3 hands)");
+            Console.Write("Choice [1/2] (Default: 1): ");
+
+            ICardRule rule = EightCardRule.Default;
+            int cardCount = 8;
+            string modeName = "8card_2hands";
+
+            while (true)
+            {
+                var key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.D1 || key.Key == ConsoleKey.NumPad1 || key.KeyChar == '1' || key.Key == ConsoleKey.Enter)
+                {
+                    rule = EightCardRule.Default;
+                    cardCount = 8;
+                    modeName = "8card_2hands";
+                    Console.WriteLine("1 (8card_2hands)");
+                    break;
+                }
+                else if (key.Key == ConsoleKey.D2 || key.Key == ConsoleKey.NumPad2 || key.KeyChar == '2')
+                {
+                    rule = NineCardThreeHandRule.Default;
+                    cardCount = 9;
+                    modeName = "9card_3hands";
+                    Console.WriteLine("2 (9card_3hands)");
+                    break;
+                }
+                else if (key.Key == ConsoleKey.Q || key.Key == ConsoleKey.Escape)
+                {
+                    Console.WriteLine("\nExiting Review Hand Split.");
+                    return;
+                }
+            }
+
+            Console.WriteLine($"\n--- Mode: {modeName} ---");
             Console.WriteLine("(Press [Space] for next hand, [D] to save debug/issue hand, [G] to save good case, [Q] or [Esc] to quit)\n");
 
             XRandom.Init((ulong)DateTime.UtcNow.Ticks);
-            var gameManager = new ConsolePlayManager(EightCardRule.Default, cardsPerPlayer: 8);
+            var gameManager = new ConsolePlayManager(rule, cardsPerPlayer: cardCount);
             string issueFilePath = "issue_hands.txt";
             int roundCount = 0;
 
             while (true)
             {
                 roundCount++;
-                string inputCardStr = gameManager.DealHandString(8);
+                string inputCardStr = gameManager.DealHandString(cardCount);
 
                 Console.WriteLine($"\n------ Round #{roundCount} ------");
                 Console.WriteLine($"Input Cards: {inputCardStr}");
 
-                var battleHands = new BaseBattleHands(inputCardStr);
+                var battleHands = new BaseBattleHands(inputCardStr, rule);
                 var resHand = battleHands.GetArrangeHands();
 
-                // Display front hand result
-                Console.WriteLine("\n=== Front Hand ===");
-                Console.WriteLine($"Rank: {resHand.FrontHand.BattleHandRank}");
-                Console.Write("Cards: ");
-                Console.WriteLine(resHand.FrontHand.GetHandString());
+                for (int i = 0; i < resHand.SubHands.Count; i++)
+                {
+                    var subHand = resHand.SubHands[i];
+                    string handTitle = resHand.SubHands.Count switch
+                    {
+                        2 => i == 0 ? "Front Hand" : "Back Hand",
+                        3 => i == 0 ? "Front Hand" : (i == 1 ? "Middle Hand" : "Back Hand"),
+                        _ => $"Hand #{i + 1}"
+                    };
 
-                // Display back hand result
-                Console.WriteLine("\n=== Back Hand ===");
-                Console.WriteLine($"Rank: {resHand.BackHand.BattleHandRank}");
-                Console.Write("Cards: ");
-                Console.WriteLine(resHand.BackHand.GetHandString());
+                    Console.WriteLine($"\n=== {handTitle} ===");
+                    Console.WriteLine($"Rank: {subHand.BattleHandRank}");
+                    Console.Write("Cards: ");
+                    Console.WriteLine(subHand.GetHandString());
+                }
 
-                string outputCardStr = $"{{{resHand.FrontHand.GetHandString(",")}}}#{{{resHand.BackHand.GetHandString(",")}}}";
+                string outputCardStr = string.Join("#", resHand.SubHands.Select(h => $"{{{h.GetHandString(",")}}}"));
                 Console.WriteLine($"\nSplit: {outputCardStr}");
 
                 Console.WriteLine("\n[Space] Next hand | [D] Save debug hand | [G] Save good hand | [Q/Esc] Quit");

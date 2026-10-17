@@ -18,7 +18,7 @@ namespace UnitTest
             Assert.That(eightCardRule.MinKindCount, Is.EqualTo(2));
             Assert.That(eightCardRule.CardCount, Is.EqualTo(8));
 
-            var nineCardRule = new NineCardRule();
+            var nineCardRule = new NineCardTwoHandRule();
             Assert.That(nineCardRule.MinStraightCount, Is.EqualTo(5));
             Assert.That(nineCardRule.MinFlushCount, Is.EqualTo(5));
             Assert.That(nineCardRule.MinFlushStraightCount, Is.EqualTo(3));
@@ -78,6 +78,33 @@ namespace UnitTest
             Assert.That(rule.AssembleHandRank(new[] { BaseCompType.ThreeCardsFlushStraight, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.Mansion));
             Assert.That(rule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
             Assert.That(rule.AssembleHandRank(System.Array.Empty<BaseCompType>()), Is.EqualTo(PokerOverAllHandRank.Nothing));
+        }
+
+        [Test]
+        public void TestAssembleHandRankWithSubHandOrder()
+        {
+            var nineCardRule = new NineCardTwoHandRule();
+            // First hand in NineCardRule cannot have > 1 component
+            Assert.That(nineCardRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Pair));
+            Assert.That(nineCardRule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
+            // Second hand in NineCardRule allows 2 components (TwoPairs)
+            Assert.That(nineCardRule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
+
+            var threeHandRule = new NineCardThreeHandRule();
+            // 1-card Front hand cannot have any multi-card components
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.None));
+            Assert.That(threeHandRule.AssembleHandRank(System.Array.Empty<BaseCompType>(), BattleSubHandOrder.FirstHand), Is.EqualTo(PokerOverAllHandRank.Nothing));
+
+            // 3-card Middle hand allows Pair, Trips, TwoPairs, but not 4+ card components or FullHouse
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.Pair));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.ThreeOfKind));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.Pair, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.TwoPairs));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.None));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }, BattleSubHandOrder.SecondHand), Is.EqualTo(PokerOverAllHandRank.None));
+
+            // 5-card Back hand allows FullHouse, TwoPairs, Straight, etc.
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.ThreeOfKind, BaseCompType.Pair }, BattleSubHandOrder.ThirdHand), Is.EqualTo(PokerOverAllHandRank.FullHouse));
+            Assert.That(threeHandRule.AssembleHandRank(new[] { BaseCompType.FiveCardsStraight }, BattleSubHandOrder.ThirdHand), Is.EqualTo(PokerOverAllHandRank.FiveCardsStraight));
         }
         
         

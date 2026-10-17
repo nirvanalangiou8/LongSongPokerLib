@@ -12,11 +12,13 @@ namespace GenericPoker
         int MinKindCount { get; set;}
         
         int CardCount { get;}
+        int TotalCardCount => CardCount;
         
-        Dictionary<BattleSubHandOrder, int> SubHandsCardCount { get; }
+        IReadOnlyList<SubHandSlotConfig> SubHandSlots { get; set; }
+        Dictionary<BattleSubHandOrder, int> SubHandsCardCount { get; set; }
 
-        PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components);
-        PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components) => AssembleHandRank(components?.Select(c => c.CompType));
-        PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerCardComponent>? components) => AssembleHandRank(components?.Select(c => c.CompRank));
+        PokerOverAllHandRank AssembleHandRank(IEnumerable<BaseCompType>? components, BattleSubHandOrder? subHandOrder = null);
+        PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerComponents>? components, BattleSubHandOrder? subHandOrder = null) => AssembleHandRank(components?.Select(c => c.CompType), subHandOrder);
+        PokerOverAllHandRank AssembleHandRank(IEnumerable<PokerCardComponent>? components, BattleSubHandOrder? subHandOrder = null) => AssembleHandRank(components?.Select(c => c.CompRank), subHandOrder);
     }
 }

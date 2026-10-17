@@ -120,7 +120,7 @@ namespace GenericPoker.CardSimStatAnalysis
             string resolvedInputPath = ResolveInputPath(inputPath);
             string resolvedOutputPath = ResolveOutputPath(outputPath, resolvedInputPath);
 
-            var effectiveRule = rule ?? ((resolvedInputPath.Contains("9cards") || resolvedInputPath.Contains("9_cards") || resolvedInputPath.Contains("9card")) ? NineCardRule.Default : EightCardRule.Default);
+            var effectiveRule = rule ?? ((resolvedInputPath.Contains("9cards") || resolvedInputPath.Contains("9_cards") || resolvedInputPath.Contains("9card")) ? NineCardTwoHandRule.Default : EightCardRule.Default);
 
             if (!File.Exists(resolvedInputPath))
             {

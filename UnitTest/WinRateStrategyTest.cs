@@ -110,8 +110,12 @@ namespace UnitTest
                 Cards = new List<BasePokerCard> { card3, card4, card5 }
             };
 
-            var (first, second) = strategy.ArrangeComps(new List<PokerCardComponent> { comp1, comp2 });
+            var hands = strategy.ArrangeComps(new List<PokerCardComponent> { comp1, comp2 });
 
+            Assert.That(hands, Is.Not.Null);
+            Assert.That(hands.Count, Is.EqualTo(2));
+            var first = hands[0];
+            var second = hands[1];
             Assert.That(first, Is.Not.Null);
             Assert.That(second, Is.Not.Null);
             Assert.That(first.BattleSubHandOrder, Is.EqualTo(BattleSubHandOrder.FirstHand));

@@ -61,7 +61,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
 
             try
             {
-                PostSimStatHandSplitProbAna.Run(SourceData9CardsPath, tempOutputPath, new NineCardRule());
+                PostSimStatHandSplitProbAna.Run(SourceData9CardsPath, tempOutputPath, new NineCardTwoHandRule());
 
                 Assert.That(File.Exists(tempOutputPath), Is.True, $"File {tempOutputPath} does not exist");
 

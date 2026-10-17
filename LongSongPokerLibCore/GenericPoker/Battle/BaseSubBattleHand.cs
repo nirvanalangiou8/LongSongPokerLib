@@ -167,9 +167,23 @@ namespace GenericPoker
 
             if (BattleHandRank != other.BattleHandRank)
             {
-                int myPower = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((_battleSubHandOrder, BattleHandRank), out var p1) ? p1 : HandPower;
-                int otherPower = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((other._battleSubHandOrder, other.BattleHandRank), out var p2) ? p2 : other.HandPower;
-                if (myPower != otherPower) return myPower.CompareTo(otherPower);
+                bool hasP1 = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((_battleSubHandOrder, BattleHandRank), out var p1);
+                bool hasP2 = PokerConst.EightCardsBattleHandPowerDict.TryGetValue((other._battleSubHandOrder, other.BattleHandRank), out var p2);
+
+                if (hasP1 && hasP2)
+                {
+                    if (p1 != p2) return p1.CompareTo(p2);
+                }
+                else
+                {
+                    int myPower = _handPower != 0 ? _handPower : (hasP1 ? p1 : 0);
+                    int otherPower = other._handPower != 0 ? other._handPower : (hasP2 ? p2 : 0);
+                    if (myPower != 0 && otherPower != 0 && myPower != otherPower)
+                    {
+                        return myPower.CompareTo(otherPower);
+                    }
+                }
+
                 return BattleHandRank.CompareTo(other.BattleHandRank);
             }
 

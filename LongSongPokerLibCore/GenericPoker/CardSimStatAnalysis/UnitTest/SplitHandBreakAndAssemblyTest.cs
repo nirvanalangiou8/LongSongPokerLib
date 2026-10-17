@@ -182,7 +182,7 @@ namespace GenericPoker.CardSimStatAnalysis.UnitTest
         [TestCase("NineCardsFlushStraight", "[Nothing,NineCardsFlushStraight],[ThreeCardsFlushStraight,SixCardsFlushStraight],[FourCardsFlushStraight,FiveCardsFlushStraight]")]
         public void Test9CardsSplitHandBreakAndAssembly(string handName, string expectedSolutions)
         {
-            string actualSolutions = SplitHandToString(handName, new NineCardRule());
+            string actualSolutions = SplitHandToString(handName, new NineCardTwoHandRule());
             Assert.That(actualSolutions, Is.EqualTo(expectedSolutions), $"Mismatch for 9-card hand: {handName}");
         }
 

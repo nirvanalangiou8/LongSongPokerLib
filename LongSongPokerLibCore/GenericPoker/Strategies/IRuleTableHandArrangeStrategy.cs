@@ -8,7 +8,7 @@ namespace GenericPoker.EightCard
     public class RuleTableStrategy : IBaseHandArrangeStrategy
 	{
 
-		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
+		public IReadOnlyList<BaseSubBattleHand> ArrangeComps(
 			List<PokerCardComponent> comps,
 			List<BasePokerCard>? remainingCards = null,
 			ICardRule? rule = null)
@@ -43,16 +43,14 @@ namespace GenericPoker.EightCard
 							    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 						{
 							var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0], remainingComps[1]);
-							(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
-							return (firstBattleHand, secondBattleHand);
+							return FinalizeHands(firstHand, secondHand);
 						}
 					}
 					else if (remainingComps.Count == 1)
 					{
 						var secondRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
 						var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0]);
-						(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
-						return (firstBattleHand, secondBattleHand);
+						return FinalizeHands(firstHand, secondHand);
 					}
 				}
 			}
@@ -77,29 +75,38 @@ namespace GenericPoker.EightCard
 						    (remainingComps[0].CompRank, remainingComps[1].CompRank), out var secondRank))
 					{
 						var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0], remainingComps[1]);
-						(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
-						return (firstBattleHand, secondBattleHand);
+						return FinalizeHands(firstHand, secondHand);
 					}
 				}
 				else if (remainingComps.Count == 1)
 				{
 					var secondRank = PokerHandStructure.ConvertCompRankToBattleRank(remainingComps[0].CompRank);
 					var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, secondRank, secondCount, remainingComps[0]);
-					(firstBattleHand, secondBattleHand) = FinalizeHands(firstHand, secondHand);
-					return (firstBattleHand, secondBattleHand);
+					return FinalizeHands(firstHand, secondHand);
 				}
 			}
 
-			return (firstBattleHand, secondBattleHand);
+			return FinalizeHands(firstBattleHand, secondBattleHand);
 		}
 
-		private (BaseSubBattleHand, BaseSubBattleHand) FinalizeHands(BaseSubBattleHand first, BaseSubBattleHand second)
+		private IReadOnlyList<BaseSubBattleHand> FinalizeHands(BaseSubBattleHand? first, BaseSubBattleHand? second)
 		{
+			var list = new List<BaseSubBattleHand>();
+			if (first == null && second == null) return list;
+			if (first == null) { list.Add(second!); return list; }
+			if (second == null) { list.Add(first); return list; }
+
 			if (first > second)
 			{
-				return (second, first);
+				list.Add(second);
+				list.Add(first);
 			}
-			return (first, second);
+			else
+			{
+				list.Add(first);
+				list.Add(second);
+			}
+			return list;
 		}
 	}
 }

@@ -24,7 +24,7 @@ namespace UnitTest
             Assert.That(eightCardRule.MinFlushStraightCount, Is.EqualTo(3));
             Assert.That(eightCardRule.MinKindCount, Is.EqualTo(2));
 
-            ICardRule nineCardRule = NineCardRule.Default;
+            ICardRule nineCardRule = NineCardThreeHandRule.Default;
             Assert.That(nineCardRule.CardCount, Is.EqualTo(9));
             Assert.That(nineCardRule.MinStraightCount, Is.EqualTo(5));
             Assert.That(nineCardRule.MinFlushCount, Is.EqualTo(5));

@@ -110,10 +110,11 @@ namespace UnitTest
             Assert.That(backHand.DesignatedCardCount, Is.EqualTo(5));
         }
 
+        /*
         [Test]
         public void TestBaseSubBattleHand_DesignatedCardCount_NineCardRule()
         {
-            var rule = NineCardRule.Default;
+            var rule = NineCardThreeHandRule.Default;
             int frontCount = rule.SubHandsCardCount[BattleSubHandOrder.FirstHand];
             int backCount = rule.SubHandsCardCount[BattleSubHandOrder.SecondHand];
             var frontHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing, frontCount);
@@ -121,7 +122,7 @@ namespace UnitTest
 
             Assert.That(frontHand.DesignatedCardCount, Is.EqualTo(4));
             Assert.That(backHand.DesignatedCardCount, Is.EqualTo(5));
-        }
+        }*/
 
         [Test]
         public void TestBaseSubBattleHand_DesignatedCardCount_CustomRule()

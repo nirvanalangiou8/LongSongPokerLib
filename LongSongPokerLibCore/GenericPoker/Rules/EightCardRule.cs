@@ -13,10 +13,10 @@ namespace GenericPoker
             MinFlushCount = 5;
             MinFlushStraightCount = 3;
             MinKindCount = 2;
-            SubHandsCardCount = new Dictionary<BattleSubHandOrder, int>
+            SubHandSlots = new List<SubHandSlotConfig>
             {
-                { BattleSubHandOrder.FirstHand, 3 },
-                { BattleSubHandOrder.SecondHand, 5 }
+                new(BattleSubHandOrder.FirstHand, 3, "Front"),
+                new(BattleSubHandOrder.SecondHand, 5, "Back")
             };
         }
         /*

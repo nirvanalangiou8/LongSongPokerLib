@@ -8,7 +8,7 @@ namespace GenericPoker.EightCard
 {
     public class BalancedStrategy : IBaseHandArrangeStrategy
     {
-        public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
+        public IReadOnlyList<BaseSubBattleHand> ArrangeComps(
             List<PokerCardComponent> comps,
             List<BasePokerCard>? remainingCards = null,
             ICardRule? rule = null)
@@ -50,7 +50,10 @@ namespace GenericPoker.EightCard
                     PokerHandStructure.ConvertCompRankToBattleRank(comps[0].CompRank), secondCount, comps[0]);
             }
 
-            return (firstBattleHand, secondBattleHand);
+            var result = new List<BaseSubBattleHand>();
+            if (firstBattleHand != null) result.Add(firstBattleHand);
+            if (secondBattleHand != null) result.Add(secondBattleHand);
+            return result;
         }
     }
 }

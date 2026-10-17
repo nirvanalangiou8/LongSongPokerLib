@@ -92,6 +92,7 @@ namespace GenericPoker.EightCard
 		/// <summary>
 		/// 取得某牌型在 Front 或 Back 手牌 CDF 上的機率區間 (min, max)。查不到時退回對應的 Nothing 區間。
 		/// </summary>
+		// TODO : this is temoparly to let 2nd and 3rd use same table, will later provide correct formal 3rd hand table if our run is three hands.
 		private static (double min, double max) GetBand(PokerOverAllHandRank rank, BattleSubHandOrder order = BattleSubHandOrder.SecondHand)
 		{
 			var dict = order == BattleSubHandOrder.FirstHand ? FrontCdfBandDict : BackCdfBandDict;
@@ -273,7 +274,11 @@ namespace GenericPoker.EightCard
 			if (sortedKickers == null || sortedKickers.Count == 0) return;
 
 			var kickers = new List<BasePokerCard>(sortedKickers);
-
+			
+			/*// 1. Search the starting point to distribute:
+			// Plan an array to store the weighting. The first hand adds 0 weight, the second hand adds 1 weight, the third hand adds 2 weight, etc.
+			// Then if the sub hand has rank >= pair, add one extra weight.
+			// Find the largest weight point slot (subhand) to start with.*/
 			int currentFindIndex = 0;
 			int lastIndex = subHands.Count - 1;
 			while (currentFindIndex < lastIndex)
@@ -303,27 +308,6 @@ namespace GenericPoker.EightCard
 			}
 
 			int startIndex = currentFindIndex;
-		
-			
-			
-			/*// 1. Search the starting point to distribute:
-			// Plan an array to store the weighting. The first hand adds 0 weight, the second hand adds 1 weight, the third hand adds 2 weight, etc.
-			// Then if the sub hand has rank >= pair, add one extra weight.
-			// Find the largest weight point slot (subhand) to start with.*/
-			
-			/*
-			int startIndex = Enumerable.Range(0, subHands.Count)
-				.MaxBy(i =>
-				{
-					
-					// 牌型 > Pair 歸零 (0)；其餘牌型賦予 1-based 位置權重 (i + 1)
-					int weight = subHands[i].BattleHandRank >= PokerOverAllHandRank.Pair ? -i : i ;
-
-					// 回傳 (Weight, Index)：確保相同權重時結果唯一（由較大的 index 勝出）
-					return (Weight: weight, Index: i);
-					
-				});*/
-			
 
 			int moveStep = -1;
 			bool firstTimeDistribute = true;
@@ -353,203 +337,153 @@ namespace GenericPoker.EightCard
 			
 		}
 
-		/*public static void DistributeKickers_old(BaseSubBattleHand firstHand, BaseSubBattleHand secondHand, List<BasePokerCard> sortedKickers)
-		 
-		 int GetTargetCapacity(int idx)
-			{
-				var h = subHands[idx];
-				if (h == null) return 0;
-				if ((int)h.BattleSubHandOrder > 0) return (int)h.BattleSubHandOrder;
-				return idx == 0 ? 3 : 5;
-			}
-
-			void PlaceOneCard(int idx)
-			{
-				if (kickers.Count == 0) return;
-				var h = subHands[idx];
-				if (h == null) return;
-				int cap = GetTargetCapacity(idx);
-				if (h.Cards.Count < cap)
-				{
-					h.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-			}
-
-			void FillHandUntilFull(int idx)
-			{
-				var h = subHands[idx];
-				if (h == null) return;
-				int cap = GetTargetCapacity(idx);
-				while (kickers.Count > 0 && h.Cards.Count < cap)
-				{
-					h.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-			}
-
-			// 2. When choose start point, always place one card from distributed pool to the subhand,
-			// but if the subhand is the first hand, always fill the card until that subhand is full for designated hand count.
-			// 3. Then move to first hand direction, and if it hit the dead end of first hand, then bounce back and make the moving direction in opposite way.
-			// 4. If ever hit the deadend when travel to distributed, after that always fill/distributed hand until its full.
-			if (startIndex == 0)
-			{
-				FillHandUntilFull(0);
-				for (int i = 1; i < subHands.Count && kickers.Count > 0; i++)
-				{
-					FillHandUntilFull(i);
-				}
-			}
-			else
-			{
-				PlaceOneCard(startIndex);
-
-				for (int i = startIndex - 1; i > 0 && kickers.Count > 0; i--)
-				{
-					PlaceOneCard(i);
-				}
-
-				if (kickers.Count > 0)
-				{
-					FillHandUntilFull(0);
-				}
-
-				for (int i = 1; i < subHands.Count && kickers.Count > 0; i++)
-				{
-					FillHandUntilFull(i);
-				}
-			}
-		 
-		{
-			if (firstHand == null || secondHand == null) return;
-			if (sortedKickers == null || sortedKickers.Count == 0) return;
-
-			var kickers = new List<BasePokerCard>(sortedKickers);
-
-			if (secondHand > firstHand)
-			{
-				while (kickers.Count > 0 && firstHand.Cards.Count < 3)
-				{
-					firstHand.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-
-				while (kickers.Count > 0 && secondHand.Cards.Count < 5)
-				{
-					secondHand.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-			}
-			else
-			{
-				if (secondHand.Cards.Count < 5 && kickers.Count > 0)
-				{
-					secondHand.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-
-				while (kickers.Count > 0 && firstHand.Cards.Count < 3)
-				{
-					firstHand.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-
-				while (kickers.Count > 0 && secondHand.Cards.Count < 5)
-				{
-					secondHand.Cards.Add(kickers[0]);
-					kickers.RemoveAt(0);
-				}
-			}
-		}*/
 		
-		
-		public (BaseSubBattleHand firstBattleHand, BaseSubBattleHand secondBattleHand) ArrangeComps(
+		public IReadOnlyList<BaseSubBattleHand> ArrangeComps(
 			List<PokerCardComponent> comps,
 			List<BasePokerCard>? remainingCards = null,
 			ICardRule? rule = null)
 		{
 			var effectiveRule = rule ?? EightCardRule.Default;
-			int firstCount = effectiveRule?.SubHandsCardCount != null &&
-			                 effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.FirstHand, out var fc) ? fc : 3;
-			int secondCount = effectiveRule?.SubHandsCardCount != null &&
-			                  effectiveRule.SubHandsCardCount.TryGetValue(BattleSubHandOrder.SecondHand, out var sc) ? sc : 5;
+			var slots = effectiveRule.SubHandSlots;
+
 			var sortedRemainingCards = remainingCards != null
 				? remainingCards.OrderByDescending(c => c.PokerCardPower).ToList()
 				: new List<BasePokerCard>();
 
-			BaseSubBattleHand bestFirst = null;
-			BaseSubBattleHand bestSecond = null;
-			double bestScore = double.NegativeInfinity;
-
 			if (comps == null || comps.Count == 0)
 			{
-				var firstHand = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing, firstCount);
-				var secondHand = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing, secondCount);
-				DistributeKickers(firstHand, secondHand, sortedRemainingCards);
-				return (firstHand, secondHand);
+				var fallbackHands = slots.Select(s => new BaseSubBattleHand(s.Order, PokerOverAllHandRank.Nothing, s.CardCount)).ToList();
+				DistributeKickers(fallbackHands, sortedRemainingCards);
+				return fallbackHands;
 			}
 
-			int maxFrontCount = comps.Count;
-			for (int selectCount = 0; selectCount <= maxFrontCount; selectCount++)
+			List<BaseSubBattleHand>? bestSubHands = null;
+			double bestScore = double.NegativeInfinity;
+
+			var allPartitions = GenerateSlotPartitions(comps, slots.Count);
+
+			allPartitions = allPartitions.Where(partition =>
 			{
-				var possibleGroups = UtilFunc.GetPermutationAllowedDuplicated(comps, selectCount);
-				foreach (var group in possibleGroups)
+				bool hasSeenNonZero = false;
+				for (int i = 0; i < partition.Count; i++)
 				{
-					var frontGroup = group.Selected;
-					var backGroup = group.Remaining;
+					if (partition[i].Count > 0)
+					{
+						hasSeenNonZero = true;
+					}
+					// when come to here, it implied this partition count is zero, and if previous see none-zero,
+					// got the invalid case so filter it out by set it false
+					else if (hasSeenNonZero)
+					{
+						return false;
+					}
+				}
+				return true;
+			}).ToList();
+			
+			
 
-					var frontRank = effectiveRule.AssembleHandRank(frontGroup);
-					var backRank = effectiveRule.AssembleHandRank(backGroup);
+			foreach (var partition in allPartitions)
+			{
+				bool validRanks = true;
+				var subHandsCandidate = new List<BaseSubBattleHand>();
 
-					// If either rank is None, it is an invalid split; skip it.
-					if (frontRank == PokerOverAllHandRank.None || backRank == PokerOverAllHandRank.None)
-						continue;
+				for (int i = 0; i < slots.Count; i++)
+				{
+					var slot = slots[i];
+					var slotComps = partition[i];
 
-					// Check if ranks are supported in power dictionary
-					if (!PokerConst.EightCardsBattleHandPowerDict.ContainsKey((BattleSubHandOrder.FirstHand, frontRank)) ||
-					    !PokerConst.EightCardsBattleHandPowerDict.ContainsKey((BattleSubHandOrder.SecondHand, backRank)))
-						continue;
+					var rank = effectiveRule.AssembleHandRank(slotComps, slot.Order);
+					if (rank == PokerOverAllHandRank.None)
+					{
+						validRanks = false;
+						break;
+					}
 
-					var handA = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, frontRank, firstCount, frontGroup.ToArray());
-					var handB = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, backRank, secondCount, backGroup.ToArray());
+					var hand = new BaseSubBattleHand(slot.Order, rank, slot.CardCount, slotComps.ToArray());
+					subHandsCandidate.Add(hand);
+				}
 
-					DistributeKickers(handA, handB, sortedRemainingCards);
+				if (!validRanks) continue;
 
-					// Front hand cannot be stronger than back hand
-					if (handA > handB)
-						continue;
+				DistributeKickers(subHandsCandidate, sortedRemainingCards);
 
-					double score = GetSubHandWinRate(handA, BattleSubHandOrder.FirstHand) +
-					               GetSubHandWinRate(handB, BattleSubHandOrder.SecondHand);
+				// Deployment ordering check: subHands[0] <= subHands[1] <= ... <= subHands[N-1]
+				bool validDeployment = true;
+				for (int i = 0; i < subHandsCandidate.Count - 1; i++)
+				{
+					if (subHandsCandidate[i] > subHandsCandidate[i + 1])
+					{
+						validDeployment = false;
+						break;
+					}
+				}
 
-					if (score > bestScore)
+				if (!validDeployment) continue;
+
+				double score = 0;
+				for (int i = 0; i < subHandsCandidate.Count; i++)
+				{
+					score += GetSubHandWinRate(subHandsCandidate[i], subHandsCandidate[i].BattleSubHandOrder);
+				}
+
+				if (score > bestScore)
+				{
+					bestScore = score;
+					bestSubHands = subHandsCandidate;
+				}
+				else if (Math.Abs(score - bestScore) < 1e-9 && bestSubHands != null)
+				{
+					var currentBattle = new BaseBattleHands(subHandsCandidate);
+					var bestBattle = new BaseBattleHands(bestSubHands);
+					if (currentBattle > bestBattle)
 					{
 						bestScore = score;
-						bestFirst = handA;
-						bestSecond = handB;
-					}
-					else if (Math.Abs(score - bestScore) < 1e-9 && bestFirst != null && bestSecond != null)
-					{
-						var currentBattle = new BaseBattleHands(handA, handB);
-						var bestBattle = new BaseBattleHands(bestFirst, bestSecond);
-						if (currentBattle > bestBattle)
-						{
-							bestScore = score;
-							bestFirst = handA;
-							bestSecond = handB;
-						}
+						bestSubHands = subHandsCandidate;
 					}
 				}
 			}
 
-			if (bestFirst == null || bestSecond == null)
+			if (bestSubHands == null)
 			{
-				bestFirst = new BaseSubBattleHand(BattleSubHandOrder.FirstHand, PokerOverAllHandRank.Nothing, firstCount);
-				bestSecond = new BaseSubBattleHand(BattleSubHandOrder.SecondHand, PokerOverAllHandRank.Nothing, secondCount);
-				DistributeKickers(bestFirst, bestSecond, sortedRemainingCards);
+				bestSubHands = slots.Select(s => new BaseSubBattleHand(s.Order, PokerOverAllHandRank.Nothing, s.CardCount)).ToList();
+				DistributeKickers(bestSubHands, sortedRemainingCards);
 			}
 
-			return (bestFirst, bestSecond);
+			return bestSubHands;
+		}
+
+		private static List<List<List<PokerCardComponent>>> GenerateSlotPartitions(List<PokerCardComponent> comps, int slotCount)
+		{
+			var results = new List<List<List<PokerCardComponent>>>();
+			var current = new List<List<PokerCardComponent>>();
+			for (int i = 0; i < slotCount; i++)
+			{
+				current.Add(new List<PokerCardComponent>());
+			}
+
+			void PartitionHelper(int compIndex)
+			{
+				if (compIndex == comps.Count)
+				{
+					var copy = current.Select(slot => new List<PokerCardComponent>(slot)).ToList();
+					results.Add(copy);
+					return;
+				}
+
+				var comp = comps[compIndex];
+				for (int slotIdx = 0; slotIdx < slotCount; slotIdx++)
+				{
+					current[slotIdx].Add(comp);
+					PartitionHelper(compIndex + 1);
+					current[slotIdx].RemoveAt(current[slotIdx].Count - 1);
+				}
+			}
+
+			PartitionHelper(0);
+			return results;
 		}
 	}
 }
+
+
