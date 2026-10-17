@@ -237,6 +237,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return comps.OrderByDescending(c => c.Power).ToList();
         }
 
+        /*
         public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
             List<PokerComponents> comps,
             int minFlushStraightCards = -1,
@@ -245,7 +246,7 @@ namespace GenericPoker.CardSimStatAnalysis
             int minKindCards = -1)
         {
             return SplitHand(comps, null, minFlushStraightCards, minFlushCards, minStraightCards, minKindCards);
-        }
+        }*/
 
         public static List<(PokerOverAllHandRank, PokerOverAllHandRank)> SplitHand(
             List<PokerComponents> comps,
