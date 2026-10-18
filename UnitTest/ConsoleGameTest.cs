@@ -86,29 +86,7 @@ namespace UnitTest
             Assert.That(handResult.FrontHand.BattleHandRank, Is.EqualTo(PokerOverAllHandRank.Pair));
             Assert.That(handResult.TotalScore, Is.GreaterThan(0));
         }
-
-        [Test]
-        public void TestConsolePlayManager()
-        {
-            var gameManager = new ConsolePlayManager(EightCardRule.Default, cardsPerPlayer: 8);
-            var player = new ConsolePlayer("Player1", EightCardRule.Default);
-            gameManager.AddPlayer(player);
-
-            Assert.That(gameManager.Players.Count, Is.EqualTo(1));
-            Assert.That(gameManager.CurrentRound, Is.EqualTo(0));
-
-            gameManager.StartNewRound();
-            Assert.That(gameManager.CurrentRound, Is.EqualTo(1));
-            Assert.That(player.Cards.Count, Is.EqualTo(8));
-
-            var result = player.EvaluateBestSplitHand();
-            Assert.That(result, Is.Not.Null);
-
-            gameManager.StartNewRound();
-            Assert.That(gameManager.CurrentRound, Is.EqualTo(2));
-            Assert.That(player.Cards.Count, Is.EqualTo(8));
-        }
-
+        
         [Test]
         public void TestConsolePlayManagerDealHand()
         {

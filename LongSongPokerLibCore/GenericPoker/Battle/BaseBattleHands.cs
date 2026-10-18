@@ -48,6 +48,14 @@ namespace GenericPoker
             _subHands = new List<BaseSubBattleHand>();
         }
 
+        public BaseBattleHands(IEnumerable<BasePokerCard> cards, ICardRule? rule = null)
+        {
+            _pokerHandCalculator = new PokerHandCalculator(rule);
+            _pokerHandCalculator.SetupCards(cards.ToList());
+            _allPokerCards = _pokerHandCalculator.AllPokerCards;
+            _subHands = new List<BaseSubBattleHand>();
+        }
+
         /// <summary>
         /// Checks if this deployment satisfies poker hand ordering rules (no foul hand / 倒水).
         /// Typically: SubHand[0] <= SubHand[1] <= ... <= SubHand[N-1]

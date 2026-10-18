@@ -22,17 +22,6 @@ namespace GenericPoker
             StatDict = new Dictionary<string, int>();
         }
 
-        public ConsolePlayManager(IPlayerFactory<ConsolePlayer> playerFactory, int cardsPerPlayer = 8, int cardDecks = 1, ICardRule? rule = null)
-            : this(rule, cardsPerPlayer, cardDecks)
-        {
-            int totalPlayers = Dealer.TotalCards / cardsPerPlayer;
-            for (var i = 1; i <= totalPlayers; i++)
-            {
-                string playerName = $"Player#{i}";
-                var player = playerFactory.Create(playerName);
-                Players.Add(player);
-            }
-        }
 
         public void AddPlayer(ConsolePlayer player)
         {
