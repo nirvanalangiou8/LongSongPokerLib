@@ -12,6 +12,7 @@ namespace GenericPoker
         public int CardsPerPlayer { get; set; }
         public int CurrentRound { get; protected set; }
         public Dictionary<string, int> StatDict { get; protected set; }
+        public bool Silent { get; set; } = false;
 
         public ConsolePlayManager(ICardRule? rule = null, int cardsPerPlayer = 8, int cardDecks = 1)
         {
@@ -28,11 +29,14 @@ namespace GenericPoker
             Players.Add(player);
         }
 
-        public bool CheckAndReshuffleIfNeeded(int requiredCards)
+        public bool CheckAndReshuffleIfNeeded(int requiredCards, bool? silent = null)
         {
             if (Dealer.RemainingCards.Count < requiredCards)
             {
-                Console.WriteLine($"牌堆不足 {requiredCards} 張，將棄牌重新洗牌補回牌堆... (reshuffle)\n");
+                if (!(silent ?? Silent))
+                {
+                    Console.WriteLine($"牌堆不足 {requiredCards} 張，將棄牌重新洗牌補回牌堆... (reshuffle)\n");
+                }
                 Dealer.RecycleDiscardAndReShuffle();
                 return true;
             }
@@ -76,15 +80,15 @@ namespace GenericPoker
             Dealer.ShuffleCards();
         }
 
-        public List<BasePokerCard> DealHand(int cardCount = 8)
+        public List<BasePokerCard> DealHand(int cardCount = 8, bool? silent = null)
         {
-            CheckAndReshuffleIfNeeded(cardCount);
+            CheckAndReshuffleIfNeeded(cardCount, silent);
             return Dealer.DealCards(cardCount);
         }
 
-        public string DealHandString(int cardCount = 8)
+        public string DealHandString(int cardCount = 8, bool? silent = null)
         {
-            var cards = DealHand(cardCount);
+            var cards = DealHand(cardCount, silent);
             return string.Join(",", cards.Select(c => c.CardStr));
         }
 

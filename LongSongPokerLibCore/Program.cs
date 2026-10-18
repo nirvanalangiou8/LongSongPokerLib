@@ -15,8 +15,8 @@ namespace LongSongPokerLibCore
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
-            // Available options: "review_split", "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "analyze"; 
+            // Available options: "review_split", "performance_review", "analyze", "hand", "game", "split", "run_stat", "debug"
+            var runOption = "performance_review"; 
 
             if (args.Length > 0)
             {
@@ -27,6 +27,13 @@ namespace LongSongPokerLibCore
             {
                 case "review_split":
                     ReviewHandSplit();
+                    break;
+                case "performance_review":
+                    int perfIterations = 1_000_000;
+                    ICardRule? perfRule = (ICardRule)NineCardThreeHandsRule.Default;
+                    int perfCardCount = 9;
+                    
+                    PerformanceReview(perfIterations, perfRule, perfCardCount);
                     break;
                 case "analyze":
                     if (args.Length >= 4)
@@ -106,9 +113,49 @@ namespace LongSongPokerLibCore
                     break;
                 
                 default:
-                    Console.WriteLine("Unknown runOption. Available options: review_split, analyze, hand, game, split, run_stat, debug");
+                    Console.WriteLine("Unknown runOption. Available options: review_split, performance_review, analyze, hand, game, split, run_stat, debug");
                     break;
             }
+        }
+
+        static void PerformanceReview(int iterations = 1_000_000, ICardRule? rule = null, int cardCount = 8, ulong seed = 12345678uL)
+        {
+            
+            var modeName = cardCount == 9 ? "9card_3hands" : "8card_2hands";
+            
+            Console.WriteLine($"\n--- Starting Performance Review: {modeName} ({iterations:N0} iterations) ---");
+
+            XRandom.Init(seed);
+            var gameManager = new ConsolePlayManager(rule, cardsPerPlayer: cardCount)
+            {
+                Silent = true
+            };
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+
+            for (int i = 0; i < iterations; i++)
+            {
+                string inputCardStr = gameManager.DealHandString(cardCount, silent: true);
+                var battleHands = new BaseBattleHands(inputCardStr, rule);
+                var resHand = battleHands.GetArrangeHands();
+                //Console.WriteLine($"\n=== { resHand.SubHands[0].BattleHandRank} {resHand.SubHands[1].BattleHandRank} ==");
+            }
+
+            sw.Stop();
+
+            double totalSeconds = sw.Elapsed.TotalSeconds;
+            double totalMs = sw.Elapsed.TotalMilliseconds;
+            double avgMsPerHand = totalMs / iterations;
+            double avgUsPerHand = avgMsPerHand * 1000.0;
+            double handsPerSec = iterations / (totalSeconds > 0 ? totalSeconds : 0.000001);
+
+            Console.WriteLine("\n=== Performance Review Results ===");
+            Console.WriteLine($"Game Mode       : {modeName}");
+            Console.WriteLine($"Iterations      : {iterations:N0}");
+            Console.WriteLine($"Total Time      : {sw.Elapsed} ({totalMs:F2} ms / {totalSeconds:F3} s)");
+            Console.WriteLine($"Avg Time/Hand   : {avgMsPerHand:F4} ms ({avgUsPerHand:F2} µs)");
+            Console.WriteLine($"Hands / Second  : {handsPerSec:N2} hands/sec");
+            Console.WriteLine("===================================\n");
         }
 
         static void ReviewHandSplit()

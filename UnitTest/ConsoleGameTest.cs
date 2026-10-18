@@ -103,5 +103,37 @@ namespace UnitTest
             var split = handStr.Split(',');
             Assert.That(split.Length, Is.EqualTo(8));
         }
+
+        [Test]
+        public void TestConsolePlayManagerDealHandSilent()
+        {
+            var gameManager = new ConsolePlayManager(EightCardRule.Default, cardsPerPlayer: 8)
+            {
+                Silent = true
+            };
+
+            for (int i = 0; i < 20; i++)
+            {
+                var handStr = gameManager.DealHandString(8, silent: true);
+                var split = handStr.Split(',');
+                Assert.That(split.Length, Is.EqualTo(8));
+            }
+        }
+
+        [Test]
+        public void TestDeterministicDealWithConstantSeed()
+        {
+            const ulong seed = 12345678uL;
+
+            XRandom.Init(seed);
+            var manager1 = new ConsolePlayManager(NineCardThreeHandsRule.Default, cardsPerPlayer: 9) { Silent = true };
+            var run1Hands = Enumerable.Range(0, 20).Select(_ => manager1.DealHandString(9, silent: true)).ToList();
+
+            XRandom.Init(seed);
+            var manager2 = new ConsolePlayManager(NineCardThreeHandsRule.Default, cardsPerPlayer: 9) { Silent = true };
+            var run2Hands = Enumerable.Range(0, 20).Select(_ => manager2.DealHandString(9, silent: true)).ToList();
+
+            Assert.That(run1Hands, Is.EqualTo(run2Hands));
+        }
     }
 }
