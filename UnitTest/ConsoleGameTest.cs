@@ -84,6 +84,11 @@ namespace UnitTest
             Assert.That(handResult.FrontHand, Is.Not.Null);
             Assert.That(handResult.BackHand.BattleHandRank, Is.EqualTo(PokerOverAllHandRank.ThreeOfKind));
             Assert.That(handResult.FrontHand.BattleHandRank, Is.EqualTo(PokerOverAllHandRank.Pair));
+            Assert.That(handResult.FrontHand.winScore, Is.GreaterThan(0));
+            Assert.That(handResult.BackHand.winScore, Is.GreaterThan(0));
+            Assert.That(handResult.FrontWinRate, Is.EqualTo(handResult.FrontHand.winScore));
+            Assert.That(handResult.BackWinRate, Is.EqualTo(handResult.BackHand.winScore));
+            Assert.That(handResult.TotalScore, Is.EqualTo(handResult.FrontWinRate + handResult.BackWinRate));
             Assert.That(handResult.TotalScore, Is.GreaterThan(0));
         }
         

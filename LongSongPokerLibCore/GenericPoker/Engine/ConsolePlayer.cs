@@ -48,8 +48,8 @@ namespace GenericPoker
             var result = battleHands.GetArrangeHands();
             if (result.FrontHand == null || result.BackHand == null) return null;
 
-            double front = IWinRateHandArrangeStrategy.GetSubHandWinRate(result.FrontHand, BattleSubHandOrder.FirstHand, effectiveRule);
-            double back = IWinRateHandArrangeStrategy.GetSubHandWinRate(result.BackHand, BattleSubHandOrder.SecondHand, effectiveRule);
+            double front = result.FrontHand.winScore;
+            double back = result.BackHand.winScore;
             return new HandSplitResult(result.FrontHand, result.BackHand, front, back, front + back);
         }
     }

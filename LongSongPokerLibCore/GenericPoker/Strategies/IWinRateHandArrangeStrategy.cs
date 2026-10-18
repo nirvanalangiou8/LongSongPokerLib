@@ -299,6 +299,10 @@ namespace GenericPoker.EightCard
 			{
 				var fallbackHands = slots.Select(s => new BaseSubBattleHand(s.Order, PokerOverAllHandRank.Nothing, s.CardCount)).ToList();
 				DistributeKickers(fallbackHands, sortedRemainingCards);
+				for (int i = 0; i < fallbackHands.Count; i++)
+				{
+					fallbackHands[i].winScore = (float)GetSubHandWinRate(fallbackHands[i], fallbackHands[i].BattleSubHandOrder, effectiveRule);
+				}
 				return fallbackHands;
 			}
 
@@ -369,7 +373,9 @@ namespace GenericPoker.EightCard
 				double score = 0;
 				for (int i = 0; i < subHandsCandidate.Count; i++)
 				{
-					score += GetSubHandWinRate(subHandsCandidate[i], subHandsCandidate[i].BattleSubHandOrder, effectiveRule);
+					double subScore = GetSubHandWinRate(subHandsCandidate[i], subHandsCandidate[i].BattleSubHandOrder, effectiveRule);
+					subHandsCandidate[i].winScore = (float)subScore;
+					score += subScore;
 				}
 
 				if (score > bestScore)
@@ -393,6 +399,10 @@ namespace GenericPoker.EightCard
 			{
 				bestSubHands = slots.Select(s => new BaseSubBattleHand(s.Order, PokerOverAllHandRank.Nothing, s.CardCount)).ToList();
 				DistributeKickers(bestSubHands, sortedRemainingCards);
+				for (int i = 0; i < bestSubHands.Count; i++)
+				{
+					bestSubHands[i].winScore = (float)GetSubHandWinRate(bestSubHands[i], bestSubHands[i].BattleSubHandOrder, effectiveRule);
+				}
 			}
 
 			return bestSubHands;

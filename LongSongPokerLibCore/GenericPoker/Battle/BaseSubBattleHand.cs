@@ -21,6 +21,13 @@ namespace GenericPoker
         // help me create a varaible called KickerWeighter as    
         public int KickerWeighter { get; set; }
         
+        public float winScore { get; set; } = 0.0f;
+        public float WinScore
+        {
+            get => winScore;
+            set => winScore = value;
+        }
+        
         public BattleSubHandOrder BattleSubHandOrder
         {
             get => _battleSubHandOrder;
