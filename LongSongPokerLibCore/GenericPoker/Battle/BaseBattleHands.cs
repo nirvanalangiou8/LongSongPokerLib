@@ -78,6 +78,12 @@ namespace GenericPoker
             allCandidateStructures.Sort((c1, c2) => c2.CompareTo(c1));
             var uniqueCandidateStructures = allCandidateStructures.Distinct().ToList();
 
+            // Filter dominated candidate structures (e.g., A >= B -> keep A, remove B; C1 >= D1 && C2 >= D2 -> keep C, remove D)
+            uniqueCandidateStructures = UtilFunc.FilterDominated(
+                uniqueCandidateStructures,
+                s => s.Components,
+                compatibilityCheck: (c1, c2) => c1.CompRank == c2.CompRank);
+
             // If no components found (pure high card / Nothing), add empty structure with all cards as kickers
             if (uniqueCandidateStructures.Count == 0)
             {

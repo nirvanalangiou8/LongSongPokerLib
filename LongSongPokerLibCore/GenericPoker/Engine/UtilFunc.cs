@@ -123,6 +123,112 @@ namespace GenericPoker
             PartitionHelper(0);
             return results;
         }
+
+        /// <summary>
+        /// Filters out candidate items whose components are dominated by another item with the same component count.
+        /// Item S2 dominates S1 (so S1 is removed) if for all component positions k: S2[k] >= S1[k],
+        /// and for at least one position: S2[k] > S1[k].
+        /// Optional compatibilityCheck ensures components at each position can be meaningfully compared for dominance.
+        /// </summary>
+        public static List<TItem> FilterDominated<TItem, TComponent>(
+            IEnumerable<TItem> items,
+            Func<TItem, IReadOnlyList<TComponent>> componentSelector,
+            IComparer<TComponent>? comparer = null,
+            Func<TComponent, TComponent, bool>? compatibilityCheck = null)
+        {
+            if (items == null) return new List<TItem>();
+            var cmp = comparer ?? Comparer<TComponent>.Default;
+
+            var itemList = items.ToList();
+            var filtered = new List<TItem>();
+
+            for (int i = 0; i < itemList.Count; i++)
+            {
+                var item1 = itemList[i];
+                var comps1 = componentSelector(item1);
+                bool isDominated = false;
+
+                for (int j = 0; j < itemList.Count; j++)
+                {
+                    if (i == j) continue;
+                    var item2 = itemList[j];
+                    var comps2 = componentSelector(item2);
+
+                    if (comps1.Count != comps2.Count) continue;
+
+                    bool compatible = true;
+                    if (compatibilityCheck != null)
+                    {
+                        for (int k = 0; k < comps1.Count; k++)
+                        {
+                            if (!compatibilityCheck(comps1[k], comps2[k]))
+                            {
+                                compatible = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!compatible) continue;
+
+                    bool allGreaterOrEqual = true;
+                    bool atLeastOneStrictlyGreater = false;
+
+                    for (int k = 0; k < comps1.Count; k++)
+                    {
+                        int compareRes = cmp.Compare(comps2[k], comps1[k]);
+                        if (compareRes < 0)
+                        {
+                            allGreaterOrEqual = false;
+                            break;
+                        }
+                        if (compareRes > 0)
+                        {
+                            atLeastOneStrictlyGreater = true;
+                        }
+                    }
+
+                    if (allGreaterOrEqual && atLeastOneStrictlyGreater)
+                    {
+                        isDominated = true;
+                        break;
+                    }
+                }
+
+                if (!isDominated)
+                {
+                    filtered.Add(item1);
+                }
+            }
+
+            return filtered;
+        }
+
+        /// <summary>
+        /// Filters out candidate solutions that are dominated (obviously loser solutions).
+        /// A solution S2 dominates S1 if S2 is >= S1 in all positions, and strictly better in at least one position.
+        /// </summary>
+        public static List<List<T>> FilterDominatedSolutions<T>(
+            IEnumerable<List<T>> solutions,
+            IComparer<T>? comparer = null)
+        {
+            if (solutions == null) return new List<List<T>>();
+
+            var cmp = comparer ?? Comparer<T>.Default;
+            var list = new List<List<T>>();
+            var seen = new HashSet<string>();
+            foreach (var sol in solutions)
+            {
+                if (sol == null) continue;
+                var key = string.Join(",", sol.Select(x => x?.ToString() ?? string.Empty));
+                if (seen.Add(key))
+                {
+                    list.Add(sol);
+                }
+            }
+
+            return FilterDominated(list, sol => sol, cmp);
+        }
     }
 }
 

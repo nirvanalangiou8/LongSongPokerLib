@@ -249,63 +249,7 @@ namespace GenericPoker.CardSimStatAnalysis
         public static List<List<PokerOverAllHandRank>> FilterDominatedSolutions(
             IEnumerable<List<PokerOverAllHandRank>> solutions)
         {
-            if (solutions == null) return new List<List<PokerOverAllHandRank>>();
-
-            var list = new List<List<PokerOverAllHandRank>>();
-            var seen = new HashSet<string>();
-            foreach (var sol in solutions)
-            {
-                var key = string.Join(",", sol.Select(r => (int)r));
-                if (seen.Add(key))
-                {
-                    list.Add(sol);
-                }
-            }
-
-            var filtered = new List<List<PokerOverAllHandRank>>();
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                var s1 = list[i];
-                bool isDominated = false;
-
-                for (int j = 0; j < list.Count; j++)
-                {
-                    if (i == j) continue;
-                    var s2 = list[j];
-
-                    if (s1.Count != s2.Count) continue;
-
-                    bool allGreaterOrEqual = true;
-                    bool atLeastOneStrictlyGreater = false;
-
-                    for (int k = 0; k < s1.Count; k++)
-                    {
-                        if ((int)s2[k] < (int)s1[k])
-                        {
-                            allGreaterOrEqual = false;
-                            break;
-                        }
-                        if ((int)s2[k] > (int)s1[k])
-                        {
-                            atLeastOneStrictlyGreater = true;
-                        }
-                    }
-
-                    if (allGreaterOrEqual && atLeastOneStrictlyGreater)
-                    {
-                        isDominated = true;
-                        break;
-                    }
-                }
-
-                if (!isDominated)
-                {
-                    filtered.Add(s1);
-                }
-            }
-
-            return filtered;
+            return UtilFunc.FilterDominatedSolutions(solutions);
         }
 
         

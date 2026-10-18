@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
 using GenericPoker;
 using NUnit.Framework;
 
@@ -106,7 +108,16 @@ namespace UnitTest
         {
             var rule = NineCardThreeHandsRule.Default;
             var battleHands = new BaseBattleHands(inputCardStr, rule);
+
+            var stopwatch = Stopwatch.StartNew();
             var result = battleHands.GetArrangeHands();
+            stopwatch.Stop();
+
+            var elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
+            var elapsedTicks = stopwatch.ElapsedTicks;
+            var logMessage = $"[DEBUG_LOG] [GetArrangeHands] Hand: \"{inputCardStr}\" | Elapsed: {elapsedMs:F3} ms ({stopwatch.ElapsedMilliseconds} ms, {elapsedTicks} ticks)";
+            TestContext.Progress.WriteLine(logMessage);
+            TestContext.Out.WriteLine(logMessage);
 
             string actualResult = string.Join("#", result.SubHands.Select(h => $"{{{h.GetHandString(",")}}}"));
             Assert.That(actualResult, Is.EqualTo(expectedResult));
