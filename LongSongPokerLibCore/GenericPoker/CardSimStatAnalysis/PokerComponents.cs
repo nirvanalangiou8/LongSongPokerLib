@@ -225,9 +225,10 @@ namespace GenericPoker.CardSimStatAnalysis
                 ComponentCategory.Kind => minKindCards > 0 ? minKindCards : effectiveRule.MinKindCount,
                 _ => 1
             };
-
+            
+            var bAllowSubSet = category == ComponentCategory.Kind;
             var partitions = new List<List<int>>();
-            GeneratePartitions(totalCards, totalCards, new List<int>(), partitions, minCards);
+            UtilFunc.GeneratePartitions<int>(totalCards, totalCards, new List<int>(), partitions, minCards, bAllowSubSet);
 
             var result = new List<List<PokerComponents>>();
             var seen = new HashSet<string>();
@@ -256,6 +257,7 @@ namespace GenericPoker.CardSimStatAnalysis
             return result;
         }
 
+        /*
         private static void GeneratePartitions(int remaining, int maxVal, List<int> current, List<List<int>> partitions, int minCards = 1)
         {
             if (remaining < minCards)
@@ -270,7 +272,7 @@ namespace GenericPoker.CardSimStatAnalysis
                 GeneratePartitions(remaining - i, i, current, partitions, minCards);
                 current.RemoveAt(current.Count - 1);
             }
-        }
+        }*/
 
         /// <summary>
         /// Computes the Cartesian Product of alternative candidate breakdowns across all component groups.

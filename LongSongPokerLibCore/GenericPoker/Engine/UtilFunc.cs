@@ -229,6 +229,110 @@ namespace GenericPoker
 
             return FilterDominated(list, sol => sol, cmp);
         }
+
+        /// <summary>
+        /// ====================================================================================================
+        /// INTEGER PARTITION GENERATION
+        /// ====================================================================================================
+        /// Recursively generates all integer partitions of a given total number such that:
+        /// 1. Each partition part is greater than or equal to <paramref name="minCount"/>.
+        /// 2. The exact sum of all elements in each sublist (partition) equals the original total number.
+        /// 3. Incomplete sublists whose sum is less than the original input number are excluded.
+        ///
+        /// ----------------------------------------------------------------------------------------------------
+        /// EXAMPLE CASES:
+        /// ----------------------------------------------------------------------------------------------------
+        /// Case 1: Total = 9, minCount = 3 for flushstraight
+        /// Allowed / Generated partitions:
+        ///   - [9]
+        ///   - [6, 3]
+        ///   - [5, 4]
+        ///   - [3, 3, 3]
+        /// Disallowed / Excluded partitions (sum &lt; 9 or part &lt; 3): 
+        ///   - [8], [7], [6], [5], [4], [3] (sum &lt; 9)
+        ///   - [5, 3] (sum = 8 &lt; 9)
+        ///   - [6, 2, 1] (contains parts &lt; 3)
+        ///
+        /// Case 2: Total = 3, minCount = 2, normally for Kindgroup. we set allow partial subset as true. If not, we will only allow [3].
+        ///  Then if we have 3 three of kind, we will miss the threeofkind+ one pair of fullhouse combination as threeofkind can not break into as one pair (count = 2)
+        /// Allowed / Generated partitions:
+        ///   - [3]
+        ///   - [2] is allowed.
+        
+        
+        /// ====================================================================================================
+        /// </summary>
+        /// <typeparam name="T">The numeric type of elements in the output partitions (e.g. int, long, double).</typeparam>
+        /// <param name="remaining">The remaining value to partition in recursive steps (initially total number).</param>
+        /// <param name="maxVal">The maximum value allowed for the next part (to maintain non-increasing order and avoid duplicates).</param>
+        /// <param name="current">The current running accumulation of partition parts.</param>
+        /// <param name="partitions">The output collection where valid full partitions are recorded.</param>
+        /// <param name="minCount">The minimum threshold for each individual partition part (default is 1).</param>
+        /// <param name="bAllowSubSet">Let the caller decide if we can allow subset.
+        public static void GeneratePartitions<T>(int remaining, int maxVal, List<T> current, List<List<T>> partitions, int minCount = 1, bool bAllowSubSet = false)
+        {
+           
+            if (remaining < minCount)
+            {
+                if (bAllowSubSet)
+                {
+                    partitions.Add(new List<T>(current));
+
+                }
+                else
+                {
+                    if (remaining == 0)
+                    {
+                        partitions.Add(new List<T>(current));
+                    }
+                }
+                return;
+            }
+            
+            for (int i = Math.Min(remaining, maxVal); i >= minCount; i--)
+            {
+                current.Add((T)Convert.ChangeType(i, typeof(T)));
+                GeneratePartitions(remaining - i, i, current, partitions, minCount, bAllowSubSet);
+                current.RemoveAt(current.Count - 1);
+            }
+        }
+        
+        /*
+        private static void GeneratePartitions(int remaining, int maxVal, List<int> current, List<List<int>> partitions, int minCards = 1)
+        {
+            if (remaining < minCards)
+            {
+                partitions.Add(new List<int>(current));
+                return;
+            }
+
+            for (int i = Math.Min(remaining, maxVal); i >= minCards; i--)
+            {
+                current.Add(i);
+                GeneratePartitions(remaining - i, i, current, partitions, minCards);
+                current.RemoveAt(current.Count - 1);
+            }
+        }*/
+
+        /// <summary>
+        /// Convenience helper that generates all valid integer partitions of <paramref name="total"/>
+        /// where each part is >= <paramref name="minCount"/> and the sum of parts exactly equals <paramref name="total"/>.
+        /// </summary>
+        /// <typeparam name="T">The numeric type of elements in the output partitions (e.g. int, long, double).</typeparam>
+        /// <param name="total">The total integer value to partition.</param>
+        /// <param name="minCount">The minimum value for each partition part (default is 1).</param>
+        /// <returns>A list of valid partitions, where each partition is a list of type <typeparamref name="T"/>.</returns>
+        public static List<List<T>> GeneratePartitions<T>(int total, int minCount = 1)
+        {
+            var partitions = new List<List<T>>();
+            if (total < minCount || total <= 0)
+            {
+                return partitions;
+            }
+
+            GeneratePartitions(total, total, new List<T>(), partitions, minCount);
+            return partitions;
+        }
     }
 }
 
