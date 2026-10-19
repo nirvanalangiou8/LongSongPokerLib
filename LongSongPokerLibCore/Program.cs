@@ -29,7 +29,7 @@ namespace LongSongPokerLibCore
                     ReviewHandSplit();
                     break;
                 case "performance_review":
-                    int perfIterations = 1_000_000;
+                    int perfIterations = 1000000;
                     ICardRule? perfRule = (ICardRule)NineCardThreeHandsRule.Default;
                     int perfCardCount = 9;
                     
@@ -62,7 +62,14 @@ namespace LongSongPokerLibCore
                                 dir = dir.Parent;
                             }
                         }
+                        
+                        
+                        string stats9 = Path.Combine(dataDir, "debug_in.csv");
+                        string threehands9 = Path.Combine(dataDir, "debug_out.csv");
 
+                        PostSimStatHandSplitProbAna.Run(stats9, threehands9, new NineCardThreeHandsRule());
+                        
+                        /*
                         string stats8 = Path.Combine(dataDir, "stats_result_8cards.csv");
                         string stats9 = Path.Combine(dataDir, "stats_result_9cards.csv");
                         string twohands8 = Path.Combine(dataDir, "twohands_prob_8cards.csv");
@@ -71,7 +78,7 @@ namespace LongSongPokerLibCore
 
                         PostSimStatHandSplitProbAna.Run(stats8, twohands8, new EightCardRule());
                         PostSimStatHandSplitProbAna.Run(stats9, twohands9, new NineCardTwoHandsRule());
-                        PostSimStatHandSplitProbAna.Run(stats9, threehands9, new NineCardThreeHandsRule());
+                        PostSimStatHandSplitProbAna.Run(stats9, threehands9, new NineCardThreeHandsRule());*/
                     }
                     break;
 
@@ -118,9 +125,22 @@ namespace LongSongPokerLibCore
             }
         }
 
+        private static string GetRunResultPath()
+        {
+            var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+            while (dir != null)
+            {
+                if (File.Exists(Path.Combine(dir.FullName, "LongSongPokerLib.sln")))
+                {
+                    return Path.Combine(dir.FullName, "run_result.txt");
+                }
+                dir = dir.Parent;
+            }
+            return "run_result.txt";
+        }
+
         static void PerformanceReview(int iterations = 1_000_000, ICardRule? rule = null, int cardCount = 8, ulong seed = 12345678uL)
         {
-            
             var modeName = cardCount == 9 ? "9card_3hands" : "8card_2hands";
             
             Console.WriteLine($"\n--- Starting Performance Review: {modeName} ({iterations:N0} iterations) ---");
@@ -131,6 +151,9 @@ namespace LongSongPokerLibCore
                 Silent = true
             };
 
+            string resultFilePath = GetRunResultPath();
+            using var writer = new StreamWriter(resultFilePath, append: false);
+
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
             for (int i = 0; i < iterations; i++)
@@ -138,7 +161,12 @@ namespace LongSongPokerLibCore
                 string inputCardStr = gameManager.DealHandString(cardCount, silent: true);
                 var battleHands = new BaseBattleHands(inputCardStr, rule);
                 var resHand = battleHands.GetArrangeHands();
-                //Console.WriteLine($"\n=== { resHand.SubHands[0].BattleHandRank} {resHand.SubHands[1].BattleHandRank} ==");
+                if (iterations < 10001)
+                {
+                    string outputCardStr = string.Join("#", resHand.SubHands.Select(h => $"{{{h.GetHandString(",")}}}"));
+                    string handRankList = string.Concat(resHand.SubHands.Select(h => $"{{{h.BattleHandRank}}}"));
+                    writer.WriteLine($"#{i} {inputCardStr}=>{outputCardStr}, hand_rank_list={handRankList}");
+                }
             }
 
             sw.Stop();
@@ -148,14 +176,16 @@ namespace LongSongPokerLibCore
             double avgMsPerHand = totalMs / iterations;
             double avgUsPerHand = avgMsPerHand * 1000.0;
             double handsPerSec = iterations / (totalSeconds > 0 ? totalSeconds : 0.000001);
-
-            Console.WriteLine("\n=== Performance Review Results ===");
-            Console.WriteLine($"Game Mode       : {modeName}");
-            Console.WriteLine($"Iterations      : {iterations:N0}");
-            Console.WriteLine($"Total Time      : {sw.Elapsed} ({totalMs:F2} ms / {totalSeconds:F3} s)");
-            Console.WriteLine($"Avg Time/Hand   : {avgMsPerHand:F4} ms ({avgUsPerHand:F2} µs)");
-            Console.WriteLine($"Hands / Second  : {handsPerSec:N2} hands/sec");
-            Console.WriteLine("===================================\n");
+            var outputStr = "\n=== Performance Review Results ===\n"+
+                            $"Game Mode       : {modeName}\n"+
+                            $"Iterations      : {iterations:N0}\n"+
+                            $"Total Time      : {sw.Elapsed} ({totalMs:F2} ms / {totalSeconds:F3} s)\n"+
+                            $"Avg Time/Hand   : {avgMsPerHand:F4} ms ({avgUsPerHand:F2} µs)\n"+
+                            $"Hands / Second  : {handsPerSec:N2} hands/sec\n"+
+                            $"Output File     : {resultFilePath}\n"+
+                            "===================================\n";
+            Console.WriteLine(outputStr);
+            writer.WriteLine(outputStr);
         }
 
         static void ReviewHandSplit()

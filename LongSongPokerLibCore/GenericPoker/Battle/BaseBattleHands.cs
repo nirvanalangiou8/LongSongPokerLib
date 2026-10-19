@@ -26,6 +26,23 @@ namespace GenericPoker
         private readonly List<BasePokerCard>? _allPokerCards;
         private readonly PokerHandCalculator? _pokerHandCalculator;
 
+        public string GetInputHandString()
+        {
+            if (_allPokerCards != null && _allPokerCards.Count > 0)
+            {
+                return string.Join(",", _allPokerCards.Select(c => c.CardStr));
+            }
+
+            var allCards = _subHands.SelectMany(h => h.Cards).ToList();
+            return string.Join(",", allCards.Select(c => c.CardStr));
+        }
+
+        public string GetBestArrangeHandString()
+        {
+            var bestHand = GetArrangeHands();
+            return string.Join("#", bestHand.SubHands.Select(h => $"{{{h.GetHandString(",")}}}"));
+        }
+
         public BaseBattleHands(IEnumerable<BaseSubBattleHand> subHands)
         {
             _subHands = subHands?.ToList() ?? new List<BaseSubBattleHand>();

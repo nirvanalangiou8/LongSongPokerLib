@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using GenericPoker;
 using NUnit.Framework;
@@ -110,7 +109,7 @@ namespace UnitTest
             var battleHands = new BaseBattleHands(inputCardStr, rule);
 
             var stopwatch = Stopwatch.StartNew();
-            var result = battleHands.GetArrangeHands();
+            string actualResult = battleHands.GetBestArrangeHandString();
             stopwatch.Stop();
 
             var elapsedMs = stopwatch.Elapsed.TotalMilliseconds;
@@ -119,7 +118,8 @@ namespace UnitTest
             TestContext.Progress.WriteLine(logMessage);
             TestContext.Out.WriteLine(logMessage);
 
-            string actualResult = string.Join("#", result.SubHands.Select(h => $"{{{h.GetHandString(",")}}}"));
+            var result = battleHands.GetArrangeHands();
+
             Assert.That(actualResult, Is.EqualTo(expectedResult));
             Assert.That(result.IsValidDeployment(), Is.True);
         }

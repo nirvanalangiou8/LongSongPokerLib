@@ -1,7 +1,6 @@
 namespace GenericPoker
 {
-
-
+    
     
     public interface IJoker
     {
