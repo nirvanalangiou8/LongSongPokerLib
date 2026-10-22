@@ -15,8 +15,8 @@ namespace LongSongPokerLibCore
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
-            // Available options: "review_split", "performance_review", "analyze", "hand", "game", "split", "run_stat", "debug"
-            var runOption = "analyze"; 
+            // Available options: "review_split", "performance_review", "analyze", "hand", "game", "split_test", "run_stat", "debug"
+            var runOption = "performance_review"; 
 
             if (args.Length > 0)
             {
@@ -29,11 +29,18 @@ namespace LongSongPokerLibCore
                     ReviewHandSplit();
                     break;
                 case "performance_review":
-                    int perfIterations = 1000000;
+                    int perfIterations = 10000;
+                    string resultFilePath = "G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data";
+                    var outputPath = $"{resultFilePath}\\performance_review_9card_3hand.txt";
                     ICardRule? perfRule = (ICardRule)NineCardThreeHandsRule.Default;
                     int perfCardCount = 9;
+                    PerformanceReview(outputPath, perfIterations, perfRule, perfCardCount);
                     
-                    PerformanceReview(perfIterations, perfRule, perfCardCount);
+                    outputPath = $"{resultFilePath}\\performance_review_8card_2hand.txt";
+                    perfRule = (ICardRule)EightCardRule.Default;
+                    perfCardCount = 8;
+                    PerformanceReview(outputPath, perfIterations, perfRule, perfCardCount);
+                    
                     break;
                 case "analyze":
                     if (args.Length >= 4)
@@ -100,7 +107,7 @@ namespace LongSongPokerLibCore
                     RunSimpleEightCardGame();
                     break;
 
-                case "split":
+                case "split_test":
                     TestHandSplit();
                     break;
 
@@ -125,7 +132,7 @@ namespace LongSongPokerLibCore
             }
         }
 
-        private static string GetRunResultPath()
+        /*private static string GetRunResultPath()
         {
             var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
             while (dir != null)
@@ -137,9 +144,9 @@ namespace LongSongPokerLibCore
                 dir = dir.Parent;
             }
             return "run_result.txt";
-        }
+        }*/
 
-        static void PerformanceReview(int iterations = 1_000_000, ICardRule? rule = null, int cardCount = 8, ulong seed = 12345678uL)
+        static void PerformanceReview(string outputPath, int iterations = 1_000_000, ICardRule? rule = null, int cardCount = 8, ulong seed = 12345678uL)
         {
             var modeName = cardCount == 9 ? "9card_3hands" : "8card_2hands";
             
@@ -150,9 +157,8 @@ namespace LongSongPokerLibCore
             {
                 Silent = true
             };
-
-            string resultFilePath = GetRunResultPath();
-            using var writer = new StreamWriter(resultFilePath, append: false);
+            
+            using var writer = new StreamWriter(outputPath, append: false);
 
             var sw = System.Diagnostics.Stopwatch.StartNew();
 
@@ -182,7 +188,7 @@ namespace LongSongPokerLibCore
                             $"Total Time      : {sw.Elapsed} ({totalMs:F2} ms / {totalSeconds:F3} s)\n"+
                             $"Avg Time/Hand   : {avgMsPerHand:F4} ms ({avgUsPerHand:F2} µs)\n"+
                             $"Hands / Second  : {handsPerSec:N2} hands/sec\n"+
-                            $"Output File     : {resultFilePath}\n"+
+                            $"Output File     : {outputPath}\n"+
                             "===================================\n";
             Console.WriteLine(outputStr);
             writer.WriteLine(outputStr);
@@ -398,23 +404,39 @@ namespace LongSongPokerLibCore
 
         static void TestHandSplit()
         {
-            var inputCardStr = "8❤️,7❤️,6♣️,6🔶,J❤️,K♣️,2♣️,A♣️";
-            //Expected results: "{A♣️,K♣️,J❤️}#{[6🔶,6♣️],8❤️,7❤️,2♣️}";
             
-            var battleHands = new BaseBattleHands(inputCardStr);
-            var resHand = battleHands.GetArrangeHands();
-
-            // Display front hand result
-            Console.WriteLine("\n=== Front Hand ===");
-            Console.WriteLine($"Rank: {resHand.FrontHand.BattleHandRank}");
-            Console.Write("Cards: ");
-            Console.WriteLine(resHand.FrontHand.GetHandString());
-
-            // Display back hand result
-            Console.WriteLine("\n=== Back Hand ===");
-            Console.WriteLine($"Rank: {resHand.BackHand.BattleHandRank}");
-            Console.Write("Cards: ");
-            Console.WriteLine(resHand.BackHand.GetHandString());
+            var inputCardStr = "8❤️,7❤️,6❤️,5❤️,4❤️,3❤️,2❤️,A❤️,9❤️";
+            //var inputCardStr = "5♠️,J♣️,8❤️,9♣️,4🔶,A♣️,K♠️,10🔶,3🔶";
+            //var inputCardStr = "8❤️,7❤️,6♣️,6🔶,J❤️,K♣️,2♣️,A♣️";
+            //Expected results: "{A♣️,K♣️,J❤️}#{[6🔶,6♣️],8❤️,7❤️,2♣️}";
+            ICardRule? perfRule = (ICardRule)NineCardThreeHandsRule.Default;
+            
+            
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            BaseBattleHands battleHands = null;
+            BaseBattleHands resHand = null;
+            
+            for (int iterations = 0; iterations < 100000; iterations++)
+            {
+                battleHands = new BaseBattleHands(inputCardStr, perfRule);
+                resHand = battleHands.GetArrangeHands();
+            }
+            
+            sw.Stop();
+            
+            double totalSeconds = sw.Elapsed.TotalSeconds;
+            double totalMs = sw.Elapsed.TotalMilliseconds;
+            
+            Console.WriteLine($"\n Time consume {totalSeconds} seconds, {totalMs} miliseconds");
+            
+            foreach (var subHand in resHand.SubHands)
+            {
+                // Display front hand result
+                Console.WriteLine($"\n=== {subHand.BattleSubHandOrder} ===");
+                Console.WriteLine($"Rank: {resHand.SubHands[0].BattleHandRank}");
+                Console.Write("Cards: ");
+                Console.WriteLine(subHand.GetHandString());
+            }
 
             Console.WriteLine("\nSuccessfully created poker hand and deployed.");
         }

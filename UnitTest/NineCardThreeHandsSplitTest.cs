@@ -100,6 +100,7 @@ namespace UnitTest
                 "K🔶,7♠️,7🔶,7♣️,8♣️,8❤️,A🔶,A♣️,K♣️",
                 "{[K🔶,K♣️]}#{[A🔶,A♣️]}#{[7♠️,7🔶,7♣️,8❤️,8♣️]}"
             }
+            // next K❤️,Q❤️,J❤️,10♠️,9♠️,K🔶,J🔶,9❤️,Q♣️
         };
 
         [Test, TestCaseSource(nameof(NineCardThreeHandTestCases))]
