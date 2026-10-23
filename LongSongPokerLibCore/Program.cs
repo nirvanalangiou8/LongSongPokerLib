@@ -31,15 +31,20 @@ namespace LongSongPokerLibCore
                 case "performance_review":
                     int perfIterations = 10000;
                     string resultFilePath = "G:\\My Drive\\GameDev\\RiderProjects\\LongSongPokerLib\\LongSongPokerLibCore\\GenericPoker\\CardSimStatAnalysis\\Data";
-                    var outputPath = $"{resultFilePath}\\performance_review_9card_3hand.txt";
+                    
+                    var outputPath9 = $"{resultFilePath}\\performance_review_9card_3hand.txt";
+                    var baselinePath9 = $"{resultFilePath}\\9card_3hands_run_result_baseline.txt";
                     ICardRule? perfRule = (ICardRule)NineCardThreeHandsRule.Default;
                     int perfCardCount = 9;
-                    PerformanceReview(outputPath, perfIterations, perfRule, perfCardCount);
+                    PerformanceReview(outputPath9, perfIterations, perfRule, perfCardCount);
+                    DiffWithBaseline(outputPath9, baselinePath9, "9card_3hands");
                     
-                    outputPath = $"{resultFilePath}\\performance_review_8card_2hand.txt";
+                    var outputPath8 = $"{resultFilePath}\\performance_review_8card_2hand.txt";
+                    var baselinePath8 = $"{resultFilePath}\\8card_2hand_run_result_baseline.txt";
                     perfRule = (ICardRule)EightCardRule.Default;
                     perfCardCount = 8;
-                    PerformanceReview(outputPath, perfIterations, perfRule, perfCardCount);
+                    PerformanceReview(outputPath8, perfIterations, perfRule, perfCardCount);
+                    DiffWithBaseline(outputPath8, baselinePath8, "8card_2hand");
                     
                     break;
                 case "analyze":
@@ -191,9 +196,60 @@ namespace LongSongPokerLibCore
                             $"Output File     : {outputPath}\n"+
                             "===================================\n";
             Console.WriteLine(outputStr);
-            writer.WriteLine(outputStr);
+            if (iterations > 10000) writer.WriteLine(outputStr);
         }
+        
+        
+        static void DiffWithBaseline(string outputPath, string baselinePath, string label) 
+        {
+            Console.WriteLine($"\n--- Checking Diff for {label} against Baseline ---");
+            if (!File.Exists(outputPath))
+            {
+                Console.WriteLine($"Output file not found: {outputPath}");
+                return;
+            }
+            if (!File.Exists(baselinePath))
+            {
+                Console.WriteLine($"Baseline file not found: {baselinePath}");
+                return;
+            }
 
+            var outputLines = File.ReadAllLines(outputPath);
+            var baselineLines = File.ReadAllLines(baselinePath);
+
+            int minLines = Math.Min(outputLines.Length, baselineLines.Length);
+            int diffCount = 0;
+
+            for (int i = 0; i < minLines; i++)
+            {
+                var outLine = outputLines[i];
+                var baseLine = baselineLines[i];
+
+                if (outLine != baseLine)
+                {
+                    diffCount++;
+                    Console.WriteLine($"[Diff #{diffCount}] Line {i + 1}:");
+                    Console.WriteLine($"  Baseline : {baseLine}");
+                    Console.WriteLine($"  Current  : {outLine}");
+                }
+            }
+
+            if (outputLines.Length != baselineLines.Length)
+            {
+                diffCount += Math.Abs(outputLines.Length - baselineLines.Length);
+                Console.WriteLine($"Line count mismatch: Baseline has {baselineLines.Length} lines, Current has {outputLines.Length} lines.");
+            }
+
+            if (diffCount == 0)
+            {
+                Console.WriteLine($"run_result clean ({label})");
+            }
+            else
+            {
+                Console.WriteLine($"Total differences found for {label}: {diffCount}");
+            }
+        }
+        
         static void ReviewHandSplit()
         {
             Console.WriteLine("=== Review Hand Split ===");

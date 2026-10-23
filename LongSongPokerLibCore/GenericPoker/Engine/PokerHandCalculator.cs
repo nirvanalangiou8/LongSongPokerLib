@@ -205,7 +205,11 @@ namespace GenericPoker
         /// <returns>A list of straight clusters of length <paramref name="targetStraightCount"/>, represented as a 3-level list.</returns>
         public List<List<BasePokerCard>> GetAllStraightCluster_represented_selected(int targetStraightCount, int minStraightCount, List<List<BasePokerCard>> kindGroupList)
         {
+            
+            //  Find straight cluster from kind group. Ex: The input is {[J,J],[10],[9],[8],[7],[5,5],[4,4],[3],[2],[A]} will return 2 straight groups.
+            // The {{[J,J],[10],[9],[8],[7]}, {[5,5],[4,4],[3],[2],[A]}}
             var allStraightCluster = GetAllStraightCluster(minStraightCount, kindGroupList);
+            
             // The stright set was a collection of contineous of kind_group, like [10,10],[9],[8,8],[7],[6,6]. simply pick the first element as represented straight.
             // to become [10,9,8,7,6]
             var allStraightCluster_represented = allStraightCluster
@@ -225,6 +229,37 @@ namespace GenericPoker
             return result;
         }
 
+
+        public List<List<BasePokerCard>> GetAllStraightCluster_represented(int minStraightCount, List<List<BasePokerCard>> kindGroupList)
+        {
+            
+            //  Find straight cluster from kind group. Ex: The input is {[J,J],[10],[9],[8],[7],[5,5],[4,4],[3],[2],[A]} will return 2 straight groups.
+            // The {{[J,J],[10],[9],[8],[7]}, {[5,5],[4,4],[3],[2],[A]}}
+            var allStraightCluster = GetAllStraightCluster(minStraightCount, kindGroupList);
+            
+            // The stright set was a collection of contineous of kind_group, like [10,10],[9],[8,8],[7],[6,6]. simply pick the first element as represented straight.
+            // to become [10,9,8,7,6]
+            var allStraightCluster_represented = allStraightCluster
+                .Select(cluster => cluster.Select(kindGroup => kindGroup[0]).ToList())
+                .ToList();
+            
+            var result = new List<List<BasePokerCard>>();
+
+            foreach (var cluster in allStraightCluster_represented)
+            {
+                // Generates all sub-straights from longest (cluster.Count) down to minStraightCount
+                for (var targetLen = cluster.Count; targetLen >= minStraightCount; targetLen--)
+                {
+                    for (var i = 0; i <= cluster.Count - targetLen; i++)
+                    {
+                        result.Add(cluster.GetRange(i, targetLen));
+                    }
+                }
+            }
+
+            return result;
+        }
+
         
         /// <summary>
         /// Identifies clusters of consecutive card ranks that are long enough to potentially form straights.
@@ -233,6 +268,8 @@ namespace GenericPoker
         /// <param name="minStraightCount">The minimum required length for a straight.</param>
         /// <param name="kindGroupList">List of cards grouped by their numerical rank.</param>
         /// <returns>A list of clusters, where each cluster is a list of consecutive rank groups.</returns>
+        ///  Ex: The input is {[J,J],[10],[9],[8],[7],[5,5],[4,4],[3],[2],[A]} will return 2 straight groups.
+        /// The {{[J,J],[10],[9],[8],[7]}, {[5,5],[4,4],[3],[2],[A]}}
         private List<List<List<BasePokerCard>>> GetAllStraightCluster(int minStraightCount,
             List<List<BasePokerCard>> kindGroupList)
         {
@@ -628,9 +665,9 @@ namespace GenericPoker
                             currentHandStructure.RemoveLast();
                         }
                     }
-                    else
+                    else if (desiredCount >= MinFlushCards)
                     {
-                        // no we don't have straight in suit group which implies @@flush@@
+                        // no we don't have straight in suit group which   implies @@flush@@
 
                         flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<BasePokerCard>(flushGroup, desiredCount));
 
@@ -734,6 +771,68 @@ namespace GenericPoker
             return candidateProcessed;
         }
 
+        // 2. Sort majorly for straight
+        //var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
+        //candidateProcessed = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates,
+        //    results, candidateProcessed);
+        
+        private bool ArrangeStraightComps(List<List<BasePokerCard>> kindGroupList,
+            List<BasePokerCard> remainingCards,
+            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool candidateProcessed)
+        {
+            
+            var allStraightClusters = GetAllStraightCluster_represented(_rule.MinFlushCount, kindGroupList);
+            
+            foreach (var straightCluster in allStraightClusters)
+            {
+                // if it's also flush, then skip it as the previous flushstraight already take care of such case.
+                if (_checkIfFlush(straightCluster)) continue;
+                var handType = DetermineCompType(straightCluster.Count, CompType.Straight);
+                if (handType == BaseCompType.None) continue;
+                var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = straightCluster };
+                currentHandCandidates.AddComp(newHandCandidateData);
+                var newRemainCards =
+                    UtilFunc.GetExcludeList(remainingCards, straightCluster, new PokerCardComparer());
+                RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
+                // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+                candidateProcessed = true;
+                currentHandCandidates.RemoveLast();
+                /*
+                //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
+                // Ex: we have 8 cards straights, 8,7,6,5,4,3,2,A we still need to visit all sub straights, such as 7-card straight and 6 and 5 cards straight and also
+                // full set of 8 cards straights.
+                for (var targetSCount = straightCluster.Count; targetSCount >= _rule.MinFlushStraightCount; targetSCount--)
+                {
+                    for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
+                    {
+                        var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
+                        
+                        var allPermutes = new List<List<BasePokerCard>>();
+                        var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
+                        if (handType == BaseCompType.None) continue;
+                        RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster,
+                            new List<BasePokerCard>(), allPermutes);
+                        foreach (var permute in allPermutes)
+                        {
+                            // if it's also flush, then skip it as the previous flushstraight already take care of such case.
+                            if (_checkIfFlush(permute)) continue;
+                            var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
+                            currentHandCandidates.AddComp(newHandCandidateData);
+                            var newRemainCards =
+                                UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
+                            RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
+                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+                            candidateProcessed = true;
+                            currentHandCandidates.RemoveLast();
+                        }
+                    }
+                }*/
+            }
+
+            return candidateProcessed;
+        }
+        
+        
         /// <summary>
         /// Attempts to arrange remaining cards into straight components based on pre-calculated clusters.
         /// Part of the recursive hand-splitting logic.
@@ -744,15 +843,15 @@ namespace GenericPoker
         /// <param name="results">Output list of complete hand structures.</param>
         /// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
         /// <returns>True if a hand component was successfully added.</returns>
-        private bool ArrangeStraightComps(List<List<List<BasePokerCard>>> allStraightClusters,
+        private bool ArrangeStraightComps_old(List<List<List<BasePokerCard>>> allStraightClusters,
             List<BasePokerCard> remainingCards,
             PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool candidateProcessed)
         {
             foreach (var straightCluster in allStraightClusters)
             {
                 //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
-                // Ex: we have 5 cards straights, 8,7,6,5,4, we still need to visit all sub straights, such as 3-card straight and 4 cards straight and also
-                // full set of 5 cards straights.
+                // Ex: we have 8 cards straights, 8,7,6,5,4,3,2,A we still need to visit all sub straights, such as 7-card straight and 6 and 5 cards straight and also
+                // full set of 8 cards straights.
                 for (var targetSCount = straightCluster.Count;
                      targetSCount >= _rule.MinFlushStraightCount;
                      targetSCount--)
@@ -840,8 +939,8 @@ namespace GenericPoker
                 results, candidateProcessed);
 
             // 2. Sort majorly for straight
-            var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
-            candidateProcessed = ArrangeStraightComps(allStraightClusters, remainingCards, currentHandCandidates,
+            //var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
+            candidateProcessed = ArrangeStraightComps(kindGroupList, remainingCards, currentHandCandidates,
                 results, candidateProcessed);
 
             // 3. Get all kinds group to performance any pair or threeOFkind or fourOFkind, etc.
