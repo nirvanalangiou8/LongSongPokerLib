@@ -100,98 +100,7 @@ namespace GenericPoker
             return uniqueCandidates;
         }
 
-        /// <summary>
-        /// Processes and generates all valid straight permutations from given card groups and jokers.
-        /// This function handles gap filling with jokers, Ace-low (1) straight logic, 
-        /// and optionally restricts the cards to a specific suit for flush-straights.
-        /// </summary>
-        /// <param name="straightCount">The target length of the straight.</param>
-        /// <param name="kindGroupList">List of card groups grouped by rank.</param>
-        /// <param name="straightableJokerCards">Available jokers that can be used in a straight.</param>
-        /// <param name="permutes">Output list where valid straight combinations will be added.</param>
-        /// <param name="assignedSuit">Optional suit restriction for flush-straights.</param>
-        /// Example, if we have 
-        private void ProcessPermuteStraight(int straightCount, List<List<BasePokerCard>> kindGroupList,
-            List<BasePokerCard> straightableJokerCards, List<List<BasePokerCard>> permutes,
-            PokerSuit assignedSuit = PokerSuit.NoSuit)
-        {
-            // if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
-            // so that to let 3,2,1 straight become available.
-            if (kindGroupList[0][0] is AcePokerCard)
-            {
-                var newKindGroup = new List<BasePokerCard>();
-                foreach (var ace in kindGroupList[0])
-                {
-                    var newAce = BasePokerCard.CreateInstance(ace);
-                    ((IJokerStraightable)newAce).SetStraightSub(1);
-                    newKindGroup.Add(newAce);
-                }
-
-                kindGroupList.Add(newKindGroup);
-            }
-
-            // For jokers Involved, we need another approach
-            // we loop through from most needed joker cards count, and reduce the joker card counted needed in order to save joker cards.
-            var jokerNeeded = straightCount - 1;
-            for (var jokerCountInvolved = jokerNeeded; jokerCountInvolved >= 0; jokerCountInvolved--)
-            {
-                var pokerCardCountInvolved = straightCount - jokerCountInvolved;
-                // 1. check if total jokers are over needed cards for straight, 
-                // 2. check if pokerCard needed > actually involved card for straight. Ex: if jokerneed = 1, then pokerCardinvolved will be 2, 
-                //    But there are only 1 card in the group, so not possible to form straight because cards are short.
-                if (jokerCountInvolved > straightableJokerCards.Count || pokerCardCountInvolved > kindGroupList.Count)
-                    continue;
-
-                var tempPermutes = UtilFunc.GetPermutation<List<BasePokerCard>>(kindGroupList, pokerCardCountInvolved);
-                foreach (var cardPermute in tempPermutes)
-                {
-                    var numberList = cardPermute.Select(group => group[0].Number).ToList();
-                    var gapNumbers = numberList
-                        .Zip(numberList.Skip(1), (a, b) => Enumerable.Range(b + 1, a - b - 1).Reverse())
-                        .SelectMany(g => g)
-                        .ToList();
-
-                    // Filter out all impossible cases that gap count are larger than jokerCount. In doing so, we made sure 
-                    // jokers can fulfill the gaps, and form straight.
-                    if (gapNumbers.Count > jokerCountInvolved) continue;
-
-                    // Now if the gapNumbers + regular PokerCard count (cardPermute.Count) < straightCount, we still need to find other gaps for jokers.
-                    // These other gaps are nor regular gap between poker Cards but the number=15 and number=1 pseudo boundary.
-                    // These extra boundary gaps from 15 to first number, and last number to 1.
-                    // if gapNumbers count + total poker Card count < straightCount, then we will add extra gap number
-                    // from 15 to first number, and last number to 1. 
-                    if (gapNumbers.Count + cardPermute.Count < straightCount)
-                    {
-                        // Add upper gap to boundary number 15, gap between first to 15 is Range(first+1, 15-first-1) <- see Range function
-                        gapNumbers.AddRange(Enumerable.Range(numberList[0] + 1,
-                            PokerConst.AceBigNumber + 1 - numberList[0] - 1));
-                        // add lower gap to boundary number 0, gap between 0 to last is Range(0+1, Last-0-1)
-                        gapNumbers.AddRange(Enumerable.Range(0 + 1, numberList.Last() - 0 - 1).Reverse());
-                    }
-
-                    // The gapNumbers come to here might be something like K, A, J, 10, etc... So we trim the required gap number
-                    // for joker first. In this example, K, A, and then sorted them. Since the reserved number are all neededs, so 
-                    // sorted them will not cause to include unwanted gap numbers. 
-                    gapNumbers = gapNumbers.GetRange(0, jokerCountInvolved).OrderByDescending(n => n).ToList();
-
-
-                    foreach (var pair in straightableJokerCards.Zip(
-                                 gapNumbers, (obj, num) => new { jokerCard = obj, Number = num }))
-                    {
-                        var newJoker = BaseJokerCard.CreateInstance((BaseJokerCard)pair.jokerCard);
-                        ((IJokerStraightable)newJoker).SetStraightSub(pair.Number);
-                        if (assignedSuit != PokerSuit.NoSuit && newJoker is IJokerFlushable)
-                            ((IJokerFlushable)newJoker).SetSuitSub(assignedSuit);
-                        cardPermute.Add(new List<BasePokerCard> { newJoker });
-                    }
-
-                    var groupPermuteWithJokers = cardPermute.OrderByDescending(objList => objList[0].Number).ToList();
-
-                    RecursivePermuteStraight(straightCount, groupPermuteWithJokers, new List<BasePokerCard>(), permutes);
-                }
-            }
-        }
-
+        
         
         
         
@@ -510,112 +419,7 @@ namespace GenericPoker
                 : BaseCompType.None;
             return retCompType;
         }
-
-        /*
-        /// <summary>
-        /// Attempts to arrange remaining cards into flush or flush-straight components.
-        /// Part of the recursive hand-splitting logic.
-        /// </summary>
-        /// <param name="flushGroups">Pre-evaluated suit groups.</param>
-        /// <param name="remainingCards">Available cards.</param>
-        /// <param name="currentHandStructure">Current state of hand composition.</param>
-        /// <param name="results">Output list of complete hand structures.</param>
-        /// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
-        /// <returns>True if a hand component was successfully added.</returns>
-        private bool ArrangeFlushOrFlushStraight_current(List<List<BasePokerCard>> flushGroups,
-            List<BasePokerCard> remainingCards,
-            PokerHandStructure currentHandStructure, List<PokerHandStructure> results, bool candidateProcessed)
-        {
-            foreach (var flushGroup in flushGroups)
-            {
-                var partitions = new List<List<int>>();
-                UtilFunc.GeneratePartitions<int>(flushGroup.Count, flushGroup.Count, new List<int>(), partitions,
-                    _rule.MinFlushStraightCount, true);
-                foreach (var breakDownGroup in partitions)
-                {
-                    breakDownGroup.Sort();
-                    var splitFlushGroups = new List<List<BasePokerCard>>();
-                    var startIndex = 0;
-                    foreach (var count in breakDownGroup)
-                    {
-                        var subGroup = flushGroup.GetRange(startIndex, count);
-                        splitFlushGroups.Add(subGroup);
-                        startIndex += count;
-                    }
-                    
-                    
-                    foreach (var splitFlushGroup in splitFlushGroups)
-                    {
-                        var desiredCount = splitFlushGroup.Count;
-                        var flushStraightPermutes = new List<List<BasePokerCard>>();
-                        var flushOnlyPermutes = new List<List<BasePokerCard>>();
-
-                        // To consider more general case for flush pairs, we need following codes to cluster them.
-                        //var wrapperListInList = flushGroup.Select(item => new List<PokerCard> { item }).ToList();
-                        var wrapperListInList = flushGroup
-                            .GroupBy(item => item) // Group by the item value
-                            .Select(group => group.ToList()) // Convert each group into a list
-                            .ToList(); //
-
-                        ProcessPermuteStraight(desiredCount, wrapperListInList, new List<BasePokerCard>(),
-                            flushStraightPermutes);
-
-                        if (flushStraightPermutes.Count > 0)
-                        {
-                            // Yes we have straight in suit group which implies @@flush-straight@@
-                            var handType = DetermineCompType(desiredCount, CompType.FlushStraight);
-                            if (handType == BaseCompType.None) continue;
-                            foreach (var permute in flushStraightPermutes)
-                            {
-                                var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
-                                currentHandStructure.AddComp(newHandCandidateData);
-                                var newRemainCards =
-                                    UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                                RecursiveExploreHandStructures(newRemainCards, currentHandStructure, results);
-                                // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as
-                                // its below running hierchial will always process candidate.
-                                candidateProcessed = true;
-                                currentHandStructure.RemoveLast();
-                            }
-                        }
-                        else
-                        {
-                            // no we don't have straight in suit group which implies @@flush@@
-
-                            flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<BasePokerCard>(flushGroup, desiredCount));
-
-                            foreach (var permute in flushOnlyPermutes)
-                            {
-                                int pairCount = permute
-                                    .GroupBy(x => x) // Group by item value
-                                    .Count(g => g.Count() >= 2);
-
-                                var handType = DetermineCompTypeWithPairInFlush(desiredCount, CompType.Flush, pairCount);
-                                if (handType == BaseCompType.None) continue;
-                                var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
-                                currentHandStructure.AddComp(newHandCandidateData);
-                                // TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
-                                // when do hash set, two J-spade will become single one.
-                                var newRemainCards =
-                                    UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                                RecursiveExploreHandStructures(newRemainCards, currentHandStructure, results);
-                                // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
-                                candidateProcessed = true;
-                                currentHandStructure.RemoveLast();
-                            }
-                        }
-
-                    }
-                }
-                
-            }
-
-            return candidateProcessed;
-        }
-        */
         
-        
-        // This is current 2
         private bool ArrangeFlushOrFlushStraight(List<List<BasePokerCard>> flushGroups,
             List<BasePokerCard> remainingCards,
             PokerHandStructure currentHandStructure, List<PokerHandStructure> results, bool candidateProcessed)
@@ -635,9 +439,7 @@ namespace GenericPoker
                         .ToList(); //
 
                     var flushStraightPermutes = GetAllStraightCluster_represented(_rule.MinFlushStraightCount, wrapperListInList, desiredCount);
-                    //ProcessPermuteStraight(desiredCount, wrapperListInList, new List<BasePokerCard>(),
-                    //    flushStraightPermutes);
-
+        
                     if (flushStraightPermutes.Count > 0)
                     {
                         // Yes we have straight in suit group which implies @@flush-straight@@
@@ -690,78 +492,6 @@ namespace GenericPoker
             return candidateProcessed;
         }
 
-        /*
-        private bool ArrangeFlushOrFlushStraight_old(List<List<BasePokerCard>> flushGroups,
-            List<BasePokerCard> remainingCards,
-            PokerHandStructure currentHandStructure, List<PokerHandStructure> results, bool candidateProcessed)
-        {
-            foreach (var flushGroup in flushGroups)
-            {
-                for (var desiredCount = flushGroup.Count; desiredCount >= _rule.MinFlushStraightCount; desiredCount--)
-                {
-                    var flushStraightPermutes = new List<List<BasePokerCard>>();
-                    var flushOnlyPermutes = new List<List<BasePokerCard>>();
-
-                    // To consider more general case for flush pairs, we need following codes to cluster them.
-                    //var wrapperListInList = flushGroup.Select(item => new List<PokerCard> { item }).ToList();
-                    var wrapperListInList = flushGroup
-                        .GroupBy(item => item) // Group by the item value
-                        .Select(group => group.ToList()) // Convert each group into a list
-                        .ToList(); //
-
-                    ProcessPermuteStraight(desiredCount, wrapperListInList, new List<BasePokerCard>(),
-                        flushStraightPermutes);
-
-                    if (flushStraightPermutes.Count > 0)
-                    {
-                        // Yes we have straight in suit group which implies @@flush-straight@@
-                        var handType = DetermineCompType(desiredCount, CompType.FlushStraight);
-                        if (handType == BaseCompType.None) continue;
-                        foreach (var permute in flushStraightPermutes)
-                        {
-                            var newHandCandidateData = new PokerCardComponent
-                                { CompRank = handType, Cards = permute };
-                            currentHandStructure.AddComp(newHandCandidateData);
-                            var newRemainCards =
-                                UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                            RecursiveExploreHandStructures(newRemainCards, currentHandStructure, results);
-                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
-                            candidateProcessed = true;
-                            currentHandStructure.RemoveLast();
-                        }
-                    }
-                    else
-                    {
-                        // no we don't have straight in suit group which implies @@flush@@
-
-                        flushOnlyPermutes.AddRange(UtilFunc.GetPermutation<BasePokerCard>(flushGroup, desiredCount));
-
-                        foreach (var permute in flushOnlyPermutes)
-                        {
-                            int pairCount = permute
-                                .GroupBy(x => x) // Group by item value
-                                .Count(g => g.Count() >= 2);
-
-                            var handType = DetermineCompTypeWithPairInFlush(desiredCount, CompType.Flush, pairCount);
-                            if (handType == BaseCompType.None) continue;
-                            var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
-                            currentHandStructure.AddComp(newHandCandidateData);
-                            // TODO, if we have deck 2, then if we have 2 same J-spade, while remove one J-spade, will also remove the other becuase 
-                            // when do hash set, two J-spade will become single one.
-                            var newRemainCards =
-                                UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                            RecursiveExploreHandStructures(newRemainCards, currentHandStructure, results);
-                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
-                            candidateProcessed = true;
-                            currentHandStructure.RemoveLast();
-                        }
-                    }
-                }
-            }
-
-            return candidateProcessed;
-        }
-        */
         
         // 2. Sort majorly for straight
         //var allStraightClusters = GetAllStraightCluster(_rule.MinFlushStraightCount, kindGroupList);
@@ -854,10 +584,10 @@ namespace GenericPoker
         /// <param name="remainingCards">Available cards.</param>
         /// <param name="currentHandCandidates">Current state of hand composition.</param>
         /// <param name="results">Output list of complete hand structures.</param>
-        /// <param name="hasRank">A flag indicating if any valid hand component was found in this branch.</param>
+        /// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
         /// <returns>True if a hand component was successfully added.</returns>
         private bool ArrangeKindComps(List<List<BasePokerCard>> allKindGroups, List<BasePokerCard> remainingCards,
-            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool hasRank)
+            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool candidateProcessed)
         {
             foreach (var kindGroup in allKindGroups)
             {
@@ -873,12 +603,12 @@ namespace GenericPoker
                         var newRemainCards = UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
                         RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
                         currentHandCandidates.RemoveLast();
-                        hasRank = true;
+                        candidateProcessed = true;
                     }
                 }
             }
 
-            return hasRank;
+            return candidateProcessed;
         }
 
         /// <summary>
@@ -937,20 +667,16 @@ namespace GenericPoker
         
         /// <summary>
         /// Retrieves all possible straight combinations of a specified card count.
-        /// It uses the ProcessPermuteStraight logic to find sequences across all available card ranks,
-        /// including those completed using straightable jokers.
+        /// It uses the GetAllStraightCluster_represented logic to find sequences across all available card ranks.
         /// </summary>
         /// <param name="cardCountInComp">The number of cards required for the straight component.</param>
         /// <returns>A list of poker card components representing all valid straight hands, sorted by power.</returns>
         public List<PokerCardComponent> GetAllStraightComps_ForUnitTest(int cardCountInComp)
         {
             var allComps = new List<PokerCardComponent>();
-            var permutes = new List<List<BasePokerCard>>();
-
 
             var kindGroupLists = GetNumberGroups(1, _noneJokerCards);
-            var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
-            ProcessPermuteStraight(cardCountInComp, kindGroupLists, straightableJokerCards, permutes);
+            var permutes = GetAllStraightCluster_represented(cardCountInComp, kindGroupLists, cardCountInComp);
             allComps.AddRange(ListsToPokerComp(permutes, DetermineCompType(cardCountInComp, CompType.Straight)));
 
 
@@ -1049,6 +775,182 @@ namespace GenericPoker
         
         /// <summary>
         /// Retrieves all possible flush-straight combinations of a specified card count.
+        /// It evaluates flush groups first and then searches for straight sequences within those groups
+        /// using GetAllStraightCluster_represented.
+        /// </summary>
+        /// <param name="cardCountInComp">The number of cards required for the flush-straight component.</param>
+        /// <returns>A list of poker card components representing all valid flush-straight hands, sorted by power.</returns>
+        public List<PokerCardComponent> GetAllFlushStraightComps_ForUnitTest(int cardCountInComp)
+        {
+            var allComps = new List<PokerCardComponent>();
+            var permutes = new List<List<BasePokerCard>>();
+
+            var straightAndFlushableJokers =
+                _jokerCards.Where(card => (card is IJokerStraightable and IJokerFlushable)).ToList();
+            var natureSuitCardNeeded = cardCountInComp - straightAndFlushableJokers.Count < 1
+                ? 1
+                : cardCountInComp - straightAndFlushableJokers.Count;
+            List<List<BasePokerCard>> flushGroupLists = _evaluateFlushGroups(natureSuitCardNeeded, _allPokerCards);
+
+            // For flush straight, we get flush groups, and check each flush group to sort out all possible
+            // straights to collect flush straight hands.
+            foreach (var flushGroup in flushGroupLists)
+            {
+                // Need to convert the single List into ListInList to cater the straight searching.
+                var wrapperListInList = flushGroup.Select(item => new List<BasePokerCard> { item }).ToList();
+                permutes.AddRange(GetAllStraightCluster_represented(cardCountInComp, wrapperListInList, cardCountInComp));
+            }
+
+            allComps.AddRange(ListsToPokerComp(permutes,
+                DetermineCompType(cardCountInComp, CompType.FlushStraight)));
+
+            //--- Finally sort them out base on their CompPower
+            allComps.Sort((x, y) => y.CompareTo(x));
+
+            return allComps;
+        }
+        
+    }
+}
+
+
+/*
+        /// <summary>
+        /// Processes and generates all valid straight permutations from given card groups and jokers.
+        /// This function handles gap filling with jokers, Ace-low (1) straight logic, 
+        /// and optionally restricts the cards to a specific suit for flush-straights.
+        /// </summary>
+        /// <param name="straightCount">The target length of the straight.</param>
+        /// <param name="kindGroupList">List of card groups grouped by rank.</param>
+        /// <param name="straightableJokerCards">Available jokers that can be used in a straight.</param>
+        /// <param name="permutes">Output list where valid straight combinations will be added.</param>
+        /// <param name="assignedSuit">Optional suit restriction for flush-straights.</param>
+        /// Example, if we have 
+        private void ProcessPermuteStraight(int straightCount, List<List<BasePokerCard>> kindGroupList,
+            List<BasePokerCard> straightableJokerCards, List<List<BasePokerCard>> permutes,
+            PokerSuit assignedSuit = PokerSuit.NoSuit)
+        {
+            // if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
+            // so that to let 3,2,1 straight become available.
+            if (kindGroupList[0][0] is AcePokerCard)
+            {
+                var newKindGroup = new List<BasePokerCard>();
+                foreach (var ace in kindGroupList[0])
+                {
+                    var newAce = BasePokerCard.CreateInstance(ace);
+                    ((IJokerStraightable)newAce).SetStraightSub(1);
+                    newKindGroup.Add(newAce);
+                }
+
+                kindGroupList.Add(newKindGroup);
+            }
+
+            // For jokers Involved, we need another approach
+            // we loop through from most needed joker cards count, and reduce the joker card counted needed in order to save joker cards.
+            var jokerNeeded = straightCount - 1;
+            for (var jokerCountInvolved = jokerNeeded; jokerCountInvolved >= 0; jokerCountInvolved--)
+            {
+                var pokerCardCountInvolved = straightCount - jokerCountInvolved;
+                // 1. check if total jokers are over needed cards for straight, 
+                // 2. check if pokerCard needed > actually involved card for straight. Ex: if jokerneed = 1, then pokerCardinvolved will be 2, 
+                //    But there are only 1 card in the group, so not possible to form straight because cards are short.
+                if (jokerCountInvolved > straightableJokerCards.Count || pokerCardCountInvolved > kindGroupList.Count)
+                    continue;
+
+                var tempPermutes = UtilFunc.GetPermutation<List<BasePokerCard>>(kindGroupList, pokerCardCountInvolved);
+                foreach (var cardPermute in tempPermutes)
+                {
+                    var numberList = cardPermute.Select(group => group[0].Number).ToList();
+                    var gapNumbers = numberList
+                        .Zip(numberList.Skip(1), (a, b) => Enumerable.Range(b + 1, a - b - 1).Reverse())
+                        .SelectMany(g => g)
+                        .ToList();
+
+                    // Filter out all impossible cases that gap count are larger than jokerCount. In doing so, we made sure 
+                    // jokers can fulfill the gaps, and form straight.
+                    if (gapNumbers.Count > jokerCountInvolved) continue;
+
+                    // Now if the gapNumbers + regular PokerCard count (cardPermute.Count) < straightCount, we still need to find other gaps for jokers.
+                    // These other gaps are nor regular gap between poker Cards but the number=15 and number=1 pseudo boundary.
+                    // These extra boundary gaps from 15 to first number, and last number to 1.
+                    // if gapNumbers count + total poker Card count < straightCount, then we will add extra gap number
+                    // from 15 to first number, and last number to 1. 
+                    if (gapNumbers.Count + cardPermute.Count < straightCount)
+                    {
+                        // Add upper gap to boundary number 15, gap between first to 15 is Range(first+1, 15-first-1) <- see Range function
+                        gapNumbers.AddRange(Enumerable.Range(numberList[0] + 1,
+                            PokerConst.AceBigNumber + 1 - numberList[0] - 1));
+                        // add lower gap to boundary number 0, gap between 0 to last is Range(0+1, Last-0-1)
+                        gapNumbers.AddRange(Enumerable.Range(0 + 1, numberList.Last() - 0 - 1).Reverse());
+                    }
+
+                    // The gapNumbers come to here might be something like K, A, J, 10, etc... So we trim the required gap number
+                    // for joker first. In this example, K, A, and then sorted them. Since the reserved number are all neededs, so 
+                    // sorted them will not cause to include unwanted gap numbers. 
+                    gapNumbers = gapNumbers.GetRange(0, jokerCountInvolved).OrderByDescending(n => n).ToList();
+
+
+                    foreach (var pair in straightableJokerCards.Zip(
+                                 gapNumbers, (obj, num) => new { jokerCard = obj, Number = num }))
+                    {
+                        var newJoker = BaseJokerCard.CreateInstance((BaseJokerCard)pair.jokerCard);
+                        ((IJokerStraightable)newJoker).SetStraightSub(pair.Number);
+                        if (assignedSuit != PokerSuit.NoSuit && newJoker is IJokerFlushable)
+                            ((IJokerFlushable)newJoker).SetSuitSub(assignedSuit);
+                        cardPermute.Add(new List<BasePokerCard> { newJoker });
+                    }
+
+                    var groupPermuteWithJokers = cardPermute.OrderByDescending(objList => objList[0].Number).ToList();
+
+                    RecursivePermuteStraight(straightCount, groupPermuteWithJokers, new List<BasePokerCard>(), permutes);
+                }
+            }
+        }
+        */
+
+/*        private BaseCompType MapToCompRank(int count, CompType type)
+        {
+            if (type == CompType.Kind)
+            {
+                if (count == 2) return BaseCompType.Pair;
+                if (count == 3) return BaseCompType.ThreeOfKind;
+                if (count == 4) return BaseCompType.FourOfKind;
+                if (count == 5) return BaseCompType.FiveOfKind;
+            }
+
+            return BaseCompType.None;
+        }*/
+
+/*
+  /// <summary>
+        /// Retrieves all possible straight combinations of a specified card count.
+        /// It uses the ProcessPermuteStraight logic to find sequences across all available card ranks,
+        /// including those completed using straightable jokers.
+        /// </summary>
+        /// <param name="cardCountInComp">The number of cards required for the straight component.</param>
+        /// <returns>A list of poker card components representing all valid straight hands, sorted by power.</returns>
+        public List<PokerCardComponent> GetAllStraightComps_ForUnitTest(int cardCountInComp)
+        {
+            var allComps = new List<PokerCardComponent>();
+            var permutes = new List<List<BasePokerCard>>();
+
+
+            var kindGroupLists = GetNumberGroups(1, _noneJokerCards);
+            var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
+            ProcessPermuteStraight(cardCountInComp, kindGroupLists, straightableJokerCards, permutes);
+            allComps.AddRange(ListsToPokerComp(permutes, DetermineCompType(cardCountInComp, CompType.Straight)));
+
+
+            //--- Finally, sort them out base on their CompPower order.
+            allComps.Sort((x, y) => y.CompareTo(x));
+
+            return allComps;
+        }
+*/
+ 
+
+/*/// <summary>
+        /// Retrieves all possible flush-straight combinations of a specified card count.
         /// It evaluates flush groups first and then searches for straight sequences within those groups,
         /// accounting for jokers that can act as both straight and flush fillers.
         /// </summary>
@@ -1091,19 +993,4 @@ namespace GenericPoker
             allComps.Sort((x, y) => y.CompareTo(x));
 
             return allComps;
-        }
-        
-        /*        private BaseCompType MapToCompRank(int count, CompType type)
-        {
-            if (type == CompType.Kind)
-            {
-                if (count == 2) return BaseCompType.Pair;
-                if (count == 3) return BaseCompType.ThreeOfKind;
-                if (count == 4) return BaseCompType.FourOfKind;
-                if (count == 5) return BaseCompType.FiveOfKind;
-            }
-
-            return BaseCompType.None;
         }*/
-    }
-}

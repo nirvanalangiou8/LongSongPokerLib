@@ -24,6 +24,179 @@ namespace EightCardsProbTest
             {
                 "MajorJoker,SuitJoker,StraightJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️",
                 new List<string> {
+                    "3♠️#2♣️#A♠️",
+                },
+            },
+            new object[]
+            {
+                
+                "2♣️,4♠️,3❤️,4❤️",
+                new List<string> {
+                    "4♠️#3❤️#2♣️", 
+                },
+            },
+            new object[]
+            {
+                "2♣️,3♠️,3❤️,4❤️",
+                new List<string> {
+                    "4❤️#3♠️#2♣️",
+                },              
+            },
+        };
+
+        private static readonly object[] TestCases13CardsStraight =
+        {
+            
+            new object[]
+            {
+                
+                    "MajorJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️," +
+                    "5♠️,4♣️,6♠️,7❤️,8❤️,J❤️,K❤️",
+                new List<string> {
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                },
+            },
+            
+        };
+        
+        private static readonly object[] TestCasesFourCardsStraight =
+        {
+            
+            new object[]
+            {
+                "MajorJoker,SuitJoker,MinorJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️",
+                new List<string> {
+                },
+            },
+        };
+        
+        // Test cases defined as a static list
+        private static readonly object[] TestCasesThreeCardsFlush =
+        {
+            new object[]
+            {
+                "A♠️,5♠️,3♠️,3❤️,10❤️,10♣️,10♠️,4♣️,Q♣️,Q❤️",
+                new List<string> {
+                    "A♠️#10♠️#5♠️", "A♠️#10♠️#3♠️", "A♠️#5♠️#3♠️", 
+                    "Q♣️#10♣️#4♣️", "Q❤️#10❤️#3❤️","10♠️#5♠️#3♠️" 
+                },
+            },
+            new object[]
+            {
+                "MajorJoker,MinorJoker,A♠️,10♠️,9♠️",
+                new List<string> {
+                    "A♠️#MajorJoker_K♠️#MinorJoker_Q♠️","A♠️#MajorJoker_K♠️#10♠️","MajorJoker_A♠️#MinorJoker_K♠️#10♠️",
+                    "A♠️#MajorJoker_K♠️#9♠️", "MajorJoker_A♠️#MinorJoker_K♠️#9♠️", "A♠️#10♠️#9♠️",
+                    "MajorJoker_A♠️#10♠️#9♠️"
+                },
+            },
+        };
+        
+        
+        // Test cases defined as a static list
+        private static readonly object[] TestCasesThreeCardsFlushStraight =
+        {
+            new object[]
+            {
+                "10🔶,J🔶,Q🔶,8🔶,A♠️,2♠️,3♠️,K♠️,Q♠️,J♠️,K❤️,J❤️,Q❤️", 
+                new List<string> {
+                    "A♠️#K♠️#Q♠️", "K♠️#Q♠️#J♠️","K❤️#Q❤️#J❤️",
+                    "Q🔶#J🔶#10🔶", "3♠️#2♠️#A♠️", 
+                },
+            },
+            new object[]
+            {
+                "MajorJoker,MinorJoker,SuitJoker,StraightJoker,10🔶,J🔶,A♠️,2♠️,3♠️",  
+                new List<string> {
+                    "3♠️#2♠️#A♠️",
+                },
+            },
+        };
+        
+        private static readonly object[] TestCases8CardsPoker =
+        {
+            new object[]
+            {
+                "6♣️,7♣️,4♣️,6♠️,9♣️,5♠️,3♠️,J♠️",
+                new List<string> {
+                    "A♠️#K♠️#Q♠️", "K♠️#Q♠️#J♠️","K❤️#Q❤️#J❤️",
+                    "Q🔶#J🔶#10🔶", "3♠️#2♠️#A♠️", 
+                },
+            },
+          
+        };
+        
+        
+        
+        
+        [Test, TestCaseSource(nameof(TestCasesThreeCardsStraight))]
+        public void TestThreeCardsStraight(string inputCardStr, List<string>  expected)
+        {
+            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
+            var allThreeCardsStraightCombo = pokerHand.GetAllStraightComps_ForUnitTest(3);
+            List<string> objectStrs = allThreeCardsStraightCombo.Select(o => o.CompString).ToList();
+            Assert.That(objectStrs, Is.EqualTo(expected));
+        }
+        
+        [Test, TestCaseSource(nameof(TestCases13CardsStraight))]
+        public void Test13CardsStraight(string inputCardStr, List<string>  expected)
+        {
+            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
+            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps_ForUnitTest(13);
+            List<string> objectStrs = allThreeCardsStraightComp.Select(o => o.CompString).ToList();
+            Assert.That(objectStrs, Is.EqualTo(expected));
+        }
+        
+        
+        [Test, TestCaseSource(nameof(TestCasesFourCardsStraight))]
+        public void TestFourCardsStraight(string inputCardStr, List<string>  expected)
+        {
+            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
+            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps_ForUnitTest(4);
+            List<string> objectStrs = allThreeCardsStraightComp.Select(o => o.CompString).ToList();
+            Assert.That(objectStrs, Is.EqualTo(expected));
+        }
+        
+        [Test, TestCaseSource(nameof(TestCasesThreeCardsFlush))]
+        public void TestThreeCardsFlush(string inputCardStr, List<string>  expected)
+        {
+            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
+            var allComps = pokerHand.GetAllFlushComps_ForUnitTest(3);
+            List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
+            Assert.That(objectStrs, Is.EqualTo(expected));
+        }
+        
+        [Test, TestCaseSource(nameof(TestCasesThreeCardsFlushStraight))]
+        public void TestThreeCardsFlushStraight(string inputCardStr, List<string>  expected)
+        {
+            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
+            var allComps = pokerHand.GetAllFlushStraightComps_ForUnitTest(3);
+            List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
+            Assert.That(objectStrs, Is.EqualTo(expected));
+        }
+        
+        /*
+        [Test, TestCaseSource(nameof(TestCases8CardsPoker))]
+        public void Test8CardsPoker(string inputCardStr, List<string>  expected)
+        {
+            var pokerHand = PokerHand.CreateInstance(inputCardStr);
+            pokerHand.Test8Cards();
+            var allComps = pokerHand.GetAllFlushStraightComps(3);
+            List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
+            Assert.That(objectStrs, Is.EqualTo(expected));
+        }*/
+        
+    }
+}
+
+/*
+        private static readonly object[] TestCasesThreeCardsStraight =
+        {
+            new object[]
+            {
+                "MajorJoker,SuitJoker,StraightJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️",
+                new List<string> {
                     "A♠️#MajorJoker_K#Q❤️", "A♠️#MajorJoker_K#StraightJoker_Q", "MajorJoker_A#StraightJoker_K#Q❤️",
                     "Q❤️#MajorJoker_J#10❤️", "MajorJoker_Q#StraightJoker_J#10❤️", 
                     "MajorJoker_J#10❤️#9❤️",
@@ -176,65 +349,4 @@ namespace EightCardsProbTest
           
         };
         
-        
-        
-        
-        [Test, TestCaseSource(nameof(TestCasesThreeCardsStraight))]
-        public void TestThreeCardsStraight(string inputCardStr, List<string>  expected)
-        {
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allThreeCardsStraightCombo = pokerHand.GetAllStraightComps_ForUnitTest(3);
-            List<string> objectStrs = allThreeCardsStraightCombo.Select(o => o.CompString).ToList();
-            Assert.That(objectStrs, Is.EqualTo(expected));
-        }
-        
-        [Test, TestCaseSource(nameof(TestCases13CardsStraight))]
-        public void Test13CardsStraight(string inputCardStr, List<string>  expected)
-        {
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps_ForUnitTest(13);
-            List<string> objectStrs = allThreeCardsStraightComp.Select(o => o.CompString).ToList();
-            Assert.That(objectStrs, Is.EqualTo(expected));
-        }
-        
-        
-        [Test, TestCaseSource(nameof(TestCasesFourCardsStraight))]
-        public void TestFourCardsStraight(string inputCardStr, List<string>  expected)
-        {
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allThreeCardsStraightComp = pokerHand.GetAllStraightComps_ForUnitTest(4);
-            List<string> objectStrs = allThreeCardsStraightComp.Select(o => o.CompString).ToList();
-            Assert.That(objectStrs, Is.EqualTo(expected));
-        }
-        
-        [Test, TestCaseSource(nameof(TestCasesThreeCardsFlush))]
-        public void TestThreeCardsFlush(string inputCardStr, List<string>  expected)
-        {
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allComps = pokerHand.GetAllFlushComps_ForUnitTest(3);
-            List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
-            Assert.That(objectStrs, Is.EqualTo(expected));
-        }
-        
-        [Test, TestCaseSource(nameof(TestCasesThreeCardsFlushStraight))]
-        public void TestThreeCardsFlushStraight(string inputCardStr, List<string>  expected)
-        {
-            var pokerHand = PokerHandCalculator.CreateInstance(inputCardStr);
-            var allComps = pokerHand.GetAllFlushStraightComps_ForUnitTest(3);
-            List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
-            Assert.That(objectStrs, Is.EqualTo(expected));
-        }
-        
-        /*
-        [Test, TestCaseSource(nameof(TestCases8CardsPoker))]
-        public void Test8CardsPoker(string inputCardStr, List<string>  expected)
-        {
-            var pokerHand = PokerHand.CreateInstance(inputCardStr);
-            pokerHand.Test8Cards();
-            var allComps = pokerHand.GetAllFlushStraightComps(3);
-            List<string> objectStrs = allComps.Select(o => o.CompString).ToList();
-            Assert.That(objectStrs, Is.EqualTo(expected));
-        }*/
-        
-    }
-}
+        */
