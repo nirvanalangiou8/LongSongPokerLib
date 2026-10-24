@@ -1,15 +1,12 @@
-﻿
-
-namespace GenericPoker
+﻿namespace GenericPoker
 {
-    /*
-    public class GodJoker : JokerCard, IJokerFlushable, IJokerStraightable
+    public class BaseJokerCardMinor : BaseJokerCard, IJokerFlushable, IJokerStraightable
     {
-        private JokerType _jokerType;
         private PokerSuit _replacedSuit = PokerSuit.NoSuit;
         private int _replacedNumber = 0;
-
-        public override string CardStr => "MajorJoker";
+        
+        public override bool IsNumberable => true;
+        public override string CardStr => "MinorJoker";
 
         public override string CardUnitTestStr
         {
@@ -34,5 +31,5 @@ namespace GenericPoker
         {
             _replacedSuit = inputSuit;
         }
-    }*/
+    }
 }

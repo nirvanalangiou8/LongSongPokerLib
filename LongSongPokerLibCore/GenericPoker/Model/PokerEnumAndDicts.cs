@@ -3,6 +3,15 @@ using System.Collections.Generic;
 
 namespace GenericPoker
 {
+	public enum JokerType
+	{
+		StraightJoker = 1, // Can be replaced to form straight
+		SuitJoker = 2, // Can be replaced to form suit
+		DrawCardJoker = 3, // Can be any card in the draw card pool
+		MinorJoker = 4, // Can be Ace, replaced as flush or straight
+		MajorJoker = 5, // Can be any card you wish. 
+	}
+
 	public enum BaseCompType
 	{
 		Nothing,
