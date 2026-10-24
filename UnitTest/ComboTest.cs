@@ -95,7 +95,7 @@ namespace EightCardsProbTest
         
         
         // Test cases defined as a static list
-        private static readonly object[] TestCasesThreeCardsFlushStraight =
+        /*private static readonly object[] TestCasesThreeCardsFlushStraight =
         {
             new object[]
             {
@@ -110,6 +110,31 @@ namespace EightCardsProbTest
                 "MajorJoker,MinorJoker,SuitJoker,StraightJoker,10🔶,J🔶,A♠️,2♠️,3♠️",  
                 new List<string> {
                     "3♠️#2♠️#A♠️",
+                },
+            },
+        };*/
+        
+        private static readonly object[] TestCasesThreeCardsFlushStraight =
+        {
+            new object[]
+            {
+                "10🔶,J🔶,Q🔶,8🔶,A♠️,2♠️,3♠️,K♠️,Q♠️,J♠️,K❤️,J❤️,Q❤️", 
+                new List<string> {
+                    "A♠️#K♠️#Q♠️", "K♠️#Q♠️#J♠️","K❤️#Q❤️#J❤️",
+                    "Q🔶#J🔶#10🔶", "3♠️#2♠️#A♠️", 
+                },
+            },
+            new object[]
+            {
+                "MajorJoker,MinorJoker,SuitJoker,StraightJoker,10🔶,J🔶,A♠️,2♠️,3♠️",  
+                new List<string> {
+                    "A♠️#MajorJoker_K♠️#MinorJoker_Q♠️", "MajorJoker_K🔶#MinorJoker_Q🔶#J🔶",
+                    "MajorJoker_Q🔶#J🔶#10🔶", "MajorJoker_Q🔶#MinorJoker_J🔶#10🔶", 
+                    "MajorJoker_5♠️#MinorJoker_4♠️#3♠️",
+                    "MajorJoker_4♠️#3♠️#2♠️","MajorJoker_4♠️#MinorJoker_3♠️#2♠️", 
+                    "3♠️#2♠️#A♠️",
+                    // Double check below extra
+                    "3♠️#MajorJoker_2♠️#A♠️", "MajorJoker_3♠️#2♠️#A♠️", "MajorJoker_3♠️#MinorJoker_2♠️#A♠️"
                 },
             },
         };

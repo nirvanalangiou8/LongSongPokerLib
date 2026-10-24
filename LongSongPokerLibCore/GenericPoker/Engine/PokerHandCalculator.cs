@@ -211,52 +211,6 @@ namespace GenericPoker
         }
 
 
-        /// <summary>
-        /// Recursively generates all possible card combinations for a straight sequence.
-        /// It navigates through rank groups to ensure consecutive numbers and collects 
-        /// all valid permutations of length equal to straightCount.
-        /// </summary>
-        /// <param name="straightCount">The target number of cards in the straight.</param>
-        /// <param name="kindGroupList">Available card groups to pick from.</param>
-        /// <param name="currentList">The current accumulation of cards in the recursion.</param>
-        /// <param name="resultList">Output list to store completed straight combinations.</param>
-        private static void RecursivePermuteStraight(int straightCount, List<List<BasePokerCard>> kindGroupList,
-            List<BasePokerCard> currentList, List<List<BasePokerCard>> resultList)
-        {
-            if (currentList.Count + kindGroupList.Count < straightCount) return;
-
-            if (currentList.Count >= straightCount)
-            {
-                // currentList is shared, so need to record at the moment when you added. If not, other hierarchy loop
-                // will contaminate it.
-                resultList.Add(new List<BasePokerCard>(currentList));
-                return;
-            }
-
-            for (var i = 0; i < kindGroupList.Count; i++)
-            {
-                var kindGroup = kindGroupList[i];
-                var remainingGroupList = kindGroupList.Skip(i + 1).ToList();
-
-                // Need to optimize, why we need to check kindGroup.Count > 0, should it always > 0?
-                if (currentList.Count > 0 && kindGroup.Count > 0)
-                {
-                    if (!currentList.Last().IsNextNeighborNumber(kindGroup.First()))
-                    {
-                        break;
-                    }
-                }
-
-                foreach (var pokerCard in kindGroup)
-                {
-                    currentList.Add(pokerCard);
-                    RecursivePermuteStraight(straightCount, remainingGroupList, currentList, resultList);
-                    // trace back by removing last element.
-                    currentList.RemoveAt(currentList.Count - 1);
-                }
-            }
-        }
-
         
         private static List<BasePokerCard>? GetStraight(int straightCount, List<List<BasePokerCard>> kindGroupList)
         {
@@ -524,58 +478,6 @@ namespace GenericPoker
             return candidateProcessed;
         }
         
-        
-        /// <summary>
-        /// Attempts to arrange remaining cards into straight components based on pre-calculated clusters.
-        /// Part of the recursive hand-splitting logic.
-        /// </summary>
-        /// <param name="allStraightClusters">Groups of consecutive ranks.</param>
-        /// <param name="remainingCards">Available cards.</param>
-        /// <param name="currentHandCandidates">Current state of hand composition.</param>
-        /// <param name="results">Output list of complete hand structures.</param>
-        /// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
-        /// <returns>True if a hand component was successfully added.</returns>
-        private bool ArrangeStraightComps_old(List<List<List<BasePokerCard>>> allStraightClusters,
-            List<BasePokerCard> remainingCards,
-            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool candidateProcessed)
-        {
-            foreach (var straightCluster in allStraightClusters)
-            {
-                //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
-                // Ex: we have 8 cards straights, 8,7,6,5,4,3,2,A we still need to visit all sub straights, such as 7-card straight and 6 and 5 cards straight and also
-                // full set of 8 cards straights.
-                for (var targetSCount = straightCluster.Count;
-                     targetSCount >= _rule.MinFlushStraightCount;
-                     targetSCount--)
-                {
-                    for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
-                    {
-                        var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
-                        var allPermutes = new List<List<BasePokerCard>>();
-                        var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
-                        if (handType == BaseCompType.None) continue;
-                        RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster,
-                            new List<BasePokerCard>(), allPermutes);
-                        foreach (var permute in allPermutes)
-                        {
-                            // if it's also flush, then skip it as the previous flushstraight already take care of such case.
-                            if (_checkIfFlush(permute)) continue;
-                            var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
-                            currentHandCandidates.AddComp(newHandCandidateData);
-                            var newRemainCards =
-                                UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
-                            RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
-                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
-                            candidateProcessed = true;
-                            currentHandCandidates.RemoveLast();
-                        }
-                    }
-                }
-            }
-
-            return candidateProcessed;
-        }
-
         /// <summary>
         /// Attempts to arrange remaining cards into kind-based components (pairs, triples, etc.).
         /// Part of the recursive hand-splitting logic.
@@ -1016,4 +918,107 @@ namespace GenericPoker
             allComps.Sort((x, y) => y.CompareTo(x));
 
             return allComps;
+        }*/
+        
+        
+        
+        /*
+        /// <summary>
+        /// Recursively generates all possible card combinations for a straight sequence.
+        /// It navigates through rank groups to ensure consecutive numbers and collects 
+        /// all valid permutations of length equal to straightCount.
+        /// </summary>
+        /// <param name="straightCount">The target number of cards in the straight.</param>
+        /// <param name="kindGroupList">Available card groups to pick from.</param>
+        /// <param name="currentList">The current accumulation of cards in the recursion.</param>
+        /// <param name="resultList">Output list to store completed straight combinations.</param>
+        private static void RecursivePermuteStraight(int straightCount, List<List<BasePokerCard>> kindGroupList,
+            List<BasePokerCard> currentList, List<List<BasePokerCard>> resultList)
+        {
+            if (currentList.Count + kindGroupList.Count < straightCount) return;
+
+            if (currentList.Count >= straightCount)
+            {
+                // currentList is shared, so need to record at the moment when you added. If not, other hierarchy loop
+                // will contaminate it.
+                resultList.Add(new List<BasePokerCard>(currentList));
+                return;
+            }
+
+            for (var i = 0; i < kindGroupList.Count; i++)
+            {
+                var kindGroup = kindGroupList[i];
+                var remainingGroupList = kindGroupList.Skip(i + 1).ToList();
+
+                // Need to optimize, why we need to check kindGroup.Count > 0, should it always > 0?
+                if (currentList.Count > 0 && kindGroup.Count > 0)
+                {
+                    if (!currentList.Last().IsNextNeighborNumber(kindGroup.First()))
+                    {
+                        break;
+                    }
+                }
+
+                foreach (var pokerCard in kindGroup)
+                {
+                    currentList.Add(pokerCard);
+                    RecursivePermuteStraight(straightCount, remainingGroupList, currentList, resultList);
+                    // trace back by removing last element.
+                    currentList.RemoveAt(currentList.Count - 1);
+                }
+            }
+        }
+        */
+        
+        
+        /*
+        /// <summary>
+        /// Attempts to arrange remaining cards into straight components based on pre-calculated clusters.
+        /// Part of the recursive hand-splitting logic.
+        /// </summary>
+        /// <param name="allStraightClusters">Groups of consecutive ranks.</param>
+        /// <param name="remainingCards">Available cards.</param>
+        /// <param name="currentHandCandidates">Current state of hand composition.</param>
+        /// <param name="results">Output list of complete hand structures.</param>
+        /// <param name="candidateProcessed">A flag indicating if any valid hand component was found in this branch.</param>
+        /// <returns>True if a hand component was successfully added.</returns>
+        private bool ArrangeStraightComps_old(List<List<List<BasePokerCard>>> allStraightClusters,
+            List<BasePokerCard> remainingCards,
+            PokerHandStructure currentHandCandidates, List<PokerHandStructure> results, bool candidateProcessed)
+        {
+            foreach (var straightCluster in allStraightClusters)
+            {
+                //straightCluster is always a straight for at least _minFlushStraight count, we still need to loop through possible sub straight
+                // Ex: we have 8 cards straights, 8,7,6,5,4,3,2,A we still need to visit all sub straights, such as 7-card straight and 6 and 5 cards straight and also
+                // full set of 8 cards straights.
+                for (var targetSCount = straightCluster.Count;
+                     targetSCount >= _rule.MinFlushStraightCount;
+                     targetSCount--)
+                {
+                    for (int selectID = 0; selectID <= straightCluster.Count - targetSCount; selectID++)
+                    {
+                        var targetStraightCluster = straightCluster.GetRange(selectID, targetSCount);
+                        var allPermutes = new List<List<BasePokerCard>>();
+                        var handType = DetermineCompType(targetStraightCluster.Count, CompType.Straight);
+                        if (handType == BaseCompType.None) continue;
+                        RecursivePermuteStraight(targetStraightCluster.Count, targetStraightCluster,
+                            new List<BasePokerCard>(), allPermutes);
+                        foreach (var permute in allPermutes)
+                        {
+                            // if it's also flush, then skip it as the previous flushstraight already take care of such case.
+                            if (_checkIfFlush(permute)) continue;
+                            var newHandCandidateData = new PokerCardComponent { CompRank = handType, Cards = permute };
+                            currentHandCandidates.AddComp(newHandCandidateData);
+                            var newRemainCards =
+                                UtilFunc.GetExcludeList(remainingCards, permute, new PokerCardComparer());
+                            RecursiveExploreHandStructures(newRemainCards, currentHandCandidates, results);
+                            // Since we call RecursiveArrangeHands above, so we mark the candidateProcessed as true as its below running hierchial will always process candidate.
+                            candidateProcessed = true;
+                            currentHandCandidates.RemoveLast();
+                        }
+                    }
+                }
+            }
+
+            return candidateProcessed;
         }*/
