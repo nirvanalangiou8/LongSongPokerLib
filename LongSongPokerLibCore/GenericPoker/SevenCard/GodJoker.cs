@@ -2,16 +2,14 @@
 
 namespace GenericPoker
 {
+    /*
     public class GodJoker : JokerCard, IJokerFlushable, IJokerStraightable
     {
-
         private JokerType _jokerType;
         private PokerSuit _replacedSuit = PokerSuit.NoSuit;
         private int _replacedNumber = 0;
-        //private IJokerFlushable _jokerFlushableImplementation;
 
-        public override string CardStr => $"MajorJoker";
-        //public override bool IsNumberable => true;
+        public override string CardStr => "MajorJoker";
 
         public override string CardUnitTestStr
         {
@@ -23,7 +21,6 @@ namespace GenericPoker
                 return retStr;
             }
         }
-
 
         public override int Number => _replacedNumber != 0 ? _replacedNumber : _number;
 
@@ -37,6 +34,5 @@ namespace GenericPoker
         {
             _replacedSuit = inputSuit;
         }
-
-    }
+    }*/
 }

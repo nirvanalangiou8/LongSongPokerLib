@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace GenericPoker.SevenCard
 {
+    /*
     public class SevenCardPokerCard : BasePokerCard
     {
         public virtual bool IsNumberable => true;
@@ -40,11 +41,6 @@ namespace GenericPoker.SevenCard
             return data;
         }
 
-/*
-        public static SevenCardPokerCard CreateInstance(SevenCardPokerCard another)
-        {
-            return CreateInstance(another._cardID, another._number, another._suit, another.ObjectID, deckID: another.DeckID);
-        }
-*/
     }
+    */
 }

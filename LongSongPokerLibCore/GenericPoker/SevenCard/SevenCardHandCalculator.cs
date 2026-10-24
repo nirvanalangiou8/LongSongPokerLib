@@ -5,12 +5,14 @@ using GenericPoker.EightCard;
 
 namespace GenericPoker.SevenCard
 {
+    /*
     public class SevenCardHandCalculator
     {
         private List<SevenCardPokerCard> _allCards;
         private List<SevenCardPokerCard> _noneJokerCards;
         private List<JokerCard> _jokerCards;
 
+        
         public SevenCardHandCalculator(List<SevenCardPokerCard> cards)
         {
             _allCards = cards;
@@ -18,6 +20,7 @@ namespace GenericPoker.SevenCard
             _jokerCards = cards.OfType<JokerCard>().ToList();
         }
 
+        
         public static SevenCardHandCalculator CreateInstance(string cardStr)
         {
              var inputCardStrs = cardStr.Split(',');
@@ -29,6 +32,7 @@ namespace GenericPoker.SevenCard
              return new SevenCardHandCalculator(newCardList);
         }
 
+        
         public List<PokerCardComponent> GetAllKindGroups(int minCount)
         {
             var result = new List<PokerCardComponent>();
@@ -45,4 +49,5 @@ namespace GenericPoker.SevenCard
         // More complex logic can be added here, mirroring EightCard but adapted for 7 cards.
         // For Seven Card game, we split into 2 (front) and 5 (back).
     }
+    */
 }

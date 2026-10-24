@@ -6,6 +6,7 @@ using GenericPoker.EightCard;
 
 namespace GenericPoker.SevenCard
 {
+    /*
     public class SevenCardSubBattleHand
     {
         public BattleSubHandOrder BattleSubHandOrder;
@@ -31,7 +32,7 @@ namespace GenericPoker.SevenCard
             }
         }
     }
-
+    */
     /*
     public class SevenCardHands : IComparable<SevenCardHands>
     {

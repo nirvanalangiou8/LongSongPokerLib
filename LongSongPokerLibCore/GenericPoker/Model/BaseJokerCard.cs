@@ -1,68 +1,10 @@
-﻿using GenericPoker.EightCard;
-
-namespace GenericPoker
+﻿namespace GenericPoker
 {
-    
-    public enum EightCardJokerType
-    {
-        StraightJoker = 1, // Can be replaced to form straight
-        SuitJoker = 2, // Can be replaced to form suit
-        DrawCardJoker = 3, // Can be any card in the draw card pool
-        MinorJoker = 4, // Can be Ace, replaced as flush or straight
-        MajorJoker = 5,	// Can be any card you wish. 
-    }
-    
-    
-
-    public class AceCard : BasePokerCard , IJokerStraightable
-    {
-        private int _replacedNumber = 0;
-        public int JokerPower => 100; // High value means low priority in sorting compared to real jokers
-        
-        public override int Number => _replacedNumber != 0 ? _replacedNumber : _number;
-
-        public void SetAceFourteenNumber(int number)
-        {
-            _number = number;
-            _replacedNumber = number;
-        }
-        
-/*
-        public override int DecideBestFourCardAceNumber(EightCardPokerCard anotherCard)
-        {
-            var retPts = 0;
-            var totalPts1 = (14 + anotherCard.Number) % 10;
-            var totalPts2 = (1 + anotherCard.Number) % 10;
-            if (totalPts1 > totalPts2) {
-                _replacedNumber = 14;
-                retPts = totalPts1;
-            } else {
-                retPts = totalPts2;
-            }
-
-            return retPts;
-        }
-*/
-        
-        public void SetStraightSub(int number)
-        {
-            _number = number;
-            _replacedNumber = number;
-        }
-        
-        /*
-        public void CheckStraight()
-        {
-            throw new System.NotImplementedException();
-        }*/
-    }
-    
-    
     public class BaseJokerCard : BasePokerCard, IJoker
     {
         protected JokerType _jokerType;
 
-        public override string CardStr => $"Joker";
+        public override string CardStr => "Joker";
         
         public override string CardUnitTestStr => CardStr;
 

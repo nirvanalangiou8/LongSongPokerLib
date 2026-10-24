@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using GenericPoker;
-using GenericPoker.SevenCard;
 using NUnit.Framework;
 
 namespace SevenCardsProbTest
@@ -19,9 +18,9 @@ namespace SevenCardsProbTest
         public void TestSevenCardKinds()
         {
             var cardStr = "3♠️,3❤️,3♣️,4❤️,4♠️,5❤️,6❤️";
-            var calculator = SevenCardHandCalculator.CreateInstance(cardStr);
-            var threeOfKind = calculator.GetAllKindGroups(3);
-            var pairs = calculator.GetAllKindGroups(2);
+            var calculator = PokerHandCalculator.CreateInstance(cardStr, SevenCardRule.Default);
+            var threeOfKind = calculator.GetAllKindComps_ForUnitTest(3);
+            var pairs = calculator.GetAllKindComps_ForUnitTest(2);
 
             Assert.That(threeOfKind.Count, Is.EqualTo(1));
             Assert.That(threeOfKind[0].CompRank, Is.EqualTo(BaseCompType.ThreeOfKind));
@@ -33,9 +32,10 @@ namespace SevenCardsProbTest
         [Test]
         public void TestSevenCardDealer()
         {
-            var dealer = new ConsoleCardDealer(1, false, cardFactory: (id, num, suit, objId, deckId) => SevenCardPokerCard.CreateInstance(id, num, suit, objId, deckId));
+            var rule = SevenCardRule.Default;
+            var dealer = new ConsoleCardDealer(1, false, rule: rule);
             var player = new ConsolePlayer("TestPlayer");
-            dealer.DealCards(player, 7);
+            dealer.DealCards(player, rule.CardCount);
             
             Assert.That(player.Cards.Count, Is.EqualTo(7));
             Assert.That(dealer.RemainingCards.Count, Is.EqualTo(52 - 7));

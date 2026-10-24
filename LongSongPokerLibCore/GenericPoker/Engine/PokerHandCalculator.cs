@@ -663,6 +663,29 @@ namespace GenericPoker
                 .Select(subList => new PokerCardComponent { CompRank = pokerCardCompRank, Cards = subList }).ToList();
         }
 
+        /// <summary>
+        /// Retrieves all kind groups of cards (e.g. pairs, three-of-a-kinds) with at least minCardCountInGroup.
+        /// </summary>
+        /// <param name="minCardCountInGroup">Minimum number of cards with the same rank required.</param>
+        /// <returns>A list of poker card components representing kind hands, sorted by power.</returns>
+        public List<PokerCardComponent> GetAllKindComps_ForUnitTest(int minCardCountInGroup)
+        {
+            var allComps = new List<PokerCardComponent>();
+            var kindGroups = GetKindGroups(minCardCountInGroup, _noneJokerCards);
+
+            foreach (var g in kindGroups)
+            {
+                var compType = DetermineCompType(g.Count, CompType.Kind);
+                if (compType != BaseCompType.None)
+                {
+                    allComps.Add(new PokerCardComponent { CompRank = compType, Cards = g });
+                }
+            }
+
+            allComps.Sort((x, y) => y.CompareTo(x));
+            return allComps;
+        }
+
 
         
         /// <summary>
