@@ -24,7 +24,14 @@ namespace EightCardsProbTest
             {
                 "MajorJoker,SuitJoker,StraightJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️",
                 new List<string> {
-                    "3♠️#2♣️#A♠️",
+                    "A♠️#MajorJoker_K#Q❤️", "A♠️#MajorJoker_K#StraightJoker_Q", "MajorJoker_A#StraightJoker_K#Q❤️",
+                    "Q❤️#MajorJoker_J#10❤️", "MajorJoker_Q#StraightJoker_J#10❤️", 
+                    "MajorJoker_J#10❤️#9❤️",
+                    "MajorJoker_J#StraightJoker_10#9❤️", 
+                    "MajorJoker_5#StraightJoker_4#3♠️", "MajorJoker_4#3♠️#2♣️", 
+                    "MajorJoker_4#StraightJoker_3#2♣️", "3♠️#2♣️#A♠️",
+                    // Double check below.
+                    "3♠️#MajorJoker_2#A♠️", "MajorJoker_3#2♣️#A♠️", "MajorJoker_3#StraightJoker_2#A♠️"
                 },
             },
             new object[]
@@ -32,14 +39,14 @@ namespace EightCardsProbTest
                 
                 "2♣️,4♠️,3❤️,4❤️",
                 new List<string> {
-                    "4♠️#3❤️#2♣️", 
+                    "4♠️#3❤️#2♣️", "4❤️#3❤️#2♣️", 
                 },
             },
             new object[]
             {
                 "2♣️,3♠️,3❤️,4❤️",
                 new List<string> {
-                    "4❤️#3♠️#2♣️",
+                    "4❤️#3♠️#2♣️", "4❤️#3❤️#2♣️",
                 },              
             },
         };
@@ -52,9 +59,39 @@ namespace EightCardsProbTest
                 
                     "MajorJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️," +
                     "5♠️,4♣️,6♠️,7❤️,8❤️,J❤️,K❤️",
+                // Normally, we can allow only maximum 13 cards in one pokerhand. This is the extreme case, that if We have A , K　to 2, the whole
+                // 13 cards, and one joker what would be the combo permute be.
+                // The answer are there ar 27 combos.
+                // Actually it's 14*2-1, and there is one unique case that K, Q, ....2, (12 cards) and missing A, in this case, the joker will be sub as Ace-14 rather than
+                // Ace-1 
                 new List<string> {
                     "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#MajorJoker_2",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#MajorJoker_3#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#MajorJoker_4#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#MajorJoker_5#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#MajorJoker_6#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#MajorJoker_7#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#9❤️#MajorJoker_8#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#10❤️#MajorJoker_9#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#J❤️#MajorJoker_10#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#Q❤️#MajorJoker_J#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#K❤️#MajorJoker_Q#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "A♠️#MajorJoker_K#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
+                    "MajorJoker_A#K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️",
                     "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#MajorJoker_2#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#MajorJoker_3#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#MajorJoker_4#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#MajorJoker_5#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#MajorJoker_6#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#8❤️#MajorJoker_7#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#9❤️#MajorJoker_8#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#10❤️#MajorJoker_9#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#J❤️#MajorJoker_10#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#Q❤️#MajorJoker_J#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "K❤️#MajorJoker_Q#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️",
+                    "MajorJoker_K#Q❤️#J❤️#10❤️#9❤️#8❤️#7❤️#6♠️#5♠️#4♣️#3♠️#2♣️#A♠️"
                 },
             },
             
@@ -67,6 +104,12 @@ namespace EightCardsProbTest
             {
                 "MajorJoker,SuitJoker,MinorJoker,A♠️,2♣️,3♠️,9❤️,Q❤️,10❤️",
                 new List<string> {
+                    "A♠️#MajorJoker_K#Q❤️#MinorJoker_J", "MajorJoker_K#Q❤️#MinorJoker_J#10❤️", 
+                    "Q❤️#MajorJoker_J#10❤️#9❤️",
+                    "Q❤️#MajorJoker_J#MinorJoker_10#9❤️",
+                    "MajorJoker_Q#MinorJoker_J#10❤️#9❤️",
+                    "MajorJoker_5#MinorJoker_4#3♠️#2♣️", "MajorJoker_4#3♠️#2♣️#A♠️",
+                    "MajorJoker_4#3♠️#MinorJoker_2#A♠️", "MajorJoker_4#MinorJoker_3#2♣️#A♠️"
                 },
             },
         };

@@ -592,18 +592,20 @@ namespace GenericPoker
         
         /// <summary>
         /// Retrieves all possible straight combinations of a specified card count.
-        /// It uses the GetAllStraightCluster_represented logic to find sequences across all available card ranks.
+        /// It processes straight combinations across all available card ranks and jokers.
         /// </summary>
         /// <param name="cardCountInComp">The number of cards required for the straight component.</param>
         /// <returns>A list of poker card components representing all valid straight hands, sorted by power.</returns>
         public List<PokerCardComponent> GetAllStraightComps_ForUnitTest(int cardCountInComp)
         {
             var allComps = new List<PokerCardComponent>();
+            var straightableJokerCards = _jokerCards.Where(card => card is IJokerStraightable).ToList();
 
             var kindGroupLists = GetNumberGroups(1, _noneJokerCards);
-            var permutes = GetAllStraightCluster_represented(cardCountInComp, kindGroupLists, cardCountInComp);
-            allComps.AddRange(ListsToPokerComp(permutes, DetermineCompType(cardCountInComp, CompType.Straight)));
 
+            var permutes = new List<List<BasePokerCard>>();
+            ProcessPermuteStraight(cardCountInComp, kindGroupLists, straightableJokerCards, permutes);
+            allComps.AddRange(ListsToPokerComp(permutes, DetermineCompType(cardCountInComp, CompType.Straight)));
 
             //--- Finally, sort them out base on their CompPower order.
             allComps.Sort((x, y) => y.CompareTo(x));
@@ -739,7 +741,8 @@ namespace GenericPoker
 
         /// <summary>
         /// Processes and generates all valid straight permutations from given card groups and jokers.
-        /// This function handles gap filling with jokers, Ace-low (1) straight logic, 
+        /// When no jokers are present, it uses a fast-path consecutive scan with Cartesian product.
+        /// When jokers are present, it handles gap filling with jokers, Ace-low (1) straight logic, 
         /// and optionally restricts the cards to a specific suit for flush-straights.
         /// </summary>
         /// <param name="straightCount">The target length of the straight.</param>
@@ -751,11 +754,13 @@ namespace GenericPoker
             List<BasePokerCard> straightableJokerCards, List<List<BasePokerCard>> permutes,
             PokerSuit assignedSuit = PokerSuit.NoSuit)
         {
+            if (straightCount <= 0 || kindGroupList.Count == 0) return;
+
             var workingKindGroupList = new List<List<BasePokerCard>>(kindGroupList);
 
             // if we have ace kind group, we copy them in the bottom of kindgroup list and make all ace becomes "1" 
             // so that to let 3,2,1 straight become available.
-            if (workingKindGroupList.Count > 0 && workingKindGroupList[0][0] is AcePokerCard)
+            if (workingKindGroupList[0][0] is AcePokerCard)
             {
                 var newKindGroup = new List<BasePokerCard>();
                 foreach (var ace in workingKindGroupList[0])
@@ -768,14 +773,40 @@ namespace GenericPoker
                 workingKindGroupList.Add(newKindGroup);
             }
 
-            // For jokers Involved, we need another approach
-            // we loop through from most needed joker cards count, and reduce the joker card counted needed in order to save joker cards.
+            // Fast-path when no straightable jokers are available
+            if (straightableJokerCards.Count == 0)
+            {
+                for (var i = 0; i <= workingKindGroupList.Count - straightCount; i++)
+                {
+                    var isConsecutive = true;
+                    var slice = new List<List<BasePokerCard>>(straightCount);
+                    slice.Add(workingKindGroupList[i]);
+
+                    for (var j = 1; j < straightCount; j++)
+                    {
+                        var prevGroup = workingKindGroupList[i + j - 1];
+                        var currGroup = workingKindGroupList[i + j];
+                        if (prevGroup[0].Number - currGroup[0].Number != 1)
+                        {
+                            isConsecutive = false;
+                            break;
+                        }
+                        slice.Add(currGroup);
+                    }
+
+                    if (isConsecutive)
+                    {
+                        RecursivePermuteStraight(straightCount, slice, new List<BasePokerCard>(), permutes);
+                    }
+                }
+                return;
+            }
+
+            // For jokers Involved, we loop from most needed jokers down to 0
             var jokerNeeded = straightCount - 1;
             for (var jokerCountInvolved = jokerNeeded; jokerCountInvolved >= 0; jokerCountInvolved--)
             {
                 var pokerCardCountInvolved = straightCount - jokerCountInvolved;
-                // 1. check if total jokers are over needed cards for straight, 
-                // 2. check if pokerCard needed > actually involved card for straight.
                 if (jokerCountInvolved > straightableJokerCards.Count || pokerCardCountInvolved > workingKindGroupList.Count)
                     continue;
 

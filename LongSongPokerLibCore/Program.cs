@@ -472,7 +472,7 @@ namespace LongSongPokerLibCore
             BaseBattleHands battleHands = null;
             BaseBattleHands resHand = null;
             
-            for (int iterations = 0; iterations < 100000; iterations++)
+            for (int iterations = 0; iterations < 10000; iterations++)
             {
                 battleHands = new BaseBattleHands(inputCardStr, perfRule);
                 resHand = battleHands.GetArrangeHands();
