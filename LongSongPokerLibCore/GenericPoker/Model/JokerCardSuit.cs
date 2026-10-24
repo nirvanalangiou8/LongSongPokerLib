@@ -1,6 +1,6 @@
 ﻿namespace GenericPoker
 {
-    public class BaseJokerCardSuit : BaseJokerCard, IJokerFlushable
+    public class JokerCardSuit : JokerCard, IJokerFlushable
     {
         private PokerSuit _replacedSuit = PokerSuit.NoSuit;
         

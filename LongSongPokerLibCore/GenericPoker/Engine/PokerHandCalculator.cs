@@ -72,7 +72,7 @@ namespace GenericPoker
 
             foreach (var card in _allPokerCards)
             {
-                if (card is BaseJokerCard) _jokerCards.Add(card);
+                if (card is JokerCard) _jokerCards.Add(card);
                 else _noneJokerCards.Add(card);
             }
         }
@@ -733,7 +733,7 @@ namespace GenericPoker
 
                     foreach (var (jokerCard, index) in jokerCards.Select((value, i) => (value, i)))
                     {
-                        var newJoker = BaseJokerCard.CreateInstance((BaseJokerCard)jokerCard);
+                        var newJoker = JokerCard.CreateInstance((JokerCard)jokerCard);
                         ((IJokerFlushable)newJoker).SetSuitSub(subSuit);
                         if (newJoker.IsNumberable)
                             ((IJokerStraightable)newJoker).SetStraightSub(jokerReplacedNumCandidate[index]);
@@ -771,7 +771,7 @@ namespace GenericPoker
 
 
             flushableJokerCards =
-                flushableJokerCards.OrderByDescending(obj => ((BaseJokerCard)obj).PokerCardPower).ToList();
+                flushableJokerCards.OrderByDescending(obj => ((JokerCard)obj).PokerCardPower).ToList();
 
 
             foreach (var gList in flushGroupLists)

@@ -20,7 +20,7 @@ public class PokerUtilFunc
             // So we need the second check to ensure it's real enum string matched.
             if (Enum.TryParse<JokerType>(splitDeckStrs[0], out var jokerType) && Enum.IsDefined(typeof(JokerType), jokerType))
             {
-                newCardList.Add(BaseJokerCard.CreateInstance(jokerType, deckID: deckNumber));
+                newCardList.Add(JokerCard.CreateInstance(jokerType, deckID: deckNumber));
             } else {
                 newCardList.Add(BasePokerCard.CreateInstance(splitDeckStrs[0], deckID :deckNumber));
             }

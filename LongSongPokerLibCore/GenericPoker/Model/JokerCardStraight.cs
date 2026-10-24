@@ -1,6 +1,6 @@
 ﻿namespace GenericPoker
 {
-    public class BaseJokerCardStraight : BaseJokerCard, IJokerStraightable
+    public class JokerCardStraight : JokerCard, IJokerStraightable
     {
         private int _replacedNumber = 0;
         

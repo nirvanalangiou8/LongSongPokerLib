@@ -1,6 +1,6 @@
 ﻿namespace GenericPoker
 {
-    public class BaseJokerCard : BasePokerCard, IJoker
+    public class JokerCard : BasePokerCard, IJoker
     {
         protected JokerType _jokerType;
 
@@ -10,14 +10,14 @@
 
         public int JokerPower => (int)_jokerType;
         
-        public static BaseJokerCard CreateInstance(BaseJokerCard another)
+        public static JokerCard CreateInstance(JokerCard another)
         {
             return CreateInstance(another._jokerType, another.ObjectID, deckID : another.DeckID);
         }
         
-        public static BaseJokerCard CreateInstance(JokerType jokerType, int objectID = 0, int deckID = 1)
+        public static JokerCard CreateInstance(JokerType jokerType, int objectID = 0, int deckID = 1)
         {
-            BaseJokerCard data;
+            JokerCard data;
             
             var id = PokerConst.TotalRegularPokerCardsWithoutJokers + (int)jokerType;
             
@@ -27,33 +27,33 @@
             switch (jokerType)
             {
                 case JokerType.MajorJoker:
-                    data = new BaseJokerCardMajor();
+                    data = new JokerCardMajor();
                     number = PokerConst.MaxTotalCountInSameSuit + (int)jokerType;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 case JokerType.MinorJoker:
-                    data = new BaseJokerCardMinor();
+                    data = new JokerCardMinor();
                     number = PokerConst.MaxTotalCountInSameSuit + (int)jokerType;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 case JokerType.SuitJoker:
-                    data = new BaseJokerCardSuit();
+                    data = new JokerCardSuit();
                     number = 0;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 case JokerType.StraightJoker:
-                    data = new BaseJokerCardStraight();
+                    data = new JokerCardStraight();
                     number = 0;
                     pokerSuit = PokerSuit.NoSuit;
                     break;
                 case JokerType.DrawCardJoker:
                     // TO BE REVISED
-                    data = new BaseJokerCardSuit();
+                    data = new JokerCardSuit();
                     number = 0;
                     pokerSuit = PokerSuit.Wild;
                     break;
                 default:
-                    data = new BaseJokerCardSuit();
+                    data = new JokerCardSuit();
                     number = 0;
                     pokerSuit = PokerSuit.Wild;
                     break;
