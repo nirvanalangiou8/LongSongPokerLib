@@ -16,7 +16,7 @@ namespace LongSongPokerLibCore
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             
             // Available options: "review_split", "performance_review", "analyze", "hand", "game", "split_test", "run_stat", "debug"
-            var runOption = "performance_review"; 
+            var runOption = "split_test"; 
 
             if (args.Length > 0)
             {
